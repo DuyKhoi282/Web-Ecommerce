@@ -1,0 +1,71 @@
+## ==========================================
+## Visual Studio & .NET .gitignore for ASP.NET MVC 5
+## Topic 1: Online Shopping E-Commerce Website
+## ==========================================
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017/2019/2022 cache & project directories
+.vs/
+.vscode/
+Generated_Files/
+
+# ASP.NET temporary files
+App_Data/*.mdf
+App_Data/*.ldf
+App_Data/*.log
+App_Data/uploads/*
+!App_Data/uploads/.gitkeep
+
+# Sensitive config & secrets
+*.env
+*.env.local
+Web.Debug.config
+Web.Release.config
+App_Data/secrets.json
+credentials.json
+token.json
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
+
+# Test results & coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Backup & temporary files
+*.bak
+*.tmp
+*~
