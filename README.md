@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg?style=flat-square)]()
 [![Platform](https://img.shields.io/badge/.NET_Framework-4.8-blue.svg?style=flat-square)]()
 [![Framework](https://img.shields.io/badge/ASP.NET-MVC_5-purple.svg?style=flat-square)]()
-[![ORM](https://img.shields.io/badge/Entity_Framework-6_Code_First-orange.svg?style=flat-square)]()
+[![ORM](https://img.shields.io/badge/Entity_Framework-6_(Code_First_|_Database_First)-orange.svg?style=flat-square)]()
 [![Database](https://img.shields.io/badge/SQL_Server-2019%2B-red.svg?style=flat-square)]()
 [![Git](https://img.shields.io/badge/Git_Flow-Weekly_CI-brightgreen.svg?style=flat-square)]()
 
@@ -34,7 +34,7 @@ Mục tiêu cốt lõi của đồ án:
 - Hiện thực hóa quy trình mua sắm khép kín: Khám phá sản phẩm &rarr; Tìm kiếm / Lọc đa tiêu chí &rarr; Giỏ hàng Ajax &rarr; Áp dụng Voucher / Flash Sale &rarr; Thanh toán (COD / Chuyển khoản QR) &rarr; Quản lý đơn hàng &rarr; Đánh giá phản hồi 5 sao có kiểm chứng.
 - Phân quyền chặt chẽ 3 cấp (**Customer**, **Store Manager**, **Administrator**) với ASP.NET Identity 2.0.
 - Áp dụng nguyên tắc **Phòng vệ biên (Boundary Defense)** với 100% Action CSDL/File/Thanh toán được bọc `try-catch`, đảm bảo ứng dụng không bao giờ bị dừng đột ngột (Yellow Screen of Death).
-- Kiểm soát phiên bản cơ sở dữ liệu tự động và đồng bộ giữa 4 thành viên thông qua **Entity Framework 6 Code First Migrations**.
+- Quản lý và đồng bộ cơ sở dữ liệu linh hoạt giữa 4 thành viên thông qua **Entity Framework 6** (hỗ trợ cả **Code First Migrations** hoặc **Database First / SQL Scripts** tùy theo phương án nhóm lựa chọn).
 
 ---
 
@@ -43,7 +43,7 @@ Mục tiêu cốt lõi của đồ án:
 | Lớp (Layer) | Công Nghệ & Thư Viện | Mục Đích Sử Dụng |
 | :--- | :--- | :--- |
 | **Backend Framework** | ASP.NET MVC 5, .NET Framework 4.8 | Xây dựng kiến trúc Model-View-Controller chuẩn doanh nghiệp |
-| **ORM / Data Access** | Entity Framework 6 (Code First) | Truy xuất dữ liệu an toàn, quản lý Migrations đồng bộ qua C# Model |
+| **ORM / Data Access** | Entity Framework 6 (Code First hoặc Database First) | Truy xuất dữ liệu an toàn, linh hoạt tiếp cận theo Code First hoặc Database First (.edmx / SQL Scripts) |
 | **Cơ sở dữ liệu** | Microsoft SQL Server (2019 / 2022 / LocalDB) | Lưu trữ quan hệ ACID, bảo đảm toàn vẹn giao dịch đặt hàng |
 | **Bảo mật & Phân quyền** | ASP.NET Identity 2.0, OWIN Cookie Authentication | Xác thực người dùng, mã hóa mật khẩu PBKDF2, phân quyền Role-based |
 | **Frontend UI** | Bootstrap 5, Razor View Engine, FontAwesome | Giao diện hiện đại, responsive hoàn toàn trên Mobile và Desktop |
@@ -206,12 +206,18 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
      </connectionStrings>
      ```
 
-5. **Đồng bộ Cơ sở dữ liệu bằng EF Migrations:**
-   - Mở menu **Tools &rarr; NuGet Package Manager &rarr; Package Manager Console**.
-   - Thực hiện lệnh sau để khởi tạo toàn bộ bảng và dữ liệu mẫu (Seed Data):
-     ```powershell
-     Update-Database -Verbose
-     ```
+5. **Đồng bộ Cơ sở dữ liệu (Tùy chọn theo phương pháp nhóm chọn):**
+   - **Lựa chọn A – Nếu sử dụng Code First Migrations:**
+     - Mở **Tools &rarr; NuGet Package Manager &rarr; Package Manager Console**.
+     - Chạy lệnh:
+       ```powershell
+       Update-Database -Verbose
+       ```
+   - **Lựa chọn B – Nếu sử dụng Database First / Script SQL:**
+     - Mở SQL Server Management Studio (SSMS).
+     - Chạy file script tạo cơ sở dữ liệu và dữ liệu mẫu tại `Database/Scripts/01_Init_Database.sql`.
+     - Kiểm tra chuỗi kết nối trong `Web.config` đã trỏ đúng tên database và server của bạn.
+     - *(Nếu dùng `.edmx`)* Mở file `.edmx` trong thư mục `Models/` &rarr; click chuột phải chọn **Update Model from Database...** để đồng bộ cấu trúc bảng.
 
 6. **Khởi chạy ứng dụng:**
    - Nhấn **F5** hoặc nút **IIS Express (Google Chrome / Edge)** để bắt đầu chạy ứng dụng.

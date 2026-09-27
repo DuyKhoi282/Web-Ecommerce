@@ -34,7 +34,7 @@
 - [ ] **Validation:** Đã kiểm tra `ModelState.IsValid` và có thông báo lỗi cho người dùng.
 - [ ] **Bảo mật:** Toàn bộ form POST đều có `@Html.AntiForgeryToken()` và `[ValidateAntiForgeryToken]`.
 - [ ] **Git Clean:** Đã kiểm tra `git status`, không commit nhầm file rác, file `.user`, `.suo`, thư mục `bin/`, `obj/`.
-- [ ] **Migrations:** (Nếu có thay đổi Model) Đã tạo và commit file Migration C# tương ứng.
+- [ ] **Database Sync:** (Nếu có thay đổi CSDL) Đã tạo Migration C# (Code First) HOẶC commit script SQL tương ứng trong `Database/Scripts/` (Database First).
 
 ---
 

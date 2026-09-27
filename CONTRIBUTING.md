@@ -232,16 +232,26 @@ public ActionResult Create(ProductViewModel model)
 }
 ```
 
-### 7.3. Quy chuẩn Entity Framework Code First
-- Không sửa trực tiếp cấu trúc bảng trong SQL Server Management Studio (SSMS).
-- Mọi thay đổi về cấu trúc bảng bắt buộc phải:
+### 7.3. Quy Chuẩn Quản Lý Cơ Sở Dữ Liệu (Linh hoạt Code First hoặc Database First)
+Nhóm không bắt buộc duy nhất một phương pháp, mà có thể linh hoạt chọn phương án phù hợp:
+
+- **Trường hợp nhóm sử dụng Code First:**
   1. Điều chỉnh file C# Model trong thư mục `Models/`.
   2. Mở Package Manager Console, chạy lệnh:
      ```powershell
      Add-Migration <TênMôTảThayĐổi>
      Update-Database
      ```
-  3. Commit file Migration C# phát sinh trong thư mục `Migrations/` lên Git để cả nhóm cùng cập nhật.
+  3. Commit file Migration C# phát sinh trong thư mục `Migrations/` lên Git để các thành viên khác kéo về và chạy `Update-Database`.
+
+- **Trường hợp nhóm sử dụng Database First / SQL Script:**
+  1. Mọi câu lệnh tạo/thay đổi bảng (DDL) phải được lưu thành file script `.sql` trong thư mục `Database/Scripts/` (đặt tên rõ ràng, ví dụ: `01_Init_Database.sql`, `02_Add_Voucher_Table.sql`).
+  2. Tuyệt đối không tự ý chỉnh sửa ngầm trong SSMS mà không commit file script SQL lên Git.
+  3. Sau khi chạy script cập nhật CSDL trên máy cá nhân:
+     - Mở file `.edmx` trong thư mục `Models/`.
+     - Click chuột phải vào màn hình thiết kế &rarr; Chọn **Update Model from Database...**
+     - Chọn các bảng/cột mới được thêm hoặc cập nhật &rarr; Bấm **Finish** và lưu file `.edmx`.
+  4. Build lại Solution để chắc chắn các lớp Entity sinh tự động không phát sinh lỗi trước khi commit.
 
 ---
 *Tuân thủ nghiêm túc các quy định trên sẽ giúp nhóm hoàn thành đồ án chất lượng cao, đúng tiến độ và không gặp rủi ro mất mát mã nguồn!*
