@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,6 +15,39 @@ namespace WebEcommerce.Models
         public bool IsActive { get; set; }
         public bool IsLockedOut { get; set; }
         public string RoleName { get; set; }
+    }
+
+    public class AdminUserDetailViewModel
+    {
+        public string Id { get; set; }
+        public string FullName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
+        public string Avatar { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsLockedOut { get; set; }
+        public string RoleName { get; set; }
+
+        // Order statistics
+        public int TotalOrders { get; set; }
+        public decimal TotalSpent { get; set; }
+        public int PendingOrders { get; set; }
+        public int CompletedOrders { get; set; }
+        public int CancelledOrders { get; set; }
+
+        // Recent orders
+        public List<AdminUserOrderItemViewModel> RecentOrders { get; set; } = new List<AdminUserOrderItemViewModel>();
+    }
+
+    public class AdminUserOrderItemViewModel
+    {
+        public int OrderID { get; set; }
+        public DateTime OrderDate { get; set; }
+        public decimal FinalAmount { get; set; }
+        public string OrderStatus { get; set; }
+        public string PaymentMethod { get; set; }
     }
 
     public class AdminUserListViewModel

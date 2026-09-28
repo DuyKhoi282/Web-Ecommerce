@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -157,7 +157,80 @@ namespace WebEcommerce.Controllers
             return View(viewModel);
         }
 
-        // POST: AdminUser/ToggleLock
+        // GET: AdminUser/Details/5
+        public async Task<ActionResult> Details(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return RedirectToAction("Index");
+
+            try
+            {
+                var user = await UserManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy người dùng trong hệ thống.";
+                    return RedirectToAction("Index");
+                }
+
+                var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_context));
+                var roles = await roleManager.Roles.ToListAsync();
+                var roleDict = roles.ToDictionary(r => r.Id, r => r.Name);
+
+                var userRoleId = user.Roles.FirstOrDefault()?.RoleId;
+                var roleName = (userRoleId != null && roleDict.ContainsKey(userRoleId))
+                    ? roleDict[userRoleId]
+                    : "Customer";
+
+                var now = DateTime.UtcNow;
+                bool isLocked = !user.IsActive || (user.LockoutEndDateUtc.HasValue && user.LockoutEndDateUtc.Value > now);
+
+                // Load order statistics
+                var orders = await _context.Orders
+                    .AsNoTracking()
+                    .Where(o => o.UserID == id)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                var recentOrders = orders.Take(5).Select(o => new AdminUserOrderItemViewModel
+                {
+                    OrderID       = o.OrderID,
+                    OrderDate     = o.OrderDate,
+                    FinalAmount   = o.FinalAmount,
+                    OrderStatus   = o.Status,
+                    PaymentMethod = o.PaymentMethod
+                }).ToList();
+
+                var viewModel = new AdminUserDetailViewModel
+                {
+                    Id              = user.Id,
+                    FullName        = user.FullName ?? "Chưa đặt tên",
+                    Email           = user.Email,
+                    PhoneNumber     = user.PhoneNumber ?? "—",
+                    Address         = user.Address ?? "Chưa cập nhật",
+                    Avatar          = user.Avatar,
+                    CreatedAt       = user.CreatedAt,
+                    IsActive        = user.IsActive,
+                    IsLockedOut     = isLocked,
+                    RoleName        = roleName,
+                    TotalOrders     = orders.Count,
+                    TotalSpent      = orders.Where(o => o.Status == "Delivered").Sum(o => o.FinalAmount),
+                    PendingOrders   = orders.Count(o => o.Status == "Pending" || o.Status == "Confirmed" || o.Status == "Processing"),
+                    CompletedOrders = orders.Count(o => o.Status == "Delivered"),
+                    CancelledOrders = orders.Count(o => o.Status == "Cancelled"),
+                    RecentOrders    = recentOrders
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AdminUser/Details Error] {ex.Message}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải thông tin người dùng.";
+                return RedirectToAction("Index");
+            }
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ToggleLock(string userId)

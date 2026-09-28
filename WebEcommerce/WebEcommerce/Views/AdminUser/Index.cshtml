@@ -249,8 +249,16 @@
                                     }
                                     else
                                     {
+                                        <!-- View Details Button (luôn hiển thị) -->
+                                        <a href="@Url.Action("Details", "AdminUser", new { id = user.Id })"
+                                           class="p-2 text-slate-500 hover:text-[#0d47a1] hover:bg-blue-50 rounded-xl transition-colors"
+                                           title="Xem chi tiết tài khoản">
+                                            <span class="material-symbols-outlined text-lg">person_search</span>
+                                        </a>
+
                                         <!-- Change Role Button (Admin only) -->
                                         if (User.IsInRole("Administrator"))
+
                                         {
                                             <button type="button" 
                                                     onclick="openRoleModal('@user.Id', '@user.FullName', '@user.RoleName')"
