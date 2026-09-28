@@ -4,7 +4,7 @@
 [![Platform](https://img.shields.io/badge/.NET_Framework-4.8-blue.svg?style=flat-square)]()
 [![Framework](https://img.shields.io/badge/ASP.NET-MVC_5-purple.svg?style=flat-square)]()
 [![ORM](https://img.shields.io/badge/Entity_Framework-6_(Database_First)-orange.svg?style=flat-square)]()
-[![Database](https://img.shields.io/badge/Database-PostgreSQL_14+-336791.svg?style=flat-square&logo=postgresql&logoColor=white)]()
+[![Database](https://img.shields.io/badge/Database-PostgreSQL_17+-336791.svg?style=flat-square&logo=postgresql&logoColor=white)]()
 [![Provider](https://img.shields.io/badge/Provider-Npgsql-004880.svg?style=flat-square)]()
 [![Git](https://img.shields.io/badge/Git_Flow-Weekly_CI-brightgreen.svg?style=flat-square)]()
 
@@ -44,7 +44,7 @@ Mục tiêu cốt lõi của đồ án:
 | Lớp (Layer) | Công Nghệ & Thư Viện | Mục Đích Sử Dụng |
 | :--- | :--- | :--- |
 | **Backend Framework** | ASP.NET MVC 5, .NET Framework 4.8 | Xây dựng kiến trúc Model-View-Controller chuẩn doanh nghiệp |
-| **Cơ sở dữ liệu** | PostgreSQL (14 / 15 / 16) | Hệ quản trị CSDL quan hệ ACID mạnh mẽ, tối ưu lưu trữ và chỉ mục |
+| **Cơ sở dữ liệu** | PostgreSQL (17.x / 16 / 15 / 14) | Hệ quản trị CSDL quan hệ ACID mạnh mẽ, tối ưu lưu trữ và chỉ mục |
 | **Database Provider** | Npgsql, EntityFramework6.Npgsql | Data Provider cung cấp kết nối ADO.NET và dịch vụ EF6 cho PostgreSQL |
 | **ORM / Data Access** | Entity Framework 6 (Database First) | Ánh xạ CSDL sang đối tượng Model theo Database First, truy vấn LINQ an toàn |
 | **Bảo mật & Phân quyền** | ASP.NET Identity 2.0, OWIN Cookie Authentication | Xác thực người dùng, mã hóa mật khẩu PBKDF2, phân quyền Role-based |
@@ -85,10 +85,10 @@ Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ
 
 | Thành Viên | Vai Trò & Phụ Trách | Controller / Deliverables Chính |
 | :--- | :--- | :--- |
-| **Thành viên 1** *(Team Lead)* | **Authentication, User Management, Authorization & Administration:**<br>• Kiến trúc & Nền tảng: Solution setup ASP.NET MVC 5, cấu hình EF 6 Database First (Npgsql / PostgreSQL), Git Flow & tích hợp tuần hoàn.<br>• Xác thực & Mật khẩu: Register, Login Cookie Auth, Logout, Change Password, Forgot & Reset Password.<br>• Hồ sơ cá nhân & Bảo mật: Xem/sửa Profile, Upload Avatar, Địa chỉ, SĐT; phòng vệ Anti-CSRF, băm mật khẩu Identity PBKDF2.<br>• Quản trị User & Tài khoản: Xem danh sách User phân trang, tìm kiếm đa tiêu chí, xem chi tiết; Khóa/Mở khóa (Lock/Unlock), Kích hoạt/Vô hiệu hóa.<br>• Phân quyền & Admin Panel: Admin layout riêng biệt (_AdminLayout.cshtml) và menu quản trị; phân quyền 3 vai trò (Customer/Manager/Admin), Gán & Đổi Role, trang 403 Forbidden.<br>• Dashboard & Biểu đồ Chart.js: Báo cáo tổng doanh thu, số đơn, số user, top bán chạy, cảnh báo kho &lt; 5; biểu đồ doanh thu Chart.js 12 tháng. | `AccountController`<br>`ManageController`<br>`AdminController`<br>`DashboardController`<br>`Identity Models & Services`<br>`Admin Layout & Views` |
-| **Thành viên 2** | **Danh mục, Sản phẩm, Tìm kiếm & Lọc:** CRUD Category, CRUD Product, tải lên nhiều ảnh, phân trang, bộ lọc đa tiêu chí (danh mục, khoảng giá, rating). | `CategoryController`<br>`ProductController`<br>`SearchController`<br>`Product Views` |
-| **Thành viên 3** | **Quy trình Mua bán Khép kín:** Giỏ hàng Ajax, Checkout, Xử lý Đơn hàng (trừ tồn kho an toàn), Mã giảm giá (Voucher), Sự kiện Flash Sale đếm ngược. | `CartController`<br>`CheckoutController`<br>`OrderController`<br>`PromotionController` |
-| **Thành viên 4** | **Tiện ích, Đánh giá & Dịch vụ Phụ thuộc:** Wishlist, Đánh giá 1-5 sao (ràng buộc đơn Delivered), Xuất hóa đơn PDF, Gửi email thông báo tự động (MailKit). | `WishlistController`<br>`ReviewController`<br>`ExportController`<br>`EmailService` |
+| **Thành viên 1** *(Team Lead)* | **Xác thực, Phân quyền & Quản trị Hệ thống:**<br>• **Kiến trúc & Nền tảng:** Solution setup ASP.NET MVC 5, cấu hình EF 6 Database First (Npgsql / PostgreSQL 17), Git Flow & tích hợp tuần hoàn.<br>• **Xác thực & Mật khẩu:** Register, Login Cookie Auth, Logout, Change Password, Forgot & Reset Password.<br>• **Hồ sơ cá nhân & Bảo mật:** Xem/sửa Profile, Upload Avatar, Địa chỉ, SĐT; phòng vệ Anti-CSRF, băm mật khẩu Identity PBKDF2.<br>• **Quản trị User & Tài khoản:** Xem danh sách User phân trang, tìm kiếm đa tiêu chí, xem chi tiết; Khóa/Mở khóa (Lock/Unlock).<br>• **Phân quyền & Admin Panel:** Admin layout riêng biệt (_AdminLayout.cshtml) và menu quản trị; phân quyền 3 vai trò, trang 403 Forbidden.<br>• **Dashboard & Biểu đồ Chart.js:** Báo cáo tổng doanh thu, số đơn, số user, top bán chạy, cảnh báo kho &lt; 5; biểu đồ doanh thu Chart.js 12 tháng. | `AccountController`<br>`ManageController`<br>`AdminController`<br>`DashboardController`<br>`Identity Models & Services`<br>`Admin Layout & Views` |
+| **Thành viên 2** | **Quản lý Hàng hóa & Tìm kiếm / Lọc:**<br>• **Danh mục Sản phẩm:** CRUD Category (Thêm/Sửa/Ẩn/Xóa, kiểm tra ràng buộc danh mục con).<br>• **Quản lý Hàng hóa:** CRUD Product (Giá gốc, giá khuyến mãi, tồn kho, trạng thái Còn hàng/Hết hàng/Ngừng bán).<br>• **Bộ sưu tập hình ảnh:** Tải lên và quản lý nhiều ảnh sản phẩm (Multiple Images Upload, ảnh đại diện `IsMain`).<br>• **Tìm kiếm đa năng:** Tìm kiếm theo từ khóa (Keyword autocomplete / full-text search) có phân trang.<br>• **Bộ lọc động đa tiêu chí:** Lọc sản phẩm theo danh mục, khoảng giá, xếp hạng sao trung bình.<br>• **Sắp xếp & Điều hướng:** Sort theo giá tăng/giảm, mới nhất, bán chạy; giao diện lưới Responsive. | `CategoryController`<br>`ProductController`<br>`SearchController`<br>`Product & Filter Views` |
+| **Thành viên 3** | **Giỏ hàng, Đặt hàng & Khuyến mãi:**<br>• **Giỏ hàng Ajax:** Thêm/sửa số lượng, xóa món, tính tổng tiền tức thời không tải lại trang (Ajax Cart).<br>• **Quy trình Thanh toán:** Trang Checkout, địa chỉ giao hàng, COD hoặc chuyển khoản ngân hàng (QR Demo).<br>• **Xử lý Đơn hàng:** Tạo đơn hàng, kiểm tra và trừ tồn kho (ACID Transaction), ngăn đặt hàng khi hết kho.<br>• **Vòng đời Đơn hàng:** Cập nhật tiến trình (Pending &rarr; Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled).<br>• **Mã ưu đãi (Voucher):** Quản lý và áp dụng mã giảm giá theo %, số tiền cố định, kiểm tra điều kiện tối thiểu.<br>• **Sự kiện Flash Sale:** Khung giờ vàng giảm giá sốc kèm đồng hồ đếm ngược thời gian thực (Countdown Timer). | `CartController`<br>`CheckoutController`<br>`OrderController`<br>`PromotionController`<br>`Order & Checkout Views` |
+| **Thành viên 4** | **Đánh giá, Tiện ích, Email & Xuất file:**<br>• **Đánh giá & Xếp hạng:** Đánh giá 1 - 5 sao và bình luận (ràng buộc chỉ tài khoản đã nhận hàng Delivered).<br>• **Tổng hợp Đánh giá:** Tự động tính điểm đánh giá trung bình và thống kê số lượt review hiển thị trực quan.<br>• **Danh sách yêu thích:** Quản lý Wishlist (Thêm/Xóa sản phẩm quan tâm, lưu trữ theo tài khoản khách).<br>• **Xuất hóa đơn PDF:** Tự động tạo và xuất hóa đơn điện tử định dạng PDF (iTextSharp / Rotativa).<br>• **Email thông báo tự động:** Dịch vụ gửi Email tự động xác nhận đơn và cập nhật trạng thái đơn (MailKit / SMTP).<br>• **Thông báo hệ thống:** Quản lý thông báo in-app (Notification Partial View) cập nhật phản hồi người dùng. | `ReviewController`<br>`WishlistController`<br>`ExportController` (PDF)<br>`EmailService` (MailKit)<br>`Notification Views` |
 
 ---
 
@@ -190,7 +190,7 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
 - **Hệ điều hành:** Windows 10 / 11
 - **IDE:** Visual Studio 2019 hoặc Visual Studio 2022 (khuyến nghị bản Community)
   - Workload cần cài: **ASP.NET and web development**, **.NET Framework 4.8 targeting pack**.
-- **Cơ sở dữ liệu:** PostgreSQL 14 / 15 / 16 & công cụ quản trị **pgAdmin 4** (hoặc DBeaver / Datagrip / `psql`).
+- **Cơ sở dữ liệu:** PostgreSQL 17.x (hoặc 16 / 15 / 14) & công cụ quản trị **pgAdmin 4** (hoặc DBeaver / Datagrip / `psql`).
 
 ### 8.2. Các Bước Cài Đặt & Chạy Ứng Dụng
 
