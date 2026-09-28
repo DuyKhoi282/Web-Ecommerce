@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Security.Claims;
+using System;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -14,11 +9,17 @@ using WebEcommerce.Models;
 
 namespace WebEcommerce
 {
+    // ──────────────────────────────────────────────
+    //  Email Service (mock – log ra console)
+    // ──────────────────────────────────────────────
     public class EmailService : IIdentityMessageService
     {
         public Task SendAsync(IdentityMessage message)
         {
-            // Plug in your email service here to send an email.
+            // TODO: Tích hợp MailKit khi đến Task của Thành viên 4
+            // Hiện tại: ghi log ra Debug để test
+            System.Diagnostics.Debug.WriteLine(
+                $"[EMAIL] To: {message.Destination} | Subject: {message.Subject} | Body: {message.Body}");
             return Task.FromResult(0);
         }
     }
@@ -27,12 +28,13 @@ namespace WebEcommerce
     {
         public Task SendAsync(IdentityMessage message)
         {
-            // Plug in your SMS service here to send a text message.
             return Task.FromResult(0);
         }
     }
 
-    // Configure the application user manager used in this application. UserManager is defined in ASP.NET Identity and is used by the application.
+    // ──────────────────────────────────────────────
+    //  ApplicationUserManager
+    // ──────────────────────────────────────────────
     public class ApplicationUserManager : UserManager<ApplicationUser>
     {
         public ApplicationUserManager(IUserStore<ApplicationUser> store)
@@ -40,70 +42,75 @@ namespace WebEcommerce
         {
         }
 
-        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
+        public static ApplicationUserManager Create(
+            IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
-            var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
-            // Configure validation logic for usernames
+            var manager = new ApplicationUserManager(
+                new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
+
+            // ── Quy tắc UserName ──────────────────────────────
             manager.UserValidator = new UserValidator<ApplicationUser>(manager)
             {
                 AllowOnlyAlphanumericUserNames = false,
-                RequireUniqueEmail = true
+                RequireUniqueEmail = true          // Email phải duy nhất
             };
 
-            // Configure validation logic for passwords
+            // ── Quy tắc mật khẩu ─────────────────────────────
+            // Nghiệp vụ: Tối thiểu 6 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt
             manager.PasswordValidator = new PasswordValidator
             {
                 RequiredLength = 6,
-                RequireNonLetterOrDigit = true,
+                RequireNonLetterOrDigit = false,   // Giảm bớt để UX không khó quá
                 RequireDigit = true,
                 RequireLowercase = true,
-                RequireUppercase = true,
+                RequireUppercase = false,
             };
 
-            // Configure user lockout defaults
+            // ── Chống Brute-Force: Lockout ────────────────────
+            // Nghiệp vụ: Sai 5 lần → khóa 10 phút
             manager.UserLockoutEnabledByDefault = true;
-            manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(10);
             manager.MaxFailedAccessAttemptsBeforeLockout = 5;
 
-            // Register two factor authentication providers. This application uses Phone and Emails as a step of receiving a code for verifying the user
-            // You can write your own provider and plug it in here.
-            manager.RegisterTwoFactorProvider("Phone Code", new PhoneNumberTokenProvider<ApplicationUser>
-            {
-                MessageFormat = "Your security code is {0}"
-            });
-            manager.RegisterTwoFactorProvider("Email Code", new EmailTokenProvider<ApplicationUser>
-            {
-                Subject = "Security Code",
-                BodyFormat = "Your security code is {0}"
-            });
+            // ── Token Provider cho Forgot Password ────────────
             manager.EmailService = new EmailService();
             manager.SmsService = new SmsService();
+
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = 
-                    new DataProtectorTokenProvider<ApplicationUser>(dataProtectionProvider.Create("ASP.NET Identity"));
+                manager.UserTokenProvider =
+                    new DataProtectorTokenProvider<ApplicationUser>(
+                        dataProtectionProvider.Create("ASP.NET Identity"))
+                    {
+                        TokenLifespan = TimeSpan.FromHours(24) // Link reset mật khẩu hết hạn sau 24h
+                    };
             }
             return manager;
         }
     }
 
-    // Configure the application sign-in manager which is used in this application.
+    // ──────────────────────────────────────────────
+    //  ApplicationSignInManager
+    // ──────────────────────────────────────────────
     public class ApplicationSignInManager : SignInManager<ApplicationUser, string>
     {
-        public ApplicationSignInManager(ApplicationUserManager userManager, IAuthenticationManager authenticationManager)
+        public ApplicationSignInManager(
+            ApplicationUserManager userManager, IAuthenticationManager authenticationManager)
             : base(userManager, authenticationManager)
         {
         }
 
-        public override Task<ClaimsIdentity> CreateUserIdentityAsync(ApplicationUser user)
+        public override Task<System.Security.Claims.ClaimsIdentity> CreateUserIdentityAsync(ApplicationUser user)
         {
             return user.GenerateUserIdentityAsync((ApplicationUserManager)UserManager);
         }
 
-        public static ApplicationSignInManager Create(IdentityFactoryOptions<ApplicationSignInManager> options, IOwinContext context)
+        public static ApplicationSignInManager Create(
+            IdentityFactoryOptions<ApplicationSignInManager> options, IOwinContext context)
         {
-            return new ApplicationSignInManager(context.GetUserManager<ApplicationUserManager>(), context.Authentication);
+            return new ApplicationSignInManager(
+                context.GetUserManager<ApplicationUserManager>(), context.Authentication);
         }
     }
 }
