@@ -1,4 +1,4 @@
-﻿@model WebEcommerce.Models.AdminUserListViewModel
+@model WebEcommerce.Models.AdminUserListViewModel
 @{
     ViewBag.Title = "Quản lý người dùng";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -41,68 +41,68 @@
 <!-- 4 KPI Metric Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
     <!-- Card 1: Total Users -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#0d47a1] hover:border-[#0d47a1] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
-            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng người dùng</span>
-            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalUsers.ToString("N0")</span>
-            <span class="block text-[11px] text-emerald-600 font-semibold mt-1">Toàn bộ tài khoản</span>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng người dùng</span>
+            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalUsers.ToString("N0")</span>
+            <span class="block text-[11px] text-emerald-600 font-bold mt-1">Toàn bộ tài khoản</span>
         </div>
-        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0d47a1] flex items-center justify-center">
-            <span class="material-symbols-outlined text-2xl">group</span>
+        <div class="w-13 h-13 rounded-2xl bg-blue-50 text-[#0d47a1] border border-blue-200 flex items-center justify-center p-3 shadow-xs">
+            <span class="material-symbols-outlined text-2xl font-bold">group</span>
         </div>
     </div>
 
     <!-- Card 2: Customers -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#00b4d8] hover:border-[#00b4d8] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
-            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Khách hàng</span>
-            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
-            <span class="block text-[11px] text-[#00b4d8] font-semibold mt-1">Khách mua hàng</span>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng</span>
+            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
+            <span class="block text-[11px] text-[#00b4d8] font-bold mt-1">Khách mua hàng</span>
         </div>
-        <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-[#00b4d8] flex items-center justify-center">
-            <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+        <div class="w-13 h-13 rounded-2xl bg-cyan-50 text-[#00b4d8] border border-cyan-200 flex items-center justify-center p-3 shadow-xs">
+            <span class="material-symbols-outlined text-2xl font-bold">shopping_bag</span>
         </div>
     </div>
 
     <!-- Card 3: Staff & Managers -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-purple-600 hover:border-purple-600 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
-            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Quản trị & Nhân viên</span>
-            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalStaff.ToString("N0")</span>
-            <span class="block text-[11px] text-purple-600 font-semibold mt-1">Vận hành hệ thống</span>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Quản trị & Nhân viên</span>
+            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalStaff.ToString("N0")</span>
+            <span class="block text-[11px] text-purple-600 font-bold mt-1">Vận hành hệ thống</span>
         </div>
-        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-            <span class="material-symbols-outlined text-2xl">badge</span>
+        <div class="w-13 h-13 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center p-3 shadow-xs">
+            <span class="material-symbols-outlined text-2xl font-bold">badge</span>
         </div>
     </div>
 
     <!-- Card 4: Locked Users -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-rose-500 hover:border-rose-500 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
-            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Tài khoản bị khóa</span>
-            <span class="block text-2xl font-bold font-headline text-red-600 mt-1">@Model.TotalLocked.ToString("N0")</span>
-            <span class="block text-[11px] text-red-500 font-semibold mt-1">Đang tạm ngưng</span>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tài khoản bị khóa</span>
+            <span class="block text-2xl font-black font-headline text-red-600 mt-1">@Model.TotalLocked.ToString("N0")</span>
+            <span class="block text-[11px] text-red-500 font-bold mt-1">Đang tạm ngưng</span>
         </div>
-        <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center">
-            <span class="material-symbols-outlined text-2xl">block</span>
+        <div class="w-13 h-13 rounded-2xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center p-3 shadow-xs">
+            <span class="material-symbols-outlined text-2xl font-bold">block</span>
         </div>
     </div>
 </div>
 
 <!-- Search & Filter Bar -->
-<div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm mb-6">
+<div class="bg-white rounded-2xl border border-slate-300 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] mb-6">
     <form method="get" action="@Url.Action("Index", "AdminUser")" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-center">
         
         <!-- Search Text Input -->
         <div class="lg:col-span-5 relative">
             <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo tên, email, số điện thoại..." 
-                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none transition-all" />
+                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none transition-all font-medium text-slate-800" />
             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
         </div>
 
         <!-- Filter by Role -->
         <div class="lg:col-span-3">
-            <select name="role" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all">
+            <select name="role" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all font-semibold text-slate-800">
                 <option value="All" @(Model.SelectedRole == "All" ? "selected" : "")>Tất cả vai trò</option>
                 <option value="Customer" @(Model.SelectedRole == "Customer" ? "selected" : "")>Khách hàng (Customer)</option>
                 <option value="StoreManager" @(Model.SelectedRole == "StoreManager" ? "selected" : "")>Nhân viên (StoreManager)</option>
@@ -112,7 +112,7 @@
 
         <!-- Filter by Status -->
         <div class="lg:col-span-2">
-            <select name="status" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all">
+            <select name="status" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all font-semibold text-slate-800">
                 <option value="All" @(Model.SelectedStatus == "All" ? "selected" : "")>Tất cả trạng thái</option>
                 <option value="Active" @(Model.SelectedStatus == "Active" ? "selected" : "")>Đang hoạt động</option>
                 <option value="Locked" @(Model.SelectedStatus == "Locked" ? "selected" : "")>Đã bị khóa</option>
@@ -121,11 +121,11 @@
 
         <!-- Submit & Reset Buttons -->
         <div class="lg:col-span-2 flex items-center gap-2">
-            <button type="submit" class="flex-1 py-2.5 px-4 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5">
+            <button type="submit" class="flex-1 py-2.5 px-4 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 border border-[#0d47a1]">
                 <span class="material-symbols-outlined text-base">filter_list</span>
                 <span>Lọc</span>
             </button>
-            <a href="@Url.Action("Index", "AdminUser")" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-colors" title="Đặt lại bộ lọc">
+            <a href="@Url.Action("Index", "AdminUser")" class="py-2.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl transition-colors font-bold shadow-xs" title="Đặt lại bộ lọc">
                 <span class="material-symbols-outlined text-base">restart_alt</span>
             </a>
         </div>
@@ -133,11 +133,11 @@
 </div>
 
 <!-- Users Data Table -->
-<div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+<div class="bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden mb-6">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
                     <th class="py-3.5 px-5">Người dùng</th>
                     <th class="py-3.5 px-4">Số điện thoại</th>
                     <th class="py-3.5 px-4">Vai trò</th>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" class="h-full">
 <head>
     <meta charset="utf-8" />
@@ -41,13 +41,28 @@
 
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        /* Đảm bảo toàn bộ viền và thẻ giao diện admin phân tách nền sắc nét */
+        *, ::before, ::after {
+            border-style: solid;
+        }
+        .admin-canvas {
+            background-color: #e9eff6 !important;
+        }
+        .admin-card {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+        }
+    </style>
 </head>
-<body class="bg-[#f8faff] text-[#1a1a2e] font-body min-h-screen antialiased flex">
+<body class="bg-[#e9eff6] text-[#1a1a2e] font-body min-h-screen antialiased flex">
 
     <!-- ========================================== -->
     <!-- SIDEBAR NAVIGATION (Deep Blue #0d47a1)    -->
     <!-- ========================================== -->
-    <aside class="fixed top-0 left-0 h-screen w-64 z-30 bg-[#0d47a1] text-white shadow-xl flex flex-col justify-between py-6 px-0 select-none">
+    <aside class="fixed top-0 left-0 h-screen w-64 z-30 bg-[#0d47a1] text-white shadow-2xl flex flex-col justify-between py-6 px-0 select-none">
         <div>
             <!-- Logo Section -->
             <div class="px-6 mb-8 flex items-center gap-3">
@@ -69,14 +84,14 @@
 
                 <!-- Tổng quan / Dashboard -->
                 <a href="@Url.Action("Index", "AdminDashboard")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminDashboard" ? "bg-white/15 text-white shadow-sm border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminDashboard" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
                     <span class="material-symbols-outlined text-xl @(currentController == "AdminDashboard" ? "text-[#00b4d8]" : "")">dashboard</span>
                     <span>Tổng quan</span>
                 </a>
 
                 <!-- Quản lý người dùng -->
                 <a href="@Url.Action("Index", "AdminUser")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/15 text-white shadow-sm border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
                     <span class="material-symbols-outlined text-xl @(currentController == "AdminUser" ? "text-[#00b4d8]" : "")">group</span>
                     <span>Quản lý tài khoản</span>
                 </a>
@@ -108,14 +123,14 @@
 
         <!-- Sidebar Footer: Admin profile & Logout -->
         <div class="px-4 pt-4 border-t border-white/10">
-            <div class="flex items-center justify-between p-2 rounded-xl bg-white/5">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white/10 border border-white/15">
                 <div class="flex items-center gap-2.5 truncate">
-                    <div class="w-9 h-9 rounded-full bg-[#00b4d8] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    <div class="w-9 h-9 rounded-full bg-[#00b4d8] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                         AD
                     </div>
                     <div class="truncate text-left">
                         <span class="block text-xs font-bold text-white truncate">@(User.Identity.IsAuthenticated ? User.Identity.Name : "Admin")</span>
-                        <span class="block text-[10px] text-blue-200">Quản trị viên</span>
+                        <span class="block text-[10px] text-blue-200 font-semibold">Quản trị viên</span>
                     </div>
                 </div>
 
@@ -136,40 +151,40 @@
     <div class="flex-1 ml-64 flex flex-col min-h-screen">
 
         <!-- Top Header Bar -->
-        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200/80 px-8 py-4 flex items-center justify-between">
+        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b-2 border-slate-300 px-8 py-4 flex items-center justify-between shadow-sm">
             <!-- Breadcrumbs / Section Title -->
             <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#0d47a1]">Admin</a>
+                <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#0d47a1] font-bold">Admin</a>
                 <span>/</span>
-                <span class="text-slate-900 font-semibold">@(ViewBag.Title ?? "Dashboard")</span>
+                <span class="text-slate-900 font-bold">@(ViewBag.Title ?? "Dashboard")</span>
             </div>
 
             <!-- Topbar Search & Notification -->
             <div class="flex items-center gap-4">
                 <div class="relative w-64">
-                    <input type="text" placeholder="Tìm kiếm nhanh..." class="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-[#0d47a1] outline-none transition-all" />
-                    <span class="material-symbols-outlined absolute left-2.5 top-2 text-slate-400 text-base">search</span>
+                    <input type="text" placeholder="Tìm kiếm nhanh..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border-2 border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all text-slate-800" />
+                    <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-base">search</span>
                 </div>
 
-                <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
-                    <button class="relative p-2 text-slate-500 hover:text-[#0d47a1] hover:bg-slate-100 rounded-full transition-colors" title="Thông báo">
+                <div class="flex items-center gap-3 border-l-2 border-slate-300 pl-4">
+                    <button class="relative p-2 text-slate-600 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 rounded-xl transition-colors shadow-sm" title="Thông báo">
                         <span class="material-symbols-outlined text-xl">notifications</span>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <span class="text-xs text-slate-400">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                    <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-300">@DateTime.Now.ToString("dd/MM/yyyy")</span>
                 </div>
             </div>
         </header>
 
-        <!-- Dynamic Body Page Content -->
-        <main class="flex-1 p-8 bg-[#f8faff]">
+        <!-- Dynamic Body Page Content (Nền #e9eff6 tách biệt sắc nét với các Card màu trắng) -->
+        <main class="flex-1 p-6 sm:p-8 bg-[#e9eff6] admin-canvas">
             @RenderBody()
         </main>
 
         <!-- Admin Footer -->
-        <footer class="bg-white border-t border-slate-200 px-8 py-4 text-xs text-slate-500 flex items-center justify-between">
-            <span>&copy; @DateTime.Now.Year TheChillShop Ecommerce • Hệ thống hoạt động ổn định</span>
-            <span>Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
+        <footer class="bg-white border-t-2 border-slate-300 px-8 py-4 text-xs text-slate-600 flex items-center justify-between">
+            <span class="font-medium">&copy; @DateTime.Now.Year TheChillShop Ecommerce • Hệ thống hoạt động ổn định</span>
+            <span class="font-semibold text-[#0d47a1]">Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
         </footer>
     </div>
 
