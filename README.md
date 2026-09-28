@@ -56,39 +56,41 @@ Mục tiêu cốt lõi của đồ án:
 
 ## 3. Kiến Trúc & Ma Trận Phân Bổ Nhân Sự
 
-Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ thuộc kỹ thuật giữa 4 thành viên:
+Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ thuộc kỹ thuật công bằng, chặt chẽ giữa 4 thành viên:
 
 ```
-[Thành viên 1: Team Lead]
-  ├── Architecture & Foundation (Solution Setup, EF 6, MVC Pattern, Git Flow)
-  ├── Authentication & Passwords (Register, Login, Logout, Change/Reset Password)
-  ├── User Profile Management (Profile, Avatar Upload, Address, Phone)
-  ├── User Management (Admin User List, Search by Name/Email, View Details)
-  ├── Account Management (Lock/Unlock, Activate/Deactivate Accounts)
-  ├── Role Management (Customer, StoreManager, Administrator, Assign/Change Role)
-  ├── Authorization ([Authorize], Role-based Access, Protect Admin/Manager, 403 Forbidden)
-  ├── Admin Panel (Dedicated Admin Layout, Navigation Menu, Centralized Views)
-  ├── Dashboard & Analytics (Total Revenue, Orders, Users, Top Selling, Low Stock < 5)
-  ├── Chart.js Integration (12-Month Revenue Bar Chart, Order Status Pie Chart)
-  ├── Security Defense (Anti-CSRF, PBKDF2 Password Hashing, Error Handling)
-  └── Weekly Integration & Code Review (PR Auditing, Merge Conflict Resolution)
-         │
-         ▼
-[Thành viên 2] ────────────► [Thành viên 3] ────────────► [Thành viên 4]
-  • Category CRUD              • Ajax Cart                  • Wishlist
-  • Product CRUD               • Checkout (COD/Bank)        • Verified Reviews
-  • Multiple Images            • Order Management           • Export PDF Invoice
-  • Search & Multi-Filter      • Voucher & Flash Sale       • MailKit Notifications
+[Thành viên 1: Team Lead]                  [Thành viên 2]
+  ├── Architecture & Foundation              ├── Category CRUD (Cha - Con)
+  ├── Authentication & Passwords             ├── Product CRUD & Pricing
+  ├── User Profile Management                ├── Multiple Images (IsMain)
+  ├── User & Account Management (Lock/Unlock)├── Search Autocomplete & Multi-Filter
+  ├── Role-based Access Control (RBAC 3 Cấp) └── Inventory Management & Low Stock (< 5)
+  ├── Admin Panel Layout & Navigation               │
+  ├── Security Defense (Anti-CSRF, PBKDF2)          │
+  └── Weekly Code Review & Integration Flow         ▼
+         │                          [Thành viên 3]
+         │                            ├── Ajax Shopping Cart
+         │                            ├── Checkout (COD / QR Bank Transfer)
+         │                            ├── Order ACID Transaction & Inventory Deduction
+         │                            ├── Order Lifecycle Management
+         │                            └── Voucher & Flash Sale Realtime
+         │                                          │
+         └──────────────────────────────────────────┴────────► [Thành viên 4]
+                                                                 ├── Admin Dashboard & Executive KPIs
+                                                                 ├── Chart.js Analytics (12 Months & Status)
+                                                                 ├── Export PDF Invoice (Rotativa)
+                                                                 ├── MailKit Automated Notifications
+                                                                 └── Verified Reviews (1-5★) & Wishlist
 ```
 
 ### Chi Tiết Phân Công Trách Nhiệm:
 
 | Thành Viên | Vai Trò & Phụ Trách | Controller / Deliverables Chính |
 | :--- | :--- | :--- |
-| **Thành viên 1** *(Team Lead)* | **Xác thực, Phân quyền & Quản trị Hệ thống:**<br>• **Kiến trúc & Nền tảng:** Solution setup ASP.NET MVC 5, cấu hình EF 6 Database First (Npgsql / PostgreSQL 17), Git Flow & tích hợp tuần hoàn.<br>• **Xác thực & Mật khẩu:** Register, Login Cookie Auth, Logout, Change Password, Forgot & Reset Password.<br>• **Hồ sơ cá nhân & Bảo mật:** Xem/sửa Profile, Upload Avatar, Địa chỉ, SĐT; phòng vệ Anti-CSRF, băm mật khẩu Identity PBKDF2.<br>• **Quản trị User & Tài khoản:** Xem danh sách User phân trang, tìm kiếm đa tiêu chí, xem chi tiết; Khóa/Mở khóa (Lock/Unlock).<br>• **Phân quyền & Admin Panel:** Admin layout riêng biệt (_AdminLayout.cshtml) và menu quản trị; phân quyền 3 vai trò, trang 403 Forbidden.<br>• **Dashboard & Biểu đồ Chart.js:** Báo cáo tổng doanh thu, số đơn, số user, top bán chạy, cảnh báo kho &lt; 5; biểu đồ doanh thu Chart.js 12 tháng. | `AccountController`<br>`ManageController`<br>`AdminController`<br>`DashboardController`<br>`Identity Models & Services`<br>`Admin Layout & Views` |
-| **Thành viên 2** | **Quản lý Hàng hóa & Tìm kiếm / Lọc:**<br>• **Danh mục Sản phẩm:** CRUD Category (Thêm/Sửa/Ẩn/Xóa, kiểm tra ràng buộc danh mục con).<br>• **Quản lý Hàng hóa:** CRUD Product (Giá gốc, giá khuyến mãi, tồn kho, trạng thái Còn hàng/Hết hàng/Ngừng bán).<br>• **Bộ sưu tập hình ảnh:** Tải lên và quản lý nhiều ảnh sản phẩm (Multiple Images Upload, ảnh đại diện `IsMain`).<br>• **Tìm kiếm đa năng:** Tìm kiếm theo từ khóa (Keyword autocomplete / full-text search) có phân trang.<br>• **Bộ lọc động đa tiêu chí:** Lọc sản phẩm theo danh mục, khoảng giá, xếp hạng sao trung bình.<br>• **Sắp xếp & Điều hướng:** Sort theo giá tăng/giảm, mới nhất, bán chạy; giao diện lưới Responsive. | `CategoryController`<br>`ProductController`<br>`SearchController`<br>`Product & Filter Views` |
+| **Thành viên 1** *(Team Lead)* | **Kiến trúc, Xác thực & Phân quyền Hệ thống:**<br>• **Kiến trúc & Nền tảng:** Solution setup ASP.NET MVC 5, cấu hình EF 6 Database First (Npgsql / PostgreSQL 17), Git Flow & tích hợp tuần hoàn.<br>• **Xác thực & Mật khẩu:** Register, Login Cookie Auth, Logout, Change Password, Forgot & Reset Password.<br>• **Hồ sơ cá nhân & Bảo mật:** Xem/sửa Profile, Upload Avatar, Địa chỉ, SĐT; phòng vệ Anti-CSRF, băm mật khẩu Identity PBKDF2.<br>• **Quản trị User & Tài khoản:** Xem danh sách User phân trang, tìm kiếm đa tiêu chí, xem chi tiết; Khóa/Mở khóa tài khoản (Lock/Unlock).<br>• **Phân quyền & Admin Layout:** Thiết kế Admin layout riêng biệt (`_AdminLayout.cshtml`), Sidebar menu; phân quyền 3 vai trò (Customer/StoreManager/Administrator), trang 403 Forbidden. | `AccountController`<br>`ManageController`<br>`AdminUsersController`<br>`Identity Models & Services`<br>`Admin Layout & Security Views` |
+| **Thành viên 2** | **Quản lý Hàng hóa, Kho & Tìm kiếm / Lọc:**<br>• **Danh mục Sản phẩm:** CRUD Category (Thêm/Sửa/Ẩn/Xóa, cấu trúc danh mục cha - con).<br>• **Quản lý Hàng hóa:** CRUD Product (Giá gốc, giá khuyến mãi, trạng thái Còn hàng/Hết hàng/Ngừng bán).<br>• **Bộ sưu tập hình ảnh:** Tải lên và quản lý nhiều ảnh sản phẩm (Multiple Images Upload, chọn ảnh đại diện `IsMain`).<br>• **Tìm kiếm đa năng:** Tìm kiếm theo từ khóa (Keyword autocomplete / full-text search) có phân trang.<br>• **Bộ lọc động đa tiêu chí:** Lọc sản phẩm theo danh mục, khoảng giá, xếp hạng sao trung bình.<br>• **Quản lý Kho & Tồn kho:** Theo dõi nhập/xuất số lượng tồn kho, phát cảnh báo sản phẩm sắp hết hàng (&lt; 5). | `CategoryController`<br>`ProductController`<br>`SearchController`<br>`InventoryController`<br>`Product & Filter Views` |
 | **Thành viên 3** | **Giỏ hàng, Đặt hàng & Khuyến mãi:**<br>• **Giỏ hàng Ajax:** Thêm/sửa số lượng, xóa món, tính tổng tiền tức thời không tải lại trang (Ajax Cart).<br>• **Quy trình Thanh toán:** Trang Checkout, địa chỉ giao hàng, COD hoặc chuyển khoản ngân hàng (QR Demo).<br>• **Xử lý Đơn hàng:** Tạo đơn hàng, kiểm tra và trừ tồn kho (ACID Transaction), ngăn đặt hàng khi hết kho.<br>• **Vòng đời Đơn hàng:** Cập nhật tiến trình (Pending &rarr; Confirmed &rarr; Processing &rarr; Shipped &rarr; Delivered/Cancelled).<br>• **Mã ưu đãi (Voucher):** Quản lý và áp dụng mã giảm giá theo %, số tiền cố định, kiểm tra điều kiện tối thiểu.<br>• **Sự kiện Flash Sale:** Khung giờ vàng giảm giá sốc kèm đồng hồ đếm ngược thời gian thực (Countdown Timer). | `CartController`<br>`CheckoutController`<br>`OrderController`<br>`PromotionController`<br>`Order & Checkout Views` |
-| **Thành viên 4** | **Đánh giá, Tiện ích, Email & Xuất file:**<br>• **Đánh giá & Xếp hạng:** Đánh giá 1 - 5 sao và bình luận (ràng buộc chỉ tài khoản đã nhận hàng Delivered).<br>• **Tổng hợp Đánh giá:** Tự động tính điểm đánh giá trung bình và thống kê số lượt review hiển thị trực quan.<br>• **Danh sách yêu thích:** Quản lý Wishlist (Thêm/Xóa sản phẩm quan tâm, lưu trữ theo tài khoản khách).<br>• **Xuất hóa đơn PDF:** Tự động tạo và xuất hóa đơn điện tử định dạng PDF (iTextSharp / Rotativa).<br>• **Email thông báo tự động:** Dịch vụ gửi Email tự động xác nhận đơn và cập nhật trạng thái đơn (MailKit / SMTP).<br>• **Thông báo hệ thống:** Quản lý thông báo in-app (Notification Partial View) cập nhật phản hồi người dùng. | `ReviewController`<br>`WishlistController`<br>`ExportController` (PDF)<br>`EmailService` (MailKit)<br>`Notification Views` |
+| **Thành viên 4** | **Dashboard Thống kê, Báo cáo & Trải nghiệm Khách hàng:**<br>• **Dashboard Quản trị:** Báo cáo tổng doanh thu, tổng số đơn hàng, số khách hàng mới, top sản phẩm bán chạy.<br>• **Phân tích Biểu đồ Chart.js:** Trực quan hóa doanh thu 12 tháng (Bar Chart), tỷ lệ trạng thái đơn hàng (Pie/Doughnut Chart).<br>• **Xuất hóa đơn PDF:** Tự động tạo và xuất hóa đơn điện tử định dạng PDF chuyên nghiệp (iTextSharp / Rotativa).<br>• **Email thông báo tự động:** Dịch vụ gửi Email tự động xác nhận đơn và cập nhật trạng thái đơn (MailKit / SMTP).<br>• **Đánh giá & Xếp hạng:** Đánh giá 1 - 5 sao và bình luận (ràng buộc chỉ tài khoản đã nhận hàng Delivered), tính điểm trung bình.<br>• **Danh sách yêu thích:** Quản lý Wishlist (Thêm/Xóa sản phẩm quan tâm, lưu trữ theo tài khoản khách). | `DashboardController`<br>`AnalyticsController`<br>`ExportController` (PDF)<br>`EmailService` (MailKit)<br>`ReviewController`<br>`WishlistController`<br>`Dashboard & Review Views` |
 
 ---
 
