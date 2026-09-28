@@ -3,19 +3,23 @@
     ViewBag.Title = "Chi tiết tài khoản — " + Model.FullName;
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
-    // Helper: badge color theo Role
-    string roleBadge = Model.RoleName switch
+    // Helper: badge color theo Role (.NET Framework 4.8 / C# 7 compatible)
+    string roleBadge, roleIcon;
+    if (Model.RoleName == "Administrator")
     {
-        "Administrator" => "bg-purple-100 text-purple-700 border-purple-200",
-        "StoreManager"  => "bg-blue-100 text-blue-700 border-blue-200",
-        _               => "bg-slate-100 text-slate-600 border-slate-200"
-    };
-    string roleIcon = Model.RoleName switch
+        roleBadge = "bg-purple-100 text-purple-700 border-purple-200";
+        roleIcon  = "shield_person";
+    }
+    else if (Model.RoleName == "StoreManager")
     {
-        "Administrator" => "shield_person",
-        "StoreManager"  => "manage_accounts",
-        _               => "person"
-    };
+        roleBadge = "bg-blue-100 text-blue-700 border-blue-200";
+        roleIcon  = "manage_accounts";
+    }
+    else
+    {
+        roleBadge = "bg-slate-100 text-slate-600 border-slate-200";
+        roleIcon  = "person";
+    }
 
     // Helper: badge màu trạng thái
     string statusBadge = Model.IsLockedOut
@@ -265,15 +269,13 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach (var order in Model.RecentOrders)
                     {
-                        string badge = order.OrderStatus switch
-                        {
-                            "Delivered"  => "bg-emerald-100 text-emerald-700",
-                            "Cancelled"  => "bg-red-100 text-red-600",
-                            "Shipped"    => "bg-blue-100 text-blue-700",
-                            "Processing" => "bg-amber-100 text-amber-700",
-                            "Confirmed"  => "bg-sky-100 text-sky-700",
-                            _            => "bg-slate-100 text-slate-600"
-                        };
+                        string badge;
+                        if (order.OrderStatus == "Delivered")       { badge = "bg-emerald-100 text-emerald-700"; }
+                        else if (order.OrderStatus == "Cancelled")  { badge = "bg-red-100 text-red-600"; }
+                        else if (order.OrderStatus == "Shipped")    { badge = "bg-blue-100 text-blue-700"; }
+                        else if (order.OrderStatus == "Processing") { badge = "bg-amber-100 text-amber-700"; }
+                        else if (order.OrderStatus == "Confirmed")  { badge = "bg-sky-100 text-sky-700"; }
+                        else                                         { badge = "bg-slate-100 text-slate-600"; }
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 font-mono font-semibold text-slate-700">#@order.OrderID</td>
                             <td class="px-6 py-4 text-slate-500">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
