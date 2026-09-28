@@ -1,106 +1,133 @@
 ﻿@{
-    ViewBag.Title = "Trang chủ - Thế giới công nghệ chính hãng";
+    ViewBag.Title = "TheChillShop - Thế giới công nghệ & phụ kiện cao cấp";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- ==========================================
-     HERO BANNER SECTION
-     ========================================== -->
-<section class="relative bg-gradient-to-br from-[#0d47a1] via-[#0b3b82] to-[#002855] text-white overflow-hidden py-16 lg:py-24">
-    <!-- Background Glow Effects -->
-    <div class="absolute -top-40 -right-40 w-96 h-96 bg-[#00b4d8]/20 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-[#0d47a1]/40 rounded-full blur-3xl pointer-events-none"></div>
+<!-- ==========================================================================
+     SECTION 1: HERO BANNER (Deep Navy Cyber Tech)
+     ========================================================================== -->
+<section class="relative bg-gradient-to-b from-[#071329] via-[#0a1b38] to-[#0d2246] text-white overflow-hidden border-b border-slate-800">
+    <!-- Ambient Radial Mesh Glows -->
+    <div class="absolute -top-32 -right-32 w-[550px] h-[550px] bg-gradient-to-br from-[#00b4d8]/25 to-[#0d47a1]/40 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-tr from-[#7209b7]/30 to-[#0077b6]/35 rounded-full blur-[110px] pointer-events-none"></div>
+    
+    <!-- Tech Grid Pattern -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <!-- Main Hero Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 lg:pt-20 lg:pb-20 relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            <!-- Left Headline & CTA -->
+            <!-- Left Column: Copy & Actions -->
             <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold tracking-wide text-[#00b4d8]">
-                    <span class="w-2 h-2 rounded-full bg-[#00b4d8] animate-ping"></span>
-                    THECHILLSHOP - ĐỈNH CAO CÔNG NGHỆ 2026
+                <!-- Badge Pill -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-cyan-400/40 text-xs font-bold tracking-wide text-cyan-300 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span>THECHILLSHOP • CÔNG NGHỆ TIÊN PHONG 2026</span>
                 </div>
 
-                <h1 class="font-headline font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight leading-tight">
-                    Khám phá phong cách <br class="hidden sm:inline" />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-white">
-                        Sống công nghệ hiện đại
+                <!-- Main Title -->
+                <h1 class="font-headline font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-[1.15]">
+                    Trải nghiệm đỉnh cao <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-white drop-shadow-sm">
+                        Phong cách sống tương lai
                     </span>
                 </h1>
 
-                <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                    Trải nghiệm mua sắm thiết bị di động, laptop, âm thanh và phụ kiện chính hãng với chính sách bảo hành 12 tháng 1 đổi 1 và giao hàng hỏa tốc trong 2 giờ.
+                <!-- Subtitle -->
+                <p class="text-slate-200 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                    Hệ thống bán lẻ thiết bị di động, laptop, âm thanh và phụ kiện chính hãng hàng đầu. Bảo hành 12 tháng 1 đổi 1, trả góp 0% và giao hàng hỏa tốc trong 2 giờ.
                 </p>
 
-                <!-- Action CTAs -->
+                <!-- Action CTA Buttons -->
                 <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                    <a href="#featured-products" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#0096c7] text-white font-bold text-sm shadow-lg shadow-[#00b4d8]/25 hover:shadow-cyan-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-lg">shopping_bag</span>
-                        <span>Khám phá sản phẩm</span>
+                    <a href="#featured-products" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-cyan-400 hover:to-[#0096c7] text-white font-extrabold text-sm shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 border border-cyan-300/30">
+                        <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                        <span>Khám phá ngay</span>
                     </a>
-                    <a href="#categories-section" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
-                        <span>Xem danh mục</span>
+                    <a href="#categories-section" class="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-2 border-white/30 text-white font-bold text-sm hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+                        <span>Danh mục sản phẩm</span>
                         <span class="material-symbols-outlined text-base">arrow_forward</span>
                     </a>
                 </div>
 
-                <!-- Trust Badges -->
-                <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-300 font-medium">
+                <!-- Trust Badges with Glowing Icons -->
+                <div class="pt-6 border-t border-white/15 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-200 font-semibold">
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[#00b4d8] text-base">verified</span>
-                        <span>100% Chính hãng</span>
+                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
+                            <span class="material-symbols-outlined text-base">verified</span>
+                        </span>
+                        <span>100% Chính hãng VN/A</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[#00b4d8] text-base">local_shipping</span>
-                        <span>Freeship toàn quốc từ 500k</span>
+                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
+                            <span class="material-symbols-outlined text-base">local_shipping</span>
+                        </span>
+                        <span>Freeship từ 500.000đ</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[#00b4d8] text-base">published_with_changes</span>
-                        <span>15 ngày đổi trả miễn phí</span>
+                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
+                            <span class="material-symbols-outlined text-base">published_with_changes</span>
+                        </span>
+                        <span>15 ngày đổi mới</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Visual Graphic / Banner Showcase -->
+            <!-- Right Column: Interactive Flagship Showcase Card -->
             <div class="lg:col-span-5 flex justify-center">
                 <div class="relative w-full max-w-md">
-                    <!-- Decorative back card -->
-                    <div class="absolute inset-0 bg-gradient-to-tr from-[#00b4d8]/20 to-[#0d47a1]/40 rounded-3xl transform rotate-3 scale-105 filter blur-lg"></div>
-                    
-                    <!-- Main Featured Showcase Card -->
-                    <div class="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-white">
-                        <div class="flex items-center justify-between mb-6">
-                            <span class="px-3 py-1 rounded-full bg-rose-500 text-white text-[11px] font-bold uppercase tracking-wider">
-                                HOT DEAL TUẦN NÀY
+                    <!-- Outer Decorative Glow -->
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-600 rounded-[32px] blur-xl opacity-70 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+
+                    <!-- Inner Glass Card with Solid High-Contrast Border -->
+                    <div class="relative bg-[#0c1d3b]/95 backdrop-blur-2xl border-2 border-cyan-400/40 rounded-[28px] p-6 sm:p-7 shadow-2xl text-white">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="px-3.5 py-1 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
+                                🔥 FLASH SALE TUẦN NÀY
                             </span>
-                            <span class="text-xs text-cyan-300 font-semibold flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">bolt</span> Flash Sale
+                            <span class="text-xs text-cyan-300 font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-yellow-300">bolt</span> Giảm sốc 14%
                             </span>
                         </div>
 
-                        <div class="w-full aspect-[4/3] rounded-2xl bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center p-4 mb-6 relative overflow-hidden group">
+                        <!-- Product Image Box -->
+                        <div class="w-full aspect-[4/3] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-4 mb-5 relative overflow-hidden group">
                             <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80" 
-                                 alt="Flagship Smartphone" 
+                                 alt="iPhone 16 Pro Max" 
                                  class="max-h-56 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500" 
                                  onerror="this.src='https://placehold.co/500x350/0d47a1/ffffff?text=Flagship+Phone';" />
                         </div>
 
+                        <!-- Content -->
                         <div class="space-y-2">
-                            <p class="text-xs text-cyan-300 uppercase tracking-wider font-semibold">Flagship Phone 2026</p>
-                            <h3 class="font-headline font-bold text-xl sm:text-2xl text-white">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] uppercase tracking-wider font-extrabold text-cyan-300">Apple Official Store</span>
+                                <span class="flex items-center text-xs text-amber-400 gap-0.5 font-bold">
+                                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <strong>4.9</strong> (428)
+                                </span>
+                            </div>
+
+                            <h3 class="font-headline font-bold text-xl text-white line-clamp-1">
                                 iPhone 16 Pro Max 256GB Titan Tự Nhiên
                             </h3>
-                            <div class="flex items-baseline gap-3 pt-2">
-                                <span class="font-headline font-extrabold text-2xl text-cyan-300">29.990.000đ</span>
+
+                            <div class="flex items-baseline gap-3 pt-1">
+                                <span class="font-headline font-black text-2xl text-cyan-300">29.990.000đ</span>
                                 <span class="text-sm text-slate-400 line-through">34.990.000đ</span>
-                                <span class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">-14%</span>
+                                <span class="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">-14%</span>
                             </div>
                         </div>
 
-                        <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-                            <span>Đã bán: <strong>142/200</strong></span>
-                            <div class="w-32 bg-white/20 rounded-full h-2 overflow-hidden">
-                                <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full" style="width: 71%"></div>
+                        <!-- Stock Progress Bar -->
+                        <div class="mt-5 pt-4 border-t border-white/15 space-y-1.5 text-xs text-slate-200">
+                            <div class="flex items-center justify-between font-semibold">
+                                <span>Đã bán: <strong class="text-cyan-300 font-bold">142/200</strong></span>
+                                <span class="text-amber-300 font-bold">Chỉ còn 58 máy!</span>
+                            </div>
+                            <div class="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 71%"></div>
                             </div>
                         </div>
                     </div>
@@ -109,187 +136,208 @@
 
         </div>
     </div>
-</section>
 
-<!-- ==========================================
-     VALUE PROPOSITIONS (4 USPs)
-     ========================================== -->
-<section class="border-b border-slate-200/80 bg-white py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-[#0d47a1]/10 text-[#0d47a1] flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-2xl">local_shipping</span>
+    <!-- ======================================================================
+         SECTION 2: 4 USPs DARK GLASS RIBBON BAR
+         ====================================================================== -->
+    <div class="border-t-2 border-slate-700/60 bg-[#061124] py-6 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-800">
+                
+                <!-- USP 1 -->
+                <div class="flex items-center gap-4 sm:pr-4 pt-3 sm:pt-0">
+                    <div class="w-13 h-13 rounded-2xl bg-cyan-400/15 border-2 border-cyan-400/40 text-cyan-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/10 p-3">
+                        <span class="material-symbols-outlined text-2xl">local_shipping</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">Giao hàng hỏa tốc 2H</h4>
+                        <p class="text-xs text-slate-300 mt-0.5">Miễn phí ship đơn từ 500k toàn quốc</p>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="font-headline font-bold text-slate-900 text-sm">Giao hàng hỏa tốc</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Miễn phí giao hàng đơn từ 500k</p>
+
+                <!-- USP 2 -->
+                <div class="flex items-center gap-4 sm:px-4 pt-3 sm:pt-0">
+                    <div class="w-13 h-13 rounded-2xl bg-emerald-400/15 border-2 border-emerald-400/40 text-emerald-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/10 p-3">
+                        <span class="material-symbols-outlined text-2xl">verified</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">100% Chính hãng</h4>
+                        <p class="text-xs text-slate-300 mt-0.5">Cam kết hoàn tiền gấp đôi nếu giả mạo</p>
+                    </div>
                 </div>
+
+                <!-- USP 3 -->
+                <div class="flex items-center gap-4 sm:px-4 pt-3 sm:pt-0">
+                    <div class="w-13 h-13 rounded-2xl bg-amber-400/15 border-2 border-amber-400/40 text-amber-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/10 p-3">
+                        <span class="material-symbols-outlined text-2xl">published_with_changes</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">15 ngày 1 đổi 1</h4>
+                        <p class="text-xs text-slate-300 mt-0.5">Đổi mới ngay nếu lỗi kỹ thuật NSX</p>
+                    </div>
+                </div>
+
+                <!-- USP 4 -->
+                <div class="flex items-center gap-4 sm:pl-4 pt-3 sm:pt-0">
+                    <div class="w-13 h-13 rounded-2xl bg-purple-400/15 border-2 border-purple-400/40 text-purple-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/10 p-3">
+                        <span class="material-symbols-outlined text-2xl">support_agent</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">Hỗ trợ kỹ thuật 24/7</h4>
+                        <p class="text-xs text-slate-300 mt-0.5">Hotline miễn cước: 1900 6868</p>
+                    </div>
+                </div>
+
             </div>
-
-            <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-[#00b4d8]/10 text-[#00b4d8] flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-2xl">verified_user</span>
-                </div>
-                <div>
-                    <h4 class="font-headline font-bold text-slate-900 text-sm">100% Chính hãng</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Cam kết nguồn gốc minh bạch</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-2xl">published_with_changes</span>
-                </div>
-                <div>
-                    <h4 class="font-headline font-bold text-slate-900 text-sm">15 ngày đổi trả</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Đổi mới nếu phát sinh lỗi kỹ thuật</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-2xl">support_agent</span>
-                </div>
-                <div>
-                    <h4 class="font-headline font-bold text-slate-900 text-sm">Hỗ trợ 24/7</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Hotline miễn phí 1900 6868</p>
-                </div>
-            </div>
-
         </div>
     </div>
 </section>
 
-<!-- ==========================================
-     FEATURED CATEGORIES (Placeholder cho TV2)
-     ========================================== -->
-<section id="categories-section" class="py-12 sm:py-16">
+<!-- ==========================================================================
+     SECTION 3: FLASH SALE / GIỜ VÀNG GIÁ SỐC (Nền xám nhạt Slate-100)
+     Đưa lên đầu sau USPs để thu hút sự chú ý tức thì của khách hàng!
+     ========================================================================== -->
+<section class="py-12 bg-[#f1f5f9] border-b-2 border-slate-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative bg-gradient-to-r from-[#d90429] via-[#ef233c] to-[#f77f00] rounded-3xl p-6 sm:p-10 text-white shadow-xl border-2 border-red-300/40 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <!-- Ambient Pattern in banner -->
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-yellow-400/25 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="space-y-2 text-center md:text-left relative z-10">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-xs font-black tracking-wider uppercase border border-white/20">
+                    <span class="material-symbols-outlined text-yellow-300 text-base animate-bounce">local_fire_department</span>
+                    GIỜ VÀNG GIÁ SỐC - HÔM NAY
+                </div>
+                <h2 class="font-headline font-black text-2xl sm:text-4xl tracking-tight leading-tight">
+                    Flash Sale Chớp Nhoáng - Giảm Tới 50%
+                </h2>
+                <p class="text-white/95 text-sm sm:text-base font-medium">Ưu đãi độc quyền trong ngày hôm nay, số lượng có hạn!</p>
+            </div>
+
+            <!-- Countdown Timer Glass Boxes -->
+            <div class="flex items-center gap-3 relative z-10">
+                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-white/30 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
+                    <span class="font-headline font-black text-2xl sm:text-3xl text-white">02</span>
+                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Giờ</span>
+                </div>
+                <span class="font-black text-2xl text-white animate-pulse">:</span>
+                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-white/30 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
+                    <span class="font-headline font-black text-2xl sm:text-3xl text-white">45</span>
+                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Phút</span>
+                </div>
+                <span class="font-black text-2xl text-white animate-pulse">:</span>
+                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-yellow-300/50 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
+                    <span class="font-headline font-black text-2xl sm:text-3xl text-yellow-300">18</span>
+                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Giây</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 4: DANH MỤC NỔI BẬT (Nền trắng tinh khiết, Card nền Slate-50)
+     Card có border-2 border-slate-300 cực rõ, không bị chìm vào nền!
+     ========================================================================== -->
+<section id="categories-section" class="py-16 bg-white border-b-2 border-slate-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-[#00b4d8]">Bộ sưu tập</span>
-                <h2 class="font-headline font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
-                    Danh mục nổi bật
+                <span class="text-xs font-black uppercase tracking-wider text-[#0d47a1] bg-blue-50 border-2 border-blue-300 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#0d47a1]"></span>
+                    DANH MỤC SẢN PHẨM
+                </span>
+                <h2 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 mt-2.5">
+                    Khám phá theo danh mục
                 </h2>
+                <p class="text-slate-600 text-sm mt-1">Đầy đủ các dòng thiết bị công nghệ hiện đại nhất thị trường</p>
             </div>
-            <a href="#" class="text-xs font-bold text-[#0d47a1] hover:text-[#00b4d8] flex items-center gap-1 transition-colors">
-                Xem tất cả danh mục &rarr;
+            <a href="#" class="text-sm font-bold text-[#0d47a1] hover:text-[#00b4d8] flex items-center gap-1.5 transition-colors group">
+                <span>Xem tất cả danh mục</span>
+                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
             
             <!-- Category 1: Điện thoại -->
-            <a href="#" class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0d47a1]/40 transition-all text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-blue-50 text-[#0d47a1] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#0d47a1] group-hover:text-white transition-all duration-300">
+            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-blue-500/25 group-hover:scale-110">
                     <span class="material-symbols-outlined text-3xl">smartphone</span>
                 </div>
-                <h3 class="font-headline font-bold text-sm text-slate-800 group-hover:text-[#0d47a1] transition-colors">Điện thoại</h3>
-                <span class="text-[11px] text-slate-400 mt-0.5">120+ sản phẩm</span>
+                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d47a1] transition-colors">Điện thoại</h3>
+                <span class="text-xs text-slate-600 mt-1 font-semibold">120+ sản phẩm</span>
             </a>
 
             <!-- Category 2: Laptop -->
-            <a href="#" class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0d47a1]/40 transition-all text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-sky-50 text-[#00b4d8] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#00b4d8] group-hover:text-white transition-all duration-300">
+            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-[#00b4d8] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-600 to-sky-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-cyan-500/25 group-hover:scale-110">
                     <span class="material-symbols-outlined text-3xl">laptop_mac</span>
                 </div>
-                <h3 class="font-headline font-bold text-sm text-slate-800 group-hover:text-[#0d47a1] transition-colors">Laptop</h3>
-                <span class="text-[11px] text-slate-400 mt-0.5">85+ sản phẩm</span>
+                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#00b4d8] transition-colors">Laptop</h3>
+                <span class="text-xs text-slate-600 mt-1 font-semibold">85+ sản phẩm</span>
             </a>
 
             <!-- Category 3: Tai nghe -->
-            <a href="#" class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0d47a1]/40 transition-all text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300">
+            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-amber-500 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-amber-500/25 group-hover:scale-110">
                     <span class="material-symbols-outlined text-3xl">headphones</span>
                 </div>
-                <h3 class="font-headline font-bold text-sm text-slate-800 group-hover:text-[#0d47a1] transition-colors">Tai nghe</h3>
-                <span class="text-[11px] text-slate-400 mt-0.5">64+ sản phẩm</span>
+                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-amber-600 transition-colors">Tai nghe</h3>
+                <span class="text-xs text-slate-600 mt-1 font-semibold">64+ sản phẩm</span>
             </a>
 
             <!-- Category 4: Đồng hồ -->
-            <a href="#" class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0d47a1]/40 transition-all text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-emerald-600 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-emerald-500/25 group-hover:scale-110">
                     <span class="material-symbols-outlined text-3xl">watch</span>
                 </div>
-                <h3 class="font-headline font-bold text-sm text-slate-800 group-hover:text-[#0d47a1] transition-colors">Smartwatch</h3>
-                <span class="text-[11px] text-slate-400 mt-0.5">48+ sản phẩm</span>
+                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-600 transition-colors">Smartwatch</h3>
+                <span class="text-xs text-slate-600 mt-1 font-semibold">48+ sản phẩm</span>
             </a>
 
             <!-- Category 5: Phụ kiện -->
-            <a href="#" class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0d47a1]/40 transition-all text-center flex flex-col items-center col-span-2 sm:col-span-1">
-                <div class="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-purple-600 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center col-span-2 sm:col-span-1">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-purple-500/25 group-hover:scale-110">
                     <span class="material-symbols-outlined text-3xl">power</span>
                 </div>
-                <h3 class="font-headline font-bold text-sm text-slate-800 group-hover:text-[#0d47a1] transition-colors">Phụ kiện</h3>
-                <span class="text-[11px] text-slate-400 mt-0.5">250+ sản phẩm</span>
+                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-purple-600 transition-colors">Phụ kiện</h3>
+                <span class="text-xs text-slate-600 mt-1 font-semibold">250+ sản phẩm</span>
             </a>
 
         </div>
     </div>
 </section>
 
-<!-- ==========================================
-     FLASH SALE BANNER
-     ========================================== -->
-<section class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="space-y-2 text-center md:text-left">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/20 text-xs font-bold tracking-wider uppercase">
-                    <span class="material-symbols-outlined text-amber-300 text-sm">local_fire_department</span>
-                    GIỜ VÀNG GIÁ SỐC
-                </div>
-                <h2 class="font-headline font-black text-2xl sm:text-3xl">
-                    Flash Sale Chớp Nhoáng - Giảm Tới 50%
-                </h2>
-                <p class="text-white/80 text-sm">Chỉ diễn ra trong hôm nay, số lượng có hạn!</p>
-            </div>
-
-            <!-- Countdown Timer Mockup -->
-            <div class="flex items-center gap-3">
-                <div class="flex flex-col items-center bg-black/30 backdrop-blur-md rounded-xl px-3 py-2 min-w-[56px]">
-                    <span class="font-headline font-extrabold text-xl text-white">02</span>
-                    <span class="text-[10px] text-white/70 uppercase">Giờ</span>
-                </div>
-                <span class="font-bold text-xl text-white/60">:</span>
-                <div class="flex flex-col items-center bg-black/30 backdrop-blur-md rounded-xl px-3 py-2 min-w-[56px]">
-                    <span class="font-headline font-extrabold text-xl text-white">45</span>
-                    <span class="text-[10px] text-white/70 uppercase">Phút</span>
-                </div>
-                <span class="font-bold text-xl text-white/60">:</span>
-                <div class="flex flex-col items-center bg-black/30 backdrop-blur-md rounded-xl px-3 py-2 min-w-[56px]">
-                    <span class="font-headline font-extrabold text-xl text-white">18</span>
-                    <span class="text-[10px] text-white/70 uppercase">Giây</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ==========================================
-     FEATURED PRODUCTS GRID (Sản phẩm nổi bật)
-     (TV2 sẽ đổ Model động vào đây)
-     ========================================== -->
-<section id="featured-products" class="py-12 sm:py-16">
+<!-- ==========================================================================
+     SECTION 5: SẢN PHẨM BÁN CHẠY & NỔI BẬT (Nền xám nhạt Slate-100)
+     Card sản phẩm màu trắng đặt trên nền xám nhạt + viền border-2 border-slate-300
+     Tạo độ tương phản TUYỆT ĐỐI, không bao giờ bị chìm!
+     ========================================================================== -->
+<section id="featured-products" class="py-16 bg-[#f1f5f9] border-b-2 border-slate-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-[#00b4d8]">Sản phẩm hot</span>
-                <h2 class="font-headline font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
-                    Sản phẩm nổi bật nhất
+                <span class="text-xs font-black uppercase tracking-wider text-[#0d47a1] bg-blue-50 border-2 border-blue-300 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#0d47a1]"></span>
+                    SẢN PHẨM NỔI BẬT
+                </span>
+                <h2 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 mt-2.5">
+                    Sản phẩm bán chạy nhất
                 </h2>
+                <p class="text-slate-600 text-sm mt-1">Các sản phẩm công nghệ dẫn đầu xu hướng được lựa chọn nhiều nhất</p>
             </div>
             
-            <!-- Category Tabs Placeholder -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 text-xs font-semibold">
-                <button type="button" class="px-4 py-2 rounded-full bg-[#0d47a1] text-white shadow-sm whitespace-nowrap">Tất cả</button>
-                <button type="button" class="px-4 py-2 rounded-full bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors whitespace-nowrap">Điện thoại</button>
-                <button type="button" class="px-4 py-2 rounded-full bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors whitespace-nowrap">Laptop</button>
-                <button type="button" class="px-4 py-2 rounded-full bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors whitespace-nowrap">Phụ kiện</button>
+            <!-- Category Tabs Navigation with distinct borders -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 text-xs font-bold">
+                <button type="button" class="px-5 py-2.5 rounded-full bg-[#0d47a1] text-white border-2 border-[#0d47a1] shadow-md shadow-[#0d47a1]/25 whitespace-nowrap">Tất cả</button>
+                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Điện thoại</button>
+                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Laptop</button>
+                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Tai nghe</button>
+                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Phụ kiện</button>
             </div>
         </div>
 
@@ -334,7 +382,7 @@
 
             <!-- Card 5 -->
             @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Samsung Galaxy S24 Ultra 12GB 256GB Gray" },
+                { "CardName", "Samsung Galaxy S24 Ultra 12GB 256GB Titanium" },
                 { "CardCategory", "Điện thoại" },
                 { "CardPrice", 31990000m },
                 { "CardDiscountPrice", 26990000m },
@@ -343,7 +391,7 @@
 
             <!-- Card 6 -->
             @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Chuột không dây Logitech MX Master 3S" },
+                { "CardName", "Chuột không dây Logitech MX Master 3S Silent" },
                 { "CardCategory", "Phụ kiện" },
                 { "CardPrice", 2490000m },
                 { "CardDiscountPrice", 1990000m },
@@ -371,8 +419,8 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a href="#" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white border border-slate-300 hover:border-[#0d47a1] text-slate-800 hover:text-[#0d47a1] font-bold text-sm shadow-sm transition-all duration-200">
-                <span>Xem thêm 240+ sản phẩm khác</span>
+            <a href="#" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300">
+                <span>Xem thêm hơn 200+ sản phẩm khác</span>
                 <span class="material-symbols-outlined text-base">expand_more</span>
             </a>
         </div>
@@ -380,29 +428,53 @@
     </div>
 </section>
 
-<!-- ==========================================
-     PROMO MEMBERSHIP BANNER
-     ========================================== -->
-<section class="py-8 bg-slate-50">
+<!-- ==========================================================================
+     SECTION 6: ĐẶC QUYỀN THÀNH VIÊN (Nền trắng, Banner xanh Deep Blue)
+     ========================================================================== -->
+<section class="py-14 bg-white border-b-2 border-slate-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="relative rounded-3xl bg-gradient-to-r from-[#0d47a1] to-[#00b4d8] text-white p-8 sm:p-12 overflow-hidden shadow-xl">
+        <div class="relative rounded-3xl bg-gradient-to-r from-[#0d47a1] via-[#0077b6] to-[#00b4d8] text-white p-8 sm:p-14 overflow-hidden shadow-2xl border-2 border-blue-400/40">
+            <!-- Background circles -->
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
             <div class="max-w-2xl relative z-10 space-y-4">
-                <span class="px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider">
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-wider border border-white/20">
+                    <span class="material-symbols-outlined text-sm text-yellow-300">stars</span>
                     ĐẶC QUYỀN THÀNH VIÊN
                 </span>
                 <h2 class="font-headline font-black text-2xl sm:text-4xl leading-tight">
-                    Đăng ký tài khoản ngay hôm nay nhận Voucher 100.000đ!
+                    Đăng ký tài khoản ngay hôm nay - Nhận Voucher 100.000đ!
                 </h2>
-                <p class="text-white/90 text-sm sm:text-base">
-                    Tích lũy điểm đổi quà mỗi đơn hàng, nhận ưu đãi độc quyền vào ngày sinh nhật và thông báo sớm các đợt Flash Sale.
+                <p class="text-white/95 text-sm sm:text-base leading-relaxed font-normal">
+                    Tích lũy điểm đổi quà mỗi đơn hàng, nhận ưu đãi độc quyền ngày sinh nhật và được ưu tiên hỗ trợ đổi trả nhanh chóng.
                 </p>
                 <div class="pt-2">
-                    <a href="@Url.Action("Register", "Account")" class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-white text-[#0d47a1] font-extrabold text-sm shadow-lg hover:bg-slate-100 transition-all">
+                    <a href="@Url.Action("Register", "Account")" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white text-[#0d47a1] font-black text-sm shadow-xl hover:bg-slate-100 hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-white">
                         <span>Đăng ký thành viên miễn phí</span>
                         <span class="material-symbols-outlined text-base">arrow_forward</span>
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 7: ĐỐI TÁC THƯƠNG HIỆU HÀNG ĐẦU (Nền Slate-50)
+     ========================================================================== -->
+<section class="py-12 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-xs uppercase font-black tracking-widest text-slate-500 mb-6">
+            ĐỐI TÁC THƯƠNG HIỆU CHÍNH HÃNG HÀNG ĐẦU
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-800 font-headline font-black text-base sm:text-lg">
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">APPLE</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">SAMSUNG</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">SONY</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">ASUS</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">DELL</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">LOGITECH</span>
+            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">MARSHALL</span>
         </div>
     </div>
 </section>
