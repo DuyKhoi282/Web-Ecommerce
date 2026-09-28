@@ -1,80 +1,291 @@
 @model WebEcommerce.Models.RegisterViewModel
 @{
     ViewBag.Title = "Đăng ký tài khoản";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-1 fw-bold">Tạo tài khoản</h2>
-                    <p class="text-center text-muted mb-4">Đăng ký để bắt đầu mua sắm</p>
-
-                    @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
-
-                    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "needs-validation" }))
-                    {
-                        @Html.AntiForgeryToken()
-
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.FullName, new { @class = "form-label" })
-                            @Html.TextBoxFor(m => m.FullName, new {
-                                @class = "form-control",
-                                placeholder = "Nguyễn Văn A",
-                                autocomplete = "name"
-                            })
-                            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger small" })
-                        </div>
-
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.Email, new { @class = "form-label" })
-                            @Html.TextBoxFor(m => m.Email, new {
-                                @class = "form-control",
-                                placeholder = "example@email.com",
-                                autocomplete = "email",
-                                type = "email"
-                            })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
-                        </div>
-
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.Password, new { @class = "form-label" })
-                            @Html.PasswordFor(m => m.Password, new {
-                                @class = "form-control",
-                                placeholder = "Tối thiểu 6 ký tự",
-                                autocomplete = "new-password"
-                            })
-                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
-                        </div>
-
-                        <div class="mb-4">
-                            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
-                            @Html.PasswordFor(m => m.ConfirmPassword, new {
-                                @class = "form-control",
-                                placeholder = "Nhập lại mật khẩu",
-                                autocomplete = "new-password"
-                            })
-                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger small" })
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Đăng ký</button>
-                        </div>
+<!DOCTYPE html>
+<html class="h-full" lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Đăng ký tài khoản - TheChillShop | Mua sắm thông minh - Sống chất lượng</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#0d47a1',
+                            primaryDark: '#0a3880',
+                            accent: '#00b4d8',
+                            accentHover: '#0096c7',
+                            dark: '#1a1a2e',
+                            muted: '#5c6370',
+                            border: '#e2e8f4',
+                            surface: '#f8faff',
+                        }
+                    },
+                    fontFamily: {
+                        headline: ["Plus Jakarta Sans", "sans-serif"],
+                        body: ["Inter", "sans-serif"]
                     }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .bg-gradient-chill {
+            background: linear-gradient(135deg, #0d47a1 0%, #0077b6 50%, #00b4d8 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<body class="h-full bg-white font-body text-[#1a1a2e] antialiased selection:bg-[#00b4d8]/20 selection:text-[#0d47a1]">
+    <main class="min-h-full flex flex-col lg:flex-row">
+        <!-- LEFT PANEL: Brand Visuals & Member Perks -->
+        <section class="lg:w-[50%] bg-gradient-chill text-white flex flex-col justify-between p-8 sm:p-12 lg:p-14 relative overflow-hidden">
+            <!-- Ambient glow elements -->
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
-                    <hr class="my-4" />
-                    <p class="text-center mb-0">
-                        Đã có tài khoản?
-                        @Html.ActionLink("Đăng nhập ngay", "Login", "Account", null, new { @class = "text-decoration-none fw-semibold" })
-                    </p>
+            <!-- Top Header / Brand Row -->
+            <div class="relative z-10 flex items-center justify-between">
+                <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-white text-[#0d47a1] flex items-center justify-center shadow-lg">
+                        <span class="material-symbols-outlined text-2xl text-[#0d47a1]">shopping_bag</span>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold font-headline tracking-tight leading-none block">TheChill<span class="text-cyan-300">Shop</span></span>
+                        <span class="text-xs text-blue-100 font-normal tracking-wide block mt-1">Mua sắm thông minh - Sống chất lượng</span>
+                    </div>
+                </a>
+                <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full transition-all border border-white/15">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                    <span>Về trang chủ</span>
+                </a>
+            </div>
+
+            <!-- Middle Content: Welcome & Perks Showcase -->
+            <div class="relative z-10 my-8 max-w-xl">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-medium mb-6 text-white shadow-sm">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                    <span>Đăng ký miễn phí - Nhận ngay ưu đãi 50K cho đơn đầu tiên!</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl lg:text-4xl font-extrabold font-headline tracking-tight leading-tight text-white mb-4">
+                    Gia nhập cộng đồng khách hàng TheChillShop
+                </h2>
+                <p class="text-blue-100/90 text-sm sm:text-base mb-6 font-light leading-relaxed">
+                    Khám phá hàng ngàn sản phẩm chính hãng với mức giá tốt nhất, tích lũy điểm thưởng thành viên và nhận bảo trợ mua sắm tuyệt đối.
+                </p>
+
+                <div class="space-y-3">
+                    <!-- Perk 1 -->
+                    <div class="glass-card rounded-xl p-3.5 flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0 border border-white/30 text-amber-300">
+                            <span class="material-symbols-outlined text-xl">redeem</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm text-white">Voucher chào mừng 50K</div>
+                            <div class="text-xs text-blue-100/80">Áp dụng ngay cho đơn hàng mua sắm đầu tiên</div>
+                        </div>
+                        <span class="ml-auto px-2 py-0.5 rounded bg-amber-400/20 text-amber-200 border border-amber-300/30 text-xs font-bold uppercase">50K</span>
+                    </div>
+
+                    <!-- Perk 2 -->
+                    <div class="glass-card rounded-xl p-3.5 flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0 border border-white/30 text-emerald-300">
+                            <span class="material-symbols-outlined text-xl">local_shipping</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm text-white">Miễn phí vận chuyển toàn quốc</div>
+                            <div class="text-xs text-blue-100/80">Áp dụng cho mọi đơn hàng từ 500.000đ</div>
+                        </div>
+                        <span class="ml-auto px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 text-xs font-bold uppercase">FREE</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+            <!-- Bottom: Footer Note -->
+            <div class="relative z-10 pt-4 flex items-center justify-between border-t border-white/15 text-xs text-blue-100">
+                <span>© @DateTime.Now.Year TheChillShop. Bản quyền thuộc về Nhóm TheChill.</span>
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-emerald-300 text-sm">lock</span>
+                    <span>Bảo mật 100%</span>
+                </span>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Registration Form Canvas -->
+        <section class="lg:w-[50%] bg-white flex flex-col justify-between p-6 sm:p-10 lg:p-14 min-h-screen overflow-y-auto">
+            <!-- Top Link -->
+            <div class="w-full flex items-center justify-end mb-4">
+                <p class="text-sm text-slate-500">
+                    Đã có tài khoản?
+                    <a href="@Url.Action("Login", "Account")" class="text-[#0d47a1] hover:text-[#00b4d8] font-bold ml-1 transition-colors">
+                        Đăng nhập
+                    </a>
+                </p>
+            </div>
+
+            <!-- Form Wrapper -->
+            <div class="w-full max-w-md mx-auto my-auto py-2">
+                <!-- Header -->
+                <div class="mb-5">
+                    <h1 class="font-headline font-bold text-3xl text-slate-900 tracking-tight">Tạo tài khoản</h1>
+                    <p class="text-slate-500 text-sm mt-1">Đăng ký thành viên nhanh chóng chỉ với vài thông tin cơ bản.</p>
+                </div>
+
+                <!-- Validation Summary Errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="mb-4 rounded-xl bg-red-50 text-red-800 border border-red-200 p-3.5 text-xs sm:text-sm">
+                        @Html.ValidationSummary(false, "", new { @class = "space-y-1 list-disc list-inside font-medium" })
+                    </div>
+                }
+
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "space-y-4" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!-- FullName Field -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" for="FullName">
+                            Họ và tên
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <span class="material-symbols-outlined text-lg">person</span>
+                            </div>
+                            @Html.TextBoxFor(m => m.FullName, new {
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                placeholder = "Nguyễn Văn A",
+                                autocomplete = "name",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-red-600 text-xs mt-1 block" })
+                    </div>
+
+                    <!-- Email Field -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" for="Email">
+                            Địa chỉ Email
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <span class="material-symbols-outlined text-lg">mail</span>
+                            </div>
+                            @Html.TextBoxFor(m => m.Email, new {
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                placeholder = "example@email.com",
+                                autocomplete = "email",
+                                type = "email",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-red-600 text-xs mt-1 block" })
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" for="Password">
+                            Mật khẩu (tối thiểu 6 ký tự)
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <span class="material-symbols-outlined text-lg">lock</span>
+                            </div>
+                            @Html.PasswordFor(m => m.Password, new {
+                                @class = "block w-full pl-10 pr-11 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                placeholder = "Tối thiểu 6 ký tự",
+                                autocomplete = "new-password",
+                                required = "required",
+                                id = "regPassword"
+                            })
+                            <button class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600" id="toggleRegPwd" type="button">
+                                <span class="material-symbols-outlined text-lg" id="regPwdEye">visibility</span>
+                            </button>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-red-600 text-xs mt-1 block" })
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" for="ConfirmPassword">
+                            Xác nhận mật khẩu
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <span class="material-symbols-outlined text-lg">lock_reset</span>
+                            </div>
+                            @Html.PasswordFor(m => m.ConfirmPassword, new {
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                placeholder = "Nhập lại mật khẩu",
+                                autocomplete = "new-password",
+                                required = "required"
+                            })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-red-600 text-xs mt-1 block" })
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button class="w-full mt-3 bg-[#0d47a1] hover:bg-[#0a3880] text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm" type="submit">
+                        <span>Đăng ký ngay</span>
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </button>
+                }
+
+                <div class="mt-4 text-center text-xs text-slate-500">
+                    Bằng việc đăng ký, bạn đồng ý với <a href="#" class="text-[#0d47a1] underline">Điều khoản dịch vụ</a> và <a href="#" class="text-[#0d47a1] underline">Chính sách bảo mật</a> của TheChillShop.
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
+                TheChillShop &copy; @DateTime.Now.Year. Bảo mật thông tin khách hàng tuyệt đối.
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const toggleRegPwd = document.getElementById('toggleRegPwd');
+        const regPassword = document.getElementById('regPassword');
+        const regPwdEye = document.getElementById('regPwdEye');
+
+        if (toggleRegPwd && regPassword && regPwdEye) {
+            toggleRegPwd.addEventListener('click', function () {
+                const isPwd = regPassword.getAttribute('type') === 'password';
+                if (isPwd) {
+                    regPassword.setAttribute('type', 'text');
+                    regPwdEye.textContent = 'visibility_off';
+                } else {
+                    regPassword.setAttribute('type', 'password');
+                    regPwdEye.textContent = 'visibility';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

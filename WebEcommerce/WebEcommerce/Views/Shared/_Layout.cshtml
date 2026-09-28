@@ -1,38 +1,190 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "TheChillShop" : ViewBag.Title + " - TheChillShop")</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#0d47a1',
+                            primaryDark: '#0a3880',
+                            accent: '#00b4d8',
+                            accentHover: '#0096c7',
+                            surface: '#f8faff',
+                            border: '#e2e8f4',
+                            charcoal: '#1a1a2e',
+                            muted: '#5c6370',
+                        }
+                    },
+                    fontFamily: {
+                        headline: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        body: ['"Inter"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-
 </head>
-<body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
-        <div class="container">
-            @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                </ul>
-                 @Html.Partial("_LoginPartial")
+<body class="bg-[#f8faff] text-[#1a1a2e] font-body min-h-screen flex flex-col justify-between selection:bg-[#00b4d8]/20 selection:text-[#0d47a1]">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-[#0d47a1] via-[#0077b6] to-[#00b4d8] text-white text-xs py-2 px-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm text-yellow-300">local_shipping</span>
+                <span>Miễn phí vận chuyển toàn quốc cho đơn hàng từ 500.000đ</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-4 text-white/90">
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">support_agent</span>
+                    <span>Hotline: 1900 6868</span>
+                </span>
+                <span>•</span>
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">verified</span>
+                    <span>100% Chính hãng</span>
+                </span>
             </div>
         </div>
-    </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
     </div>
+
+    <!-- Main Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-4 sm:gap-8">
+
+                <!-- Logo TheChillShop -->
+                <a href="@Url.Action("Index", "Home")" class="flex items-center gap-3 group flex-shrink-0">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] flex items-center justify-center text-white shadow-md shadow-[#0d47a1]/20 transition-transform group-hover:scale-105 duration-200">
+                        <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+                    </div>
+                    <div>
+                        <span class="font-headline font-extrabold text-2xl tracking-tight text-[#0d47a1]">TheChill<span class="text-[#00b4d8]">Shop</span></span>
+                        <span class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 -mt-1">Mua sắm thông minh</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-6">
+                    <a href="@Url.Action("Index", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] transition-colors py-1">Trang chủ</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] transition-colors py-1">Sản phẩm</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] transition-colors py-1">Bộ sưu tập</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] transition-colors py-1">Khuyến mãi</a>
+                    <a href="@Url.Action("Contact", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] transition-colors py-1">Liên hệ</a>
+                </nav>
+
+                <!-- Search Input Bar -->
+                <div class="hidden md:flex flex-1 max-w-xs xl:max-w-md relative">
+                    <input type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu..." class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-full focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none" />
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                </div>
+
+                <!-- Right Actions: Cart & Auth Partial -->
+                <div class="flex items-center gap-3">
+                    <!-- Shopping Cart Icon -->
+                    <a href="#" class="relative p-2 text-slate-600 hover:text-[#0d47a1] hover:bg-slate-100 rounded-full transition-colors" title="Giỏ hàng">
+                        <span class="material-symbols-outlined text-2xl">shopping_cart</span>
+                        <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- User Account / Login Partial -->
+                    @Html.Partial("_LoginPartial")
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-16 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+                <!-- Col 1: Brand Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined text-xl">shopping_bag</span>
+                        </div>
+                        <span class="font-headline font-bold text-xl text-[#0d47a1]">TheChill<span class="text-[#00b4d8]">Shop</span></span>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Hệ thống thương mại điện tử uy tín, mang đến trải nghiệm mua sắm hiện đại, sản phẩm chính hãng và dịch vụ tận tâm.
+                    </p>
+                    <div class="flex items-center gap-3 text-xs text-slate-500">
+                        <span class="flex items-center gap-1 text-emerald-600 font-semibold">
+                            <span class="material-symbols-outlined text-base">lock</span> SSL 256-bit
+                        </span>
+                        <span>•</span>
+                        <span class="flex items-center gap-1 text-blue-600 font-semibold">
+                            <span class="material-symbols-outlined text-base">verified</span> Chính hãng 100%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Col 2: About Us -->
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-slate-900 uppercase tracking-wider mb-4">Về chúng tôi</h3>
+                    <ul class="space-y-2.5 text-sm text-slate-600">
+                        <li><a href="@Url.Action("About", "Home")" class="hover:text-[#0d47a1] transition-colors">Giới thiệu TheChillShop</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Tuyển dụng</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Điều khoản dịch vụ</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Customer Support -->
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-slate-900 uppercase tracking-wider mb-4">Hỗ trợ khách hàng</h3>
+                    <ul class="space-y-2.5 text-sm text-slate-600">
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Trung tâm trợ giúp</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Chính sách đổi trả 15 ngày</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Chính sách bảo hành</a></li>
+                        <li><a href="#" class="hover:text-[#0d47a1] transition-colors">Phương thức thanh toán</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Newsletter -->
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-slate-900 uppercase tracking-wider mb-4">Đăng ký nhận ưu đãi</h3>
+                    <p class="text-sm text-slate-600 mb-3">Nhận ngay voucher giảm giá 50.000đ cho đơn hàng đầu tiên!</p>
+                    <form class="space-y-2" onsubmit="event.preventDefault();">
+                        <div class="flex">
+                            <input type="email" placeholder="Nhập email của bạn..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-l-lg focus:outline-none focus:border-[#0d47a1]" />
+                            <button type="button" class="px-4 py-2 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-sm font-semibold rounded-r-lg transition-colors">Gửi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright -->
+            <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+                <p>&copy; @DateTime.Now.Year TheChillShop. Bản quyền thuộc về Nhóm TheChill - Đồ Án Cuối Kỳ.</p>
+                <p class="text-slate-400">Phiên bản hệ thống 1.0.0 (ASP.NET MVC 5 & PostgreSQL)</p>
+            </div>
+        </div>
+    </footer>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")

@@ -1,0 +1,407 @@
+@model WebEcommerce.Models.AdminUserListViewModel
+@{
+    ViewBag.Title = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h1 class="font-headline font-bold text-2xl sm:text-3xl text-slate-900 tracking-tight">Quản lý tài khoản người dùng</h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Quản lý danh sách thành viên, phân quyền và kiểm soát trạng thái hoạt động trong hệ thống TheChillShop.</p>
+    </div>
+</div>
+
+<!-- Success & Error Alerts -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="mb-6 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 p-4 text-sm flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-emerald-600 text-xl shrink-0">check_circle</span>
+            <span class="font-medium">@TempData["SuccessMessage"]</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="mb-6 rounded-2xl bg-red-50 text-red-800 border border-red-200 p-4 text-sm flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-red-600 text-xl shrink-0">error</span>
+            <span class="font-medium">@TempData["ErrorMessage"]</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
+
+<!-- 4 KPI Metric Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+    <!-- Card 1: Total Users -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+        <div>
+            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng người dùng</span>
+            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalUsers.ToString("N0")</span>
+            <span class="block text-[11px] text-emerald-600 font-semibold mt-1">Toàn bộ tài khoản</span>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0d47a1] flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">group</span>
+        </div>
+    </div>
+
+    <!-- Card 2: Customers -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+        <div>
+            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Khách hàng</span>
+            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
+            <span class="block text-[11px] text-[#00b4d8] font-semibold mt-1">Khách mua hàng</span>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-[#00b4d8] flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+        </div>
+    </div>
+
+    <!-- Card 3: Staff & Managers -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+        <div>
+            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Quản trị & Nhân viên</span>
+            <span class="block text-2xl font-bold font-headline text-slate-900 mt-1">@Model.TotalStaff.ToString("N0")</span>
+            <span class="block text-[11px] text-purple-600 font-semibold mt-1">Vận hành hệ thống</span>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">badge</span>
+        </div>
+    </div>
+
+    <!-- Card 4: Locked Users -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+        <div>
+            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Tài khoản bị khóa</span>
+            <span class="block text-2xl font-bold font-headline text-red-600 mt-1">@Model.TotalLocked.ToString("N0")</span>
+            <span class="block text-[11px] text-red-500 font-semibold mt-1">Đang tạm ngưng</span>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">block</span>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm mb-6">
+    <form method="get" action="@Url.Action("Index", "AdminUser")" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-center">
+        
+        <!-- Search Text Input -->
+        <div class="lg:col-span-5 relative">
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo tên, email, số điện thoại..." 
+                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none transition-all" />
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+        </div>
+
+        <!-- Filter by Role -->
+        <div class="lg:col-span-3">
+            <select name="role" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all">
+                <option value="All" @(Model.SelectedRole == "All" ? "selected" : "")>Tất cả vai trò</option>
+                <option value="Customer" @(Model.SelectedRole == "Customer" ? "selected" : "")>Khách hàng (Customer)</option>
+                <option value="StoreManager" @(Model.SelectedRole == "StoreManager" ? "selected" : "")>Nhân viên (StoreManager)</option>
+                <option value="Administrator" @(Model.SelectedRole == "Administrator" ? "selected" : "")>Quản trị viên (Administrator)</option>
+            </select>
+        </div>
+
+        <!-- Filter by Status -->
+        <div class="lg:col-span-2">
+            <select name="status" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all">
+                <option value="All" @(Model.SelectedStatus == "All" ? "selected" : "")>Tất cả trạng thái</option>
+                <option value="Active" @(Model.SelectedStatus == "Active" ? "selected" : "")>Đang hoạt động</option>
+                <option value="Locked" @(Model.SelectedStatus == "Locked" ? "selected" : "")>Đã bị khóa</option>
+            </select>
+        </div>
+
+        <!-- Submit & Reset Buttons -->
+        <div class="lg:col-span-2 flex items-center gap-2">
+            <button type="submit" class="flex-1 py-2.5 px-4 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-base">filter_list</span>
+                <span>Lọc</span>
+            </button>
+            <a href="@Url.Action("Index", "AdminUser")" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-colors" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-base">restart_alt</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Users Data Table -->
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">Người dùng</th>
+                    <th class="py-3.5 px-4">Số điện thoại</th>
+                    <th class="py-3.5 px-4">Vai trò</th>
+                    <th class="py-3.5 px-4">Ngày tham gia</th>
+                    <th class="py-3.5 px-4">Trạng thái</th>
+                    <th class="py-3.5 px-5 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                @if (Model.Users == null || !Model.Users.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-400">
+                            <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">search_off</span>
+                            Không tìm thấy tài khoản người dùng nào phù hợp với điều kiện tìm kiếm.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var user in Model.Users)
+                    {
+                        var avatarUrl = string.IsNullOrEmpty(user.Avatar)
+                            ? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user.FullName ?? "User") + "&background=0d47a1&color=fff&size=80"
+                            : Url.Content(user.Avatar);
+
+                        <tr class="hover:bg-slate-50/60 transition-colors">
+                            <!-- User info -->
+                            <td class="py-3.5 px-5">
+                                <div class="flex items-center gap-3">
+                                    <img src="@avatarUrl" alt="@user.FullName" class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0" />
+                                    <div class="truncate max-w-xs">
+                                        <span class="block font-semibold text-slate-800 leading-tight truncate">@user.FullName</span>
+                                        <span class="block text-xs text-slate-400 truncate">@user.Email</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Phone -->
+                            <td class="py-3.5 px-4 text-slate-600">
+                                @user.PhoneNumber
+                            </td>
+
+                            <!-- Role Badge -->
+                            <td class="py-3.5 px-4">
+                                @if (user.RoleName == "Administrator")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                        Administrator
+                                    </span>
+                                }
+                                else if (user.RoleName == "StoreManager")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-800 border border-cyan-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#00b4d8]"></span>
+                                        StoreManager
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        Customer
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Created At -->
+                            <td class="py-3.5 px-4 text-slate-500 text-xs">
+                                @user.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td class="py-3.5 px-4">
+                                @if (user.IsLockedOut)
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                        Đã khóa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        Hoạt động
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="py-3.5 px-5 text-right">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <!-- Change Role Button (Admin only) -->
+                                    @if (User.IsInRole("Administrator"))
+                                    {
+                                        <button type="button" 
+                                                onclick="openRoleModal('@user.Id', '@user.FullName', '@user.RoleName')"
+                                                class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors" 
+                                                title="Phân quyền vai trò">
+                                            <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
+                                        </button>
+                                    }
+
+                                    <!-- Lock / Unlock Button -->
+                                    @using (Html.BeginForm("ToggleLock", "AdminUser", FormMethod.Post, new { @class = "inline", onsubmit = "return confirm('Bạn có chắc chắn muốn thay đổi trạng thái khóa của tài khoản này?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        if (user.IsLockedOut)
+                                        {
+                                            <button type="submit" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Mở khóa tài khoản">
+                                                <span class="material-symbols-outlined text-lg">lock_open</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors" title="Khóa tài khoản">
+                                                <span class="material-symbols-outlined text-lg">lock</span>
+                                            </button>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="px-6 py-4 bg-slate-50/60 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div>
+            Hiển thị <strong>@((Model.CurrentPage - 1) * Model.PageSize + (Model.Users.Any() ? 1 : 0))</strong> - 
+            <strong>@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount))</strong> trong tổng số 
+            <strong>@Model.TotalCount</strong> người dùng
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="flex items-center gap-1">
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = Model.CurrentPage - 1 })" 
+                       class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
+                        Trước
+                    </a>
+                }
+
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    if (p == Model.CurrentPage)
+                    {
+                        <span class="px-3 py-1.5 rounded-lg bg-[#0d47a1] text-white font-bold">@p</span>
+                    }
+                    else if (p <= 3 || p > Model.TotalPages - 2 || Math.Abs(p - Model.CurrentPage) <= 1)
+                    {
+                        <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = p })" 
+                           class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
+                            @p
+                        </a>
+                    }
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = Model.CurrentPage + 1 })" 
+                       class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
+                        Sau
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: Phân quyền vai trò người dùng (Change Role Modal)      -->
+<!-- ============================================================ -->
+<div id="roleModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+                </div>
+                <h3 class="font-headline font-bold text-lg text-slate-900">Phân quyền tài khoản</h3>
+            </div>
+            <button type="button" onclick="closeRoleModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+        </div>
+
+        @using (Html.BeginForm("ChangeRole", "AdminUser", FormMethod.Post, new { id = "roleChangeForm", @class = "mt-4 space-y-4" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="modalUserId" name="userId" value="" />
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                <span class="text-slate-500">Tài khoản:</span>
+                <span id="modalUserName" class="font-bold text-slate-800 ml-1"></span>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Chọn vai trò mới</label>
+                <div class="space-y-2">
+                    <!-- Customer option -->
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-[#0d47a1] cursor-pointer transition-colors">
+                        <input type="radio" name="newRole" value="Customer" class="mt-1 text-[#0d47a1] focus:ring-[#0d47a1]" />
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Customer (Khách hàng)</span>
+                            <span class="block text-[11px] text-slate-500">Có quyền xem sản phẩm, tạo giỏ hàng, mua hàng và quản lý hồ sơ cá nhân.</span>
+                        </div>
+                    </label>
+
+                    <!-- StoreManager option -->
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-[#00b4d8] cursor-pointer transition-colors">
+                        <input type="radio" name="newRole" value="StoreManager" class="mt-1 text-[#00b4d8] focus:ring-[#00b4d8]" />
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">StoreManager (Quản lý cửa hàng)</span>
+                            <span class="block text-[11px] text-slate-500">Quản lý kho sản phẩm, xem danh sách đơn hàng và thống kê doanh thu.</span>
+                        </div>
+                    </label>
+
+                    <!-- Administrator option -->
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-purple-600 cursor-pointer transition-colors">
+                        <input type="radio" name="newRole" value="Administrator" class="mt-1 text-purple-600 focus:ring-purple-600" />
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Administrator (Quản trị viên tối cao)</span>
+                            <span class="block text-[11px] text-slate-500">Toàn quyền hệ thống: quản lý tài khoản người dùng, phân quyền và cấu hình hệ thống.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeRoleModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#0d47a1] hover:bg-[#0a3880] rounded-xl shadow-sm transition-all">
+                    Lưu phân quyền
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function openRoleModal(userId, userName, currentRole) {
+        document.getElementById('modalUserId').value = userId;
+        document.getElementById('modalUserName').textContent = userName + ' (' + currentRole + ')';
+        
+        // Check current role radio
+        const radios = document.getElementsByName('newRole');
+        for (let r of radios) {
+            r.checked = (r.value === currentRole);
+        }
+
+        document.getElementById('roleModal').classList.remove('hidden');
+    }
+
+    function closeRoleModal() {
+        document.getElementById('roleModal').classList.add('hidden');
+    }
+</script>

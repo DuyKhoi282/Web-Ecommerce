@@ -1,20 +1,101 @@
-﻿/* Set padding to keep content from hitting the edges */
-.body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+/* ==========================================================================
+   TheChillShop - Global Design System & Custom Tokens
+   Colors: Primary Deep Blue (#0d47a1), Accent Cyan (#00b4d8)
+   Fonts: Plus Jakarta Sans (Headlines), Inter (Body)
+   ========================================================================== */
+
+:root {
+    --brand-primary: #0d47a1;
+    --brand-primary-dark: #0a3880;
+    --brand-primary-light: #1565c0;
+    --brand-accent: #00b4d8;
+    --brand-accent-hover: #0096c7;
+    --brand-accent-light: #e0f7fa;
+    --brand-surface: #f8faff;
+    --brand-border: #e2e8f4;
+    --brand-charcoal: #1a1a2e;
+    --brand-muted: #5c6370;
+    --brand-success: #10b981;
+    --brand-warning: #f59e0b;
+    --brand-danger: #ef4444;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--brand-charcoal);
+    background-color: var(--brand-surface);
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
+h1, h2, h3, h4, h5, h6, .font-headline {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Material Symbols Outlined styling */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    vertical-align: middle;
+}
+
+.material-symbols-outlined.fill-1 {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Gradients */
+.bg-gradient-chill {
+    background: linear-gradient(135deg, #0d47a1 0%, #0077b6 50%, #00b4d8 100%);
+}
+
+.bg-gradient-hero {
+    background: linear-gradient(135deg, #0a3880 0%, #0d47a1 60%, #0096c7 100%);
+}
+
+/* Glassmorphism utilities */
+.glass-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Reset default ASP.NET MVC input restriction */
+input, select, textarea {
+    max-width: 100%;
 }
