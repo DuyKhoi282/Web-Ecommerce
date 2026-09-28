@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -9,7 +9,7 @@ using WebEcommerce.Filters;
 
 namespace WebEcommerce.Controllers
 {
-    [CustomAuthorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
+    [CustomAuthorize(Roles = "Administrator,StoreManager")]
     public class AdminDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;

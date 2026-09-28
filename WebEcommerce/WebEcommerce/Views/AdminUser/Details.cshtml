@@ -137,8 +137,8 @@
     <!-- Action Panel -->
     <div class="flex flex-col gap-4">
 
-        <!-- Lock / Unlock -->
-        @if (!isSuperAdmin)
+        <!-- Lock / Unlock (Administrator only) -->
+        @if (User.IsInRole("Administrator") && !isSuperAdmin)
         {
             <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] p-5">
                 <h2 class="font-headline font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">

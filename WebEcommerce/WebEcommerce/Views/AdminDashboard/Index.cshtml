@@ -10,12 +10,15 @@
         <h1 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">Bảng điều khiển tổng quan</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào! Dưới đây là tình hình hoạt động kinh doanh và người dùng của TheChillShop.</p>
     </div>
-    <div class="flex items-center gap-3">
-        <a href="@Url.Action("Index", "AdminUser")" class="px-5 py-2.5 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#0d47a1]">
-            <span class="material-symbols-outlined text-base">person_search</span>
-            <span>Quản lý người dùng</span>
-        </a>
-    </div>
+    @if (User.IsInRole("Administrator"))
+    {
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("Index", "AdminUser")" class="px-5 py-2.5 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#0d47a1]">
+                <span class="material-symbols-outlined text-base">person_search</span>
+                <span>Quản lý người dùng</span>
+            </a>
+        </div>
+    }
 </div>
 
 @if (ViewBag.ErrorMessage != null)

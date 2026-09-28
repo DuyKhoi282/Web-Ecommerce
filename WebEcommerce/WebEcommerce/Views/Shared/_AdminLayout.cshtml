@@ -89,12 +89,15 @@
                     <span>Tổng quan</span>
                 </a>
 
-                <!-- Quản lý người dùng -->
-                <a href="@Url.Action("Index", "AdminUser")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "AdminUser" ? "text-[#00b4d8]" : "")">group</span>
-                    <span>Quản lý tài khoản</span>
-                </a>
+                <!-- Quản lý tài khoản (Độc quyền Administrator theo Ma trận RBAC) -->
+                @if (User.IsInRole("Administrator"))
+                {
+                    <a href="@Url.Action("Index", "AdminUser")" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                        <span class="material-symbols-outlined text-xl @(currentController == "AdminUser" ? "text-[#00b4d8]" : "")">group</span>
+                        <span>Quản lý tài khoản</span>
+                    </a>
+                }
 
                 <!-- Quản lý sản phẩm (TV2) -->
                 <a href="#" 
@@ -123,14 +126,21 @@
 
         <!-- Sidebar Footer: Admin profile & Logout -->
         <div class="px-4 pt-4 border-t border-white/10">
+            @{
+                var adminUserEmail = User.Identity.IsAuthenticated ? User.Identity.Name : "Admin";
+                var adminRoleTitle = User.IsInRole("Administrator") ? "Quản trị viên" : (User.IsInRole("StoreManager") ? "Quản lý cửa hàng" : "Nhân viên");
+                var adminInitial = !string.IsNullOrEmpty(adminUserEmail) && adminUserEmail.Length >= 2 
+                    ? adminUserEmail.Substring(0, 2).ToUpper() 
+                    : "AD";
+            }
             <div class="flex items-center justify-between p-2 rounded-xl bg-white/10 border border-white/15">
                 <div class="flex items-center gap-2.5 truncate">
                     <div class="w-9 h-9 rounded-full bg-[#00b4d8] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                        AD
+                        @adminInitial
                     </div>
                     <div class="truncate text-left">
-                        <span class="block text-xs font-bold text-white truncate">@(User.Identity.IsAuthenticated ? User.Identity.Name : "Admin")</span>
-                        <span class="block text-[10px] text-blue-200 font-semibold">Quản trị viên</span>
+                        <span class="block text-xs font-bold text-white truncate" title="@adminUserEmail">@adminUserEmail</span>
+                        <span class="block text-[10px] text-blue-200 font-semibold">@adminRoleTitle</span>
                     </div>
                 </div>
 

@@ -13,7 +13,7 @@ using WebEcommerce.Filters;
 
 namespace WebEcommerce.Controllers
 {
-    [CustomAuthorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
+    [CustomAuthorize(Roles = "Administrator")]
     public class AdminUserController : Controller
     {
         private ApplicationUserManager _userManager;
@@ -233,6 +233,7 @@ namespace WebEcommerce.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "Administrator")]
         public async Task<ActionResult> ToggleLock(string userId)
         {
             try
