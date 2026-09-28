@@ -1,14 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using WebEcommerce.Models;
+using WebEcommerce.Filters;
 
 namespace WebEcommerce.Controllers
 {
-    [Authorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
+    [CustomAuthorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
     public class AdminDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
