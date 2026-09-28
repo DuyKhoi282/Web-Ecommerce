@@ -90,19 +90,20 @@
 </div>
 
 <!-- Search & Filter Bar -->
-<div class="bg-white rounded-2xl border border-slate-300 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] mb-6">
-    <form method="get" action="@Url.Action("Index", "AdminUser")" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-center">
+<!-- Search & Filter Bar (Viền màu gradient, không bị mất chữ trạng thái) -->
+<div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#0d47a1] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] mb-6">
+    <form method="get" action="@Url.Action("Index", "AdminUser")" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
         
-        <!-- Search Text Input -->
-        <div class="lg:col-span-5 relative">
+        <!-- Search Text Input (col 4) -->
+        <div class="lg:col-span-4 relative">
             <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo tên, email, số điện thoại..." 
-                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none transition-all font-medium text-slate-800" />
+                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:border-[#0d47a1] focus:ring-3 focus:ring-blue-100 outline-none transition-all font-medium text-slate-800 shadow-2xs" />
             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
         </div>
 
-        <!-- Filter by Role -->
+        <!-- Filter by Role (col 3) -->
         <div class="lg:col-span-3">
-            <select name="role" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all font-semibold text-slate-800">
+            <select name="role" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:border-[#0d47a1] focus:ring-3 focus:ring-blue-100 outline-none transition-all font-semibold text-slate-800 shadow-2xs cursor-pointer">
                 <option value="All" @(Model.SelectedRole == "All" ? "selected" : "")>Tất cả vai trò</option>
                 <option value="Customer" @(Model.SelectedRole == "Customer" ? "selected" : "")>Khách hàng (Customer)</option>
                 <option value="StoreManager" @(Model.SelectedRole == "StoreManager" ? "selected" : "")>Nhân viên (StoreManager)</option>
@@ -110,40 +111,40 @@
             </select>
         </div>
 
-        <!-- Filter by Status -->
-        <div class="lg:col-span-2">
-            <select name="status" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all font-semibold text-slate-800">
+        <!-- Filter by Status (col 3: Đủ rộng để không bao giờ bị cắt chữ) -->
+        <div class="lg:col-span-3">
+            <select name="status" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:border-[#0d47a1] focus:ring-3 focus:ring-blue-100 outline-none transition-all font-semibold text-slate-800 shadow-2xs cursor-pointer">
                 <option value="All" @(Model.SelectedStatus == "All" ? "selected" : "")>Tất cả trạng thái</option>
                 <option value="Active" @(Model.SelectedStatus == "Active" ? "selected" : "")>Đang hoạt động</option>
                 <option value="Locked" @(Model.SelectedStatus == "Locked" ? "selected" : "")>Đã bị khóa</option>
             </select>
         </div>
 
-        <!-- Submit & Reset Buttons -->
+        <!-- Submit & Reset Buttons (col 2) -->
         <div class="lg:col-span-2 flex items-center gap-2">
-            <button type="submit" class="flex-1 py-2.5 px-4 bg-[#0d47a1] hover:bg-[#0a3880] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 border border-[#0d47a1]">
+            <button type="submit" class="flex-1 py-2.5 px-4 bg-gradient-to-r from-[#0d47a1] to-[#00b4d8] hover:from-[#0a3880] hover:to-[#0096c7] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-base">filter_list</span>
                 <span>Lọc</span>
             </button>
-            <a href="@Url.Action("Index", "AdminUser")" class="py-2.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl transition-colors font-bold shadow-xs" title="Đặt lại bộ lọc">
+            <a href="@Url.Action("Index", "AdminUser")" class="py-2.5 px-3 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-300 border border-slate-300 rounded-xl transition-all shadow-xs flex items-center justify-center" title="Đặt lại bộ lọc">
                 <span class="material-symbols-outlined text-base">restart_alt</span>
             </a>
         </div>
     </form>
 </div>
 
-<!-- Users Data Table -->
-<div class="bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden mb-6">
-    <div class="overflow-x-auto">
+<!-- Users Data Table (Thiết kế sang trọng, có màu sắc phân biệt) -->
+<div class="w-full max-w-full min-w-0 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden mb-6">
+    <div class="w-full max-w-full min-w-0 overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
-                    <th class="py-3.5 px-5">Người dùng</th>
-                    <th class="py-3.5 px-4">Số điện thoại</th>
-                    <th class="py-3.5 px-4">Vai trò</th>
-                    <th class="py-3.5 px-4">Ngày tham gia</th>
-                    <th class="py-3.5 px-4">Trạng thái</th>
-                    <th class="py-3.5 px-5 text-right">Thao tác</th>
+                <tr class="bg-gradient-to-r from-slate-100 via-blue-50/30 to-slate-100 border-b-2 border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+                    <th class="py-3.5 px-4 w-[28%] min-w-[200px]">Người dùng</th>
+                    <th class="py-3.5 px-3 w-[15%] min-w-[115px]">Số điện thoại</th>
+                    <th class="py-3.5 px-3 w-[15%] min-w-[125px]">Vai trò</th>
+                    <th class="py-3.5 px-3 w-[13%] min-w-[105px]">Ngày tham gia</th>
+                    <th class="py-3.5 px-3 w-[13%] min-w-[105px]">Trạng thái</th>
+                    <th class="py-3.5 px-4 text-right w-[16%] min-w-[120px]">Thao tác</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -160,85 +161,141 @@
                 {
                     foreach (var user in Model.Users)
                     {
-                        var avatarUrl = string.IsNullOrEmpty(user.Avatar)
-                            ? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user.FullName ?? "User") + "&background=0d47a1&color=fff&size=80"
-                            : Url.Content(user.Avatar);
                         var isRootAdmin = string.Equals(user.Email, "admin@thechillshop.vn", StringComparison.OrdinalIgnoreCase);
 
-                        <tr class="hover:bg-slate-50/60 transition-colors">
+                        // Tính toán chữ cái viết tắt (Initials)
+                        var initials = "U";
+                        if (!string.IsNullOrWhiteSpace(user.FullName))
+                        {
+                            var parts = user.FullName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            initials = parts.Length >= 2 
+                                ? (parts[0][0].ToString() + parts[parts.Length - 1][0].ToString()).ToUpper()
+                                : user.FullName.Substring(0, Math.Min(2, user.FullName.Length)).ToUpper();
+                        }
+
+                        // Gradient màu sắc đa dạng cho Avatar theo Vai trò hoặc Người dùng
+                        string avatarClass;
+                        if (isRootAdmin)
+                        {
+                            avatarClass = "bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-400 text-white shadow-md shadow-amber-500/25 ring-2 ring-amber-300";
+                        }
+                        else if (user.RoleName == "Administrator")
+                        {
+                            avatarClass = "bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 text-white shadow-md shadow-purple-500/25";
+                        }
+                        else if (user.RoleName == "StoreManager")
+                        {
+                            avatarClass = "bg-gradient-to-tr from-[#00b4d8] via-sky-600 to-[#0d47a1] text-white shadow-md shadow-cyan-500/25";
+                        }
+                        else
+                        {
+                            int hash = Math.Abs((user.Email ?? user.FullName ?? "user").GetHashCode()) % 5;
+                            switch (hash)
+                            {
+                                case 0: avatarClass = "bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20"; break;
+                                case 1: avatarClass = "bg-gradient-to-tr from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20"; break;
+                                case 2: avatarClass = "bg-gradient-to-tr from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/20"; break;
+                                case 3: avatarClass = "bg-gradient-to-tr from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/20"; break;
+                                default: avatarClass = "bg-gradient-to-tr from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/20"; break;
+                            }
+                        }
+
+                        <tr class="hover:bg-blue-50/40 transition-colors">
                             <!-- User info -->
-                            <td class="py-3.5 px-5">
+                            <td class="py-3 px-4">
                                 <div class="flex items-center gap-3">
-                                    <img src="@avatarUrl" alt="@user.FullName" class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0" />
-                                    <div class="truncate max-w-xs">
-                                        <span class="block font-semibold text-slate-800 leading-tight truncate">@user.FullName</span>
-                                        <span class="block text-xs text-slate-400 truncate">@user.Email</span>
+                                    @if (!string.IsNullOrEmpty(user.Avatar))
+                                    {
+                                        <img src="@Url.Content(user.Avatar)" alt="@user.FullName" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm shrink-0" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-10 h-10 rounded-full @avatarClass flex items-center justify-center font-bold text-xs shrink-0 tracking-wider">
+                                            @initials
+                                        </div>
+                                    }
+                                    <div class="truncate max-w-[170px] lg:max-w-xs">
+                                        <span class="block font-bold text-slate-800 leading-tight truncate">@user.FullName</span>
+                                        <span class="block text-xs text-slate-400 font-medium truncate mt-0.5">@user.Email</span>
                                     </div>
                                 </div>
                             </td>
 
                             <!-- Phone -->
-                            <td class="py-3.5 px-4 text-slate-600">
-                                @user.PhoneNumber
+                            <td class="py-3 px-3 text-slate-700 font-medium whitespace-nowrap">
+                                @if (!string.IsNullOrEmpty(user.PhoneNumber) && user.PhoneNumber != "—")
+                                {
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-slate-600">
+                                        <span class="material-symbols-outlined text-xs text-slate-400">call</span>
+                                        @user.PhoneNumber
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-slate-400 text-xs italic">Chưa có SĐT</span>
+                                }
                             </td>
 
-                            <!-- Role Badge -->
-                            <td class="py-3.5 px-4">
+                            <!-- Role Badge (Màu sắc rõ nét theo từng vai trò) -->
+                            <td class="py-3 px-3 whitespace-nowrap">
                                 @if (isRootAdmin)
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300" title="Quản trị viên tối cao (Khóa cứng hệ thống)">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 border border-amber-300 shadow-2xs" title="Quản trị viên tối cao (Khóa cứng hệ thống)">
                                         <span class="material-symbols-outlined text-xs text-amber-600">verified</span>
                                         Super Admin
                                     </span>
                                 }
                                 else if (user.RoleName == "Administrator")
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200 shadow-2xs">
+                                        <span class="material-symbols-outlined text-xs text-purple-600">admin_panel_settings</span>
                                         Administrator
                                     </span>
                                 }
                                 else if (user.RoleName == "StoreManager")
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-800 border border-cyan-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#00b4d8]"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-100 to-sky-100 text-cyan-900 border border-cyan-200 shadow-2xs">
+                                        <span class="material-symbols-outlined text-xs text-[#00b4d8]">storefront</span>
                                         StoreManager
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+                                        <span class="material-symbols-outlined text-xs text-slate-400">person</span>
                                         Customer
                                     </span>
                                 }
                             </td>
 
                             <!-- Created At -->
-                            <td class="py-3.5 px-4 text-slate-500 text-xs">
-                                @user.CreatedAt.ToString("dd/MM/yyyy")
+                            <td class="py-3 px-3 text-slate-500 text-xs whitespace-nowrap font-medium">
+                                <span class="inline-flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-xs text-slate-400">calendar_today</span>
+                                    @user.CreatedAt.ToString("dd/MM/yyyy")
+                                </span>
                             </td>
 
-                            <!-- Status Badge -->
-                            <td class="py-3.5 px-4">
+                            <!-- Status Badge (Khắc phục tuyệt đối lỗi xuống dòng, có hiệu ứng động) -->
+                            <td class="py-3 px-3 whitespace-nowrap">
                                 @if (user.IsLockedOut)
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs whitespace-nowrap">
+                                        <span class="material-symbols-outlined text-xs text-rose-600">lock</span>
                                         Đã khóa
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs whitespace-nowrap">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                         Hoạt động
                                     </span>
                                 }
                             </td>
 
-                            <!-- Actions -->
-                            <td class="py-3.5 px-5 text-right">
+                            <!-- Actions (Nút thao tác có màu sắc rực rỡ, hover mượt mà) -->
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5">
                                     @if (isRootAdmin)
                                     {
@@ -249,33 +306,43 @@
                                     }
                                     else
                                     {
+                                        <!-- View Details Button -->
+                                        <a href="@Url.Action("Details", "AdminUser", new { id = user.Id })"
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#0d47a1] hover:text-white border border-blue-200 transition-all shadow-2xs hover:scale-105"
+                                           title="Xem chi tiết tài khoản">
+                                            <span class="material-symbols-outlined text-base">person_search</span>
+                                        </a>
+
                                         <!-- Change Role Button (Admin only) -->
                                         if (User.IsInRole("Administrator"))
                                         {
                                             <button type="button" 
                                                     onclick="openRoleModal('@user.Id', '@user.FullName', '@user.RoleName')"
-                                                    class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors" 
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-200 transition-all shadow-2xs hover:scale-105 cursor-pointer" 
                                                     title="Phân quyền vai trò">
-                                                <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
+                                                <span class="material-symbols-outlined text-base">manage_accounts</span>
                                             </button>
                                         }
 
-                                        <!-- Lock / Unlock Button -->
-                                        using (Html.BeginForm("ToggleLock", "AdminUser", FormMethod.Post, new { @class = "inline", onsubmit = "return confirm('Bạn có chắc chắn muốn thay đổi trạng thái khóa của tài khoản này?');" }))
+                                        <!-- Lock / Unlock Button (Administrator only) -->
+                                        if (User.IsInRole("Administrator"))
                                         {
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            if (user.IsLockedOut)
+                                            using (Html.BeginForm("ToggleLock", "AdminUser", FormMethod.Post, new { @class = "inline", onsubmit = "return confirm('Bạn có chắc chắn muốn thay đổi trạng thái khóa của tài khoản này?');" }))
                                             {
-                                                <button type="submit" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Mở khóa tài khoản">
-                                                    <span class="material-symbols-outlined text-lg">lock_open</span>
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <button type="submit" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors" title="Khóa tài khoản">
-                                                    <span class="material-symbols-outlined text-lg">lock</span>
-                                                </button>
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                if (user.IsLockedOut)
+                                                {
+                                                    <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-all shadow-2xs hover:scale-105 cursor-pointer" title="Mở khóa tài khoản">
+                                                        <span class="material-symbols-outlined text-base">lock_open</span>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 transition-all shadow-2xs hover:scale-105 cursor-pointer" title="Khóa tài khoản">
+                                                        <span class="material-symbols-outlined text-base">lock</span>
+                                                    </button>
+                                                }
                                             }
                                         }
                                     }

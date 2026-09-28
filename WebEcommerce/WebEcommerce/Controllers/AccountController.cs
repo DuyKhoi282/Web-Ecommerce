@@ -157,9 +157,12 @@ namespace WebEcommerce.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
-                        if (model.Email.ToLower() == "admin@thechillshop.vn" && string.IsNullOrEmpty(returnUrl))
+                        if (string.IsNullOrEmpty(returnUrl) && user != null)
                         {
-                            return RedirectToAction("Index", "AdminDashboard");
+                            if (await UserManager.IsInRoleAsync(user.Id, "Administrator") || await UserManager.IsInRoleAsync(user.Id, "StoreManager"))
+                            {
+                                return RedirectToAction("Index", "AdminDashboard");
+                            }
                         }
                         return RedirectToLocal(returnUrl);
 

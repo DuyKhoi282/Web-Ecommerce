@@ -1,0 +1,293 @@
+@model WebEcommerce.Models.AdminUserDetailViewModel
+@{
+    ViewBag.Title = "Chi tiết tài khoản — " + Model.FullName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Helper: badge color theo Role (.NET Framework 4.8 / C# 7 compatible)
+    string roleBadge, roleIcon;
+    if (Model.RoleName == "Administrator")
+    {
+        roleBadge = "bg-purple-100 text-purple-700 border-purple-200";
+        roleIcon  = "shield_person";
+    }
+    else if (Model.RoleName == "StoreManager")
+    {
+        roleBadge = "bg-blue-100 text-blue-700 border-blue-200";
+        roleIcon  = "manage_accounts";
+    }
+    else
+    {
+        roleBadge = "bg-slate-100 text-slate-600 border-slate-200";
+        roleIcon  = "person";
+    }
+
+    // Helper: badge màu trạng thái
+    string statusBadge = Model.IsLockedOut
+        ? "bg-red-100 text-red-700 border-red-200"
+        : "bg-emerald-100 text-emerald-700 border-emerald-200";
+    string statusIcon  = Model.IsLockedOut ? "lock" : "check_circle";
+    string statusText  = Model.IsLockedOut ? "Đang bị khoá" : "Hoạt động";
+
+    bool isSuperAdmin = string.Equals(Model.Email, "admin@thechillshop.vn", StringComparison.OrdinalIgnoreCase);
+}
+
+<!-- Breadcrumb + Back -->
+<div class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+    @Html.ActionLink("Quản lý người dùng", "Index", "AdminUser", null, new { @class = "hover:text-[#0d47a1] transition-colors" })
+    <span class="material-symbols-outlined text-base text-slate-400">chevron_right</span>
+    <span class="text-slate-700 font-medium">@Model.FullName</span>
+</div>
+
+<!-- Success & Error Alerts -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="mb-6 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 p-4 text-sm flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-emerald-600 text-xl shrink-0">check_circle</span>
+            <span class="font-medium">@TempData["SuccessMessage"]</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="mb-6 rounded-2xl bg-red-50 text-red-800 border border-red-200 p-4 text-sm flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-red-600 text-xl shrink-0">error</span>
+            <span class="font-medium">@TempData["ErrorMessage"]</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
+
+<!-- Top: Profile Card + Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+    <!-- Profile Card -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] p-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+
+            <!-- Avatar -->
+            <div class="relative shrink-0">
+                @if (!string.IsNullOrEmpty(Model.Avatar))
+                {
+                    <img src="@Model.Avatar" alt="Avatar của @Model.FullName"
+                         class="w-24 h-24 rounded-2xl object-cover border-2 border-slate-200 shadow" />
+                }
+                else
+                {
+                    <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center border-2 border-slate-200 shadow">
+                        <span class="material-symbols-outlined text-slate-400 text-4xl">person</span>
+                    </div>
+                }
+                <!-- Status dot -->
+                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow @(Model.IsLockedOut ? "bg-red-500" : "bg-emerald-500")"></span>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="font-headline font-bold text-2xl text-slate-900 truncate">@Model.FullName</h1>
+                    @if (isSuperAdmin)
+                    {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                            <span class="material-symbols-outlined text-xs">workspace_premium</span> Super Admin
+                        </span>
+                    }
+                </div>
+                <p class="text-slate-500 text-sm mb-3">@Model.Email</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border @roleBadge">
+                        <span class="material-symbols-outlined text-xs">@roleIcon</span>@Model.RoleName
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border @statusBadge">
+                        <span class="material-symbols-outlined text-xs">@statusIcon</span>@statusText
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5 border-slate-100" />
+
+        <!-- Detail Fields -->
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+            <div>
+                <dt class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Số điện thoại</dt>
+                <dd class="text-slate-700 font-medium">@Model.PhoneNumber</dd>
+            </div>
+            <div>
+                <dt class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Ngày đăng ký</dt>
+                <dd class="text-slate-700 font-medium">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            </div>
+            <div class="sm:col-span-2">
+                <dt class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Địa chỉ</dt>
+                <dd class="text-slate-700 font-medium">@Model.Address</dd>
+            </div>
+            <div>
+                <dt class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">ID tài khoản</dt>
+                <dd class="text-slate-500 text-xs font-mono break-all">@Model.Id</dd>
+            </div>
+        </dl>
+    </div>
+
+    <!-- Action Panel -->
+    <div class="flex flex-col gap-4">
+
+        <!-- Lock / Unlock (Administrator only) -->
+        @if (User.IsInRole("Administrator") && !isSuperAdmin)
+        {
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] p-5">
+                <h2 class="font-headline font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base text-slate-400">lock</span>
+                    Khoá / Mở khoá tài khoản
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">
+                    @(Model.IsLockedOut
+                        ? "Tài khoản hiện đang bị khoá. Nhấn để mở khoá và cho phép đăng nhập trở lại."
+                        : "Tài khoản đang hoạt động bình thường. Nhấn để khoá và ngăn người dùng này đăng nhập.")
+                </p>
+                @using (Html.BeginForm("ToggleLock", "AdminUser", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" value="@Model.Id" />
+                    if (Model.IsLockedOut)
+                    {
+                        <button type="submit"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors shadow">
+                            <span class="material-symbols-outlined text-base">lock_open</span>
+                            Mở khoá tài khoản
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit"
+                                onclick="return confirm('Bạn chắc chắn muốn khoá tài khoản này?')"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors shadow">
+                            <span class="material-symbols-outlined text-base">lock</span>
+                            Khoá tài khoản
+                        </button>
+                    }
+                }
+            </div>
+        }
+
+        <!-- Change Role (Administrator only) -->
+        @if (User.IsInRole("Administrator") && !isSuperAdmin)
+        {
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] p-5">
+                <h2 class="font-headline font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base text-slate-400">manage_accounts</span>
+                    Phân quyền vai trò
+                </h2>
+                @using (Html.BeginForm("ChangeRole", "AdminUser", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" value="@Model.Id" />
+                    <select name="newRole"
+                            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0d47a1] mb-3">
+                        <option value="Customer"       selected="@(Model.RoleName == "Customer")">Customer</option>
+                        <option value="StoreManager"   selected="@(Model.RoleName == "StoreManager")">Store Manager</option>
+                        <option value="Administrator"  selected="@(Model.RoleName == "Administrator")">Administrator</option>
+                    </select>
+                    <button type="submit"
+                            onclick="return confirm('Xác nhận thay đổi vai trò người dùng này?')"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#0d47a1] hover:bg-blue-900 text-white text-sm font-semibold transition-colors shadow">
+                        <span class="material-symbols-outlined text-base">save</span>
+                        Cập nhật vai trò
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Back button -->
+        <a href="@Url.Action("Index", "AdminUser")"
+           class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-sm font-semibold transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            Quay lại danh sách
+        </a>
+    </div>
+</div>
+
+<!-- 4 KPI Order Stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#0d47a1] p-4 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)]">
+        <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng đơn hàng</span>
+        <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalOrders</span>
+        <span class="block text-[11px] text-slate-500 mt-0.5">Tất cả đơn</span>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500 p-4 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)]">
+        <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Đã hoàn thành</span>
+        <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.CompletedOrders</span>
+        <span class="block text-[11px] text-emerald-600 font-semibold mt-0.5">Delivered</span>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-amber-400 p-4 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)]">
+        <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Đang xử lý</span>
+        <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.PendingOrders</span>
+        <span class="block text-[11px] text-amber-600 font-semibold mt-0.5">Pending / Processing</span>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-red-400 p-4 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)]">
+        <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng chi tiêu</span>
+        <span class="block text-xl font-black font-headline text-slate-900 mt-1">@Model.TotalSpent.ToString("N0")₫</span>
+        <span class="block text-[11px] text-slate-500 mt-0.5">Đơn đã giao</span>
+    </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)]">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <h2 class="font-headline font-semibold text-base text-slate-800 flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">receipt_long</span>
+            5 Đơn hàng gần nhất
+        </h2>
+        <span class="text-xs text-slate-400">@Model.TotalOrders đơn tổng cộng</span>
+    </div>
+
+    @if (!Model.RecentOrders.Any())
+    {
+        <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <span class="material-symbols-outlined text-5xl mb-3">shopping_bag</span>
+            <p class="text-sm font-medium">Người dùng này chưa có đơn hàng nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left">Mã đơn</th>
+                        <th class="px-6 py-3 text-left">Ngày đặt</th>
+                        <th class="px-6 py-3 text-left">Thanh toán</th>
+                        <th class="px-6 py-3 text-right">Thành tiền</th>
+                        <th class="px-6 py-3 text-left">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        string badge;
+                        if (order.OrderStatus == "Delivered")       { badge = "bg-emerald-100 text-emerald-700"; }
+                        else if (order.OrderStatus == "Cancelled")  { badge = "bg-red-100 text-red-600"; }
+                        else if (order.OrderStatus == "Shipped")    { badge = "bg-blue-100 text-blue-700"; }
+                        else if (order.OrderStatus == "Processing") { badge = "bg-amber-100 text-amber-700"; }
+                        else if (order.OrderStatus == "Confirmed")  { badge = "bg-sky-100 text-sky-700"; }
+                        else                                         { badge = "bg-slate-100 text-slate-600"; }
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-mono font-semibold text-slate-700">#@order.OrderID</td>
+                            <td class="px-6 py-4 text-slate-500">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="px-6 py-4 text-slate-600">@order.PaymentMethod</td>
+                            <td class="px-6 py-4 text-right font-semibold text-slate-800">@order.FinalAmount.ToString("N0")₫</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold @badge">@order.OrderStatus</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -81,11 +81,64 @@ namespace WebEcommerce
                             userManager.AddToRole(adminUser.Id, "Administrator");
                         }
                     }
+
+                    // 3. Seed tài khoản mẫu cho development & testing
+                    SeedUser(userManager, "customer1@gmail.com", "Customer@123456",
+                        fullName: "Nguyễn Thị Lan",       phone: "0901234561",
+                        address: "123 Lê Lợi, Q1, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "customer2@gmail.com", "Customer@123456",
+                        fullName: "Trần Văn Minh",         phone: "0912345672",
+                        address: "456 Trần Hưng Đạo, Q5, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "customer3@gmail.com", "Customer@123456",
+                        fullName: "Phạm Thị Hoa",          phone: "0923456783",
+                        address: "789 Nguyễn Trãi, Q7, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "manager@thechillshop.vn", "Manager@123456",
+                        fullName: "Lê Quản Lý",            phone: "0934567894",
+                        address: "TheChillShop HQ, Q3, TP.HCM", role: "StoreManager");
                 }
             }
             catch (Exception)
             {
                 // Silently bypass if database is initializing or offline
+            }
+        }
+
+        /// <summary>
+        /// Tạo tài khoản mẫu nếu chưa tồn tại (idempotent).
+        /// </summary>
+        private void SeedUser(
+            UserManager<ApplicationUser> userManager,
+            string email, string password,
+            string fullName, string phone, string address, string role)
+        {
+            try
+            {
+                if (userManager.FindByEmail(email) != null) return;
+
+                var user = new ApplicationUser
+                {
+                    UserName       = email,
+                    Email          = email,
+                    FullName       = fullName,
+                    PhoneNumber    = phone,
+                    Address        = address,
+                    IsActive       = true,
+                    EmailConfirmed = true,
+                    CreatedAt      = DateTime.UtcNow
+                };
+
+                var result = userManager.Create(user, password);
+                if (result.Succeeded)
+                {
+                    userManager.AddToRole(user.Id, role);
+                }
+            }
+            catch (Exception)
+            {
+                // Bỏ qua nếu user đã tồn tại hoặc DB chưa sẵn sàng
             }
         }
     }

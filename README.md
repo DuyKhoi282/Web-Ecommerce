@@ -219,8 +219,8 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
    - Mở file `Web.config`, cập nhật thẻ `connectionStrings` với thông tin đăng nhập PostgreSQL trên máy của bạn:
      ```xml
      <connectionStrings>
-       <add name="DefaultConnection" 
-            connectionString="Server=localhost;Port=5432;Database=webecommerce_db;User Id=postgres;Password=your_password;" 
+       <add name="DefaultConnection"
+            connectionString="Server=localhost;Port=5432;Database=webecommerce_db;User Id=postgres;Password=your_password;"
             providerName="Npgsql" />
      </connectionStrings>
      ```
@@ -245,14 +245,30 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
    - Mở file `WebEcommerceModel.edmx` trong thư mục `Models/`.
    - Nhấp chuột phải vào vùng trống &rarr; Chọn **Update Model from Database...** &rarr; Đồng bộ cấu trúc bảng từ PostgreSQL.
 
-7. **Khởi chạy ứng dụng:**
-   - Nhấn **F5** hoặc nút **IIS Express (Google Chrome / Edge)** để bắt đầu chạy ứng dụng.
-   - Tài khoản mẫu mặc định (sau khi Seed Database):
-     - **Admin:** `admin@ecommerce.com` / Mật khẩu: `Admin@123456`
-     - **Store Manager:** `manager@ecommerce.com` / Mật khẩu: `Manager@123456`
-     - **Customer:** `customer1@gmail.com` / Mật khẩu: `Customer@123456`
+7. **Khởi chạy ứng dụng (F5) — Tự động Seed tài khoản mẫu:**
+   - Nhấn **F5** hoặc nút **IIS Express**. Khi app khởi động, `Startup.cs` tự động tạo các tài khoản sau:
+
+   | Email | Mật khẩu | Vai trò |
+   | :--- | :--- | :--- |
+   | `admin@thechillshop.vn` | `Admin@123456` | Administrator |
+   | `manager@thechillshop.vn` | `Manager@123456` | StoreManager |
+   | `customer1@gmail.com` | `Customer@123456` | Customer |
+   | `customer2@gmail.com` | `Customer@123456` | Customer |
+   | `customer3@gmail.com` | `Customer@123456` | Customer |
+
+8. **Bơm dữ liệu mẫu đầy đủ:**
+   - Sau khi app đã chạy thành công, mở **pgAdmin** &rarr; chạy `Database/Scripts/02_Seed_Data.sql`.
+   - Script tự động thêm **32 sản phẩm** (8 danh mục có cha-con), **50 ảnh placeholder**, **5 voucher**, **20 đơn hàng** (đủ 6 trạng thái), đánh giá và wishlist mẫu.
+
+### 8.3. Reset Dữ Liệu (Môi Trường Development)
+
+Khi cần làm sạch DB để test lại từ đầu, chạy `Database/Scripts/99_Reset_Data.sql`:
+- **Mode A** *(mặc định)*: Xoá data nghiệp vụ, giữ nguyên tài khoản &rarr; Chạy lại `02_Seed_Data.sql`.
+- **Mode B** *(bỏ comment phần cuối file)*: Xoá toàn bộ kể cả Users &rarr; Restart app rồi chạy lại `02_Seed_Data.sql`.
 
 ---
+
+
 
 ## 9. Tài Liệu Dự Án & Liên Kết
 
