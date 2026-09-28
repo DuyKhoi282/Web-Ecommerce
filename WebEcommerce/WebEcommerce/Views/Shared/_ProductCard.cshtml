@@ -1,0 +1,124 @@
+﻿@model WebEcommerce.Models.Product
+@{
+    // TheChillShop Standard Product Card Component
+    // Dành cho Thành viên 2 (Hiển thị sản phẩm), Thành viên 3 (Thêm giỏ hàng Ajax), Thành viên 4 (Đánh giá)
+    
+    int id = Model != null ? Model.ProductID : 0;
+    string name = Model != null ? Model.Name : (ViewBag.CardName as string ?? "Sản phẩm công nghệ cao cấp");
+    decimal price = Model != null ? Model.Price : (ViewBag.CardPrice != null ? (decimal)ViewBag.CardPrice : 2990000m);
+    decimal? discountPrice = Model != null ? Model.DiscountPrice : (ViewBag.CardDiscountPrice as decimal?);
+    string categoryName = Model?.Category?.Name ?? (ViewBag.CardCategory as string ?? "Thiết bị số");
+    string imageUrl = Model?.ProductImages?.FirstOrDefault(p => p.IsMain)?.ImageURL 
+                      ?? Model?.ProductImages?.FirstOrDefault()?.ImageURL 
+                      ?? (ViewBag.CardImageUrl as string ?? "https://placehold.co/400x400/eef2ff/0d47a1?text=TheChillShop");
+    int stock = Model != null ? Model.StockQuantity : 25;
+    
+    // Tính phần trăm giảm giá nếu có
+    int discountPercent = 0;
+    if (discountPrice.HasValue && discountPrice.Value > 0 && discountPrice.Value < price && price > 0)
+    {
+        discountPercent = (int)Math.Round((price - discountPrice.Value) / price * 100);
+    }
+}
+
+<div class="group bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-[#0d47a1]/30 transition-all duration-300 flex flex-col overflow-hidden relative" data-product-id="@id">
+    
+    <!-- Image & Badges Container -->
+    <div class="relative aspect-square w-full bg-slate-50 overflow-hidden">
+        <!-- Badges (Top Left) -->
+        <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+            @if (discountPercent > 0)
+            {
+                <span class="px-2.5 py-1 rounded-md text-[11px] font-extrabold uppercase bg-rose-500 text-white shadow-sm tracking-wider">
+                    -@discountPercent%
+                </span>
+            }
+            else
+            {
+                <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase bg-gradient-to-r from-[#0d47a1] to-[#00b4d8] text-white shadow-sm tracking-wider">
+                    Mới
+                </span>
+            }
+        </div>
+
+        <!-- Wishlist / Favorite Icon (Top Right) -->
+        <button type="button" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur text-slate-400 hover:text-rose-500 hover:bg-white flex items-center justify-center transition-all duration-200 shadow-sm opacity-80 group-hover:opacity-100" title="Thêm vào yêu thích">
+            <span class="material-symbols-outlined text-lg">favorite</span>
+        </button>
+
+        <!-- Product Image -->
+        <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" class="block w-full h-full">
+            <img src="@imageUrl" 
+                 alt="@name" 
+                 class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" 
+                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8faff/0d47a1?text=TheChillShop';" />
+        </a>
+    </div>
+
+    <!-- Product Details Content -->
+    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div>
+            <!-- Category Tag -->
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-[#00b4d8] mb-1">
+                @categoryName
+            </p>
+
+            <!-- Product Title -->
+            <h3 class="font-headline font-bold text-slate-800 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-[#0d47a1] transition-colors duration-200 mb-2">
+                <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" title="@name">
+                    @name
+                </a>
+            </h3>
+
+            <!-- Star Rating (Thành viên 4 kết nối Review) -->
+            <div class="flex items-center gap-1.5 mb-3">
+                <div class="flex items-center text-amber-400 text-xs">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">5.0 (24)</span>
+            </div>
+        </div>
+
+        <div>
+            <!-- Price Section -->
+            <div class="flex items-baseline gap-2 mb-4">
+                @if (discountPrice.HasValue && discountPrice.Value > 0)
+                {
+                    <span class="font-headline font-extrabold text-lg sm:text-xl text-[#0d47a1]">
+                        @string.Format("{0:N0}đ", discountPrice.Value)
+                    </span>
+                    <span class="text-xs text-slate-400 line-through">
+                        @string.Format("{0:N0}đ", price)
+                    </span>
+                }
+                else
+                {
+                    <span class="font-headline font-extrabold text-lg sm:text-xl text-[#0d47a1]">
+                        @string.Format("{0:N0}đ", price)
+                    </span>
+                }
+            </div>
+
+            <!-- Action Buttons: Thêm giỏ hàng (Thành viên 3 gắn hàm Ajax) -->
+            <div class="flex items-center gap-2">
+                <button type="button" 
+                        class="btn-add-to-cart flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-[#0d47a1] text-slate-700 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm"
+                        data-product-id="@id"
+                        onclick="if(window.addToCart) { addToCart(@id); } else { alert('Chức năng Giỏ hàng do TV3 phụ trách đang kết nối backend. Sản phẩm ID: ' + @id); }">
+                    <span class="material-symbols-outlined text-base">shopping_cart</span>
+                    <span>Thêm giỏ</span>
+                </button>
+                
+                <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" 
+                   class="w-10 h-10 rounded-xl border border-slate-200 text-slate-500 hover:text-[#0d47a1] hover:border-[#0d47a1] flex items-center justify-center transition-colors"
+                   title="Xem chi tiết">
+                    <span class="material-symbols-outlined text-lg">visibility</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

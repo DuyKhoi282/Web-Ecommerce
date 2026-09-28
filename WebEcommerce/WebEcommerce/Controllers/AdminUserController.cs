@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -9,10 +9,11 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using WebEcommerce.Models;
+using WebEcommerce.Filters;
 
 namespace WebEcommerce.Controllers
 {
-    [Authorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
+    [CustomAuthorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
     public class AdminUserController : Controller
     {
         private ApplicationUserManager _userManager;
@@ -211,7 +212,7 @@ namespace WebEcommerce.Controllers
         // POST: AdminUser/ChangeRole
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [CustomAuthorize(Roles = "Administrator")]
         public async Task<ActionResult> ChangeRole(string userId, string newRole)
         {
             try
