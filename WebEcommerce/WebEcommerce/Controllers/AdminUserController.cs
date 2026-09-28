@@ -178,6 +178,13 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // KHÓA CỨNG: Bảo vệ tài khoản Super Admin gốc, không thể bị khóa
+                if (string.Equals(user.Email, "admin@thechillshop.vn", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Tài khoản Quản trị viên tối cao (admin@thechillshop.vn) là tài khoản gốc được bảo vệ, không thể bị khóa.";
+                    return RedirectToAction("Index");
+                }
+
                 var now = DateTime.UtcNow;
                 bool isCurrentlyLocked = !user.IsActive || (user.LockoutEndDateUtc.HasValue && user.LockoutEndDateUtc.Value > now);
 
@@ -235,6 +242,13 @@ namespace WebEcommerce.Controllers
                 if (user == null)
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
+                    return RedirectToAction("Index");
+                }
+
+                // KHÓA CỨNG: Bảo vệ tài khoản Super Admin gốc, không thể bị thay đổi vai trò
+                if (string.Equals(user.Email, "admin@thechillshop.vn", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Không thể thay đổi vai trò của Quản trị viên tối cao (admin@thechillshop.vn).";
                     return RedirectToAction("Index");
                 }
 
