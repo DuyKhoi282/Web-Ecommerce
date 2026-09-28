@@ -1,0 +1,129 @@
+@model WebEcommerce.Models.ProfileViewModel
+@{
+    ViewBag.Title = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var avatarSrc = string.IsNullOrEmpty(Model.Avatar)
+        ? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(Model.FullName ?? "User") + "&background=4f46e5&color=fff&size=128"
+        : Url.Content(Model.Avatar);
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-8">
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-1"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold mb-4">Hồ sơ cá nhân</h2>
+
+                    @using (Html.BeginForm("Profile", "Manage", FormMethod.Post,
+                        new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
+                        <div class="row g-4">
+                            <!-- Ảnh đại diện -->
+                            <div class="col-md-3 text-center">
+                                <img id="avatar-preview"
+                                     src="@avatarSrc"
+                                     alt="Ảnh đại diện"
+                                     class="rounded-circle img-thumbnail mb-2"
+                                     style="width:120px;height:120px;object-fit:cover;" />
+
+                                <div>
+                                    <label class="btn btn-outline-secondary btn-sm" for="AvatarFile">
+                                        Chọn ảnh
+                                    </label>
+                                    @Html.TextBoxFor(m => m.AvatarFile, new {
+                                        type = "file",
+                                        id = "AvatarFile",
+                                        accept = "image/*",
+                                        @class = "d-none",
+                                        onchange = "previewAvatar(this)"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.AvatarFile, "", new { @class = "text-danger small d-block" })
+                                    <small class="text-muted d-block mt-1">JPG, PNG, GIF. Tối đa 2MB.</small>
+                                </div>
+                            </div>
+
+                            <!-- Thông tin -->
+                            <div class="col-md-9">
+                                <!-- Email: Chỉ đọc -->
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control bg-light" value="@Model.Email" readonly />
+                                    <small class="text-muted">Địa chỉ email không thể thay đổi.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    @Html.LabelFor(m => m.FullName, new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.FullName, new {
+                                        @class = "form-control",
+                                        placeholder = "Nguyễn Văn A"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger small" })
+                                </div>
+
+                                <div class="mb-3">
+                                    @Html.LabelFor(m => m.PhoneNumber, new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new {
+                                        @class = "form-control",
+                                        placeholder = "0901234567",
+                                        type = "tel"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger small" })
+                                </div>
+
+                                <div class="mb-4">
+                                    @Html.LabelFor(m => m.Address, new { @class = "form-label" })
+                                    @Html.TextAreaFor(m => m.Address, 3, 0, new {
+                                        @class = "form-control",
+                                        placeholder = "123 Đường ABC, Phường XYZ, TP. Hồ Chí Minh"
+                                    })
+                                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger small" })
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary px-4">Lưu thay đổi</button>
+                                    @Html.ActionLink("Đổi mật khẩu", "ChangePassword", "Manage",
+                                        null, new { @class = "btn btn-outline-secondary px-4" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Preview ảnh ngay khi chọn file — không cần upload trước
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('avatar-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
