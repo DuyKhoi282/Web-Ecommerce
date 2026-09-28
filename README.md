@@ -3,8 +3,9 @@
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg?style=flat-square)]()
 [![Platform](https://img.shields.io/badge/.NET_Framework-4.8-blue.svg?style=flat-square)]()
 [![Framework](https://img.shields.io/badge/ASP.NET-MVC_5-purple.svg?style=flat-square)]()
-[![ORM](https://img.shields.io/badge/Entity_Framework-6_(Code_First_|_Database_First)-orange.svg?style=flat-square)]()
-[![Database](https://img.shields.io/badge/SQL_Server-2019%2B-red.svg?style=flat-square)]()
+[![ORM](https://img.shields.io/badge/Entity_Framework-6_(Database_First)-orange.svg?style=flat-square)]()
+[![Database](https://img.shields.io/badge/Database-PostgreSQL_14+-336791.svg?style=flat-square&logo=postgresql&logoColor=white)]()
+[![Provider](https://img.shields.io/badge/Provider-Npgsql-004880.svg?style=flat-square)]()
 [![Git](https://img.shields.io/badge/Git_Flow-Weekly_CI-brightgreen.svg?style=flat-square)]()
 
 > **Đồ án Cuối kỳ:** Học phần Phát triển Ứng dụng Web (`ITE1265E`)  
@@ -28,13 +29,13 @@
 
 ## 1. Giới Thiệu Dự Án
 
-Hệ thống Website Bán Hàng Trực Tuyến là một ứng dụng web thương mại điện tử đa tầng hoàn chỉnh, được xây dựng trên nền tảng **ASP.NET MVC 5** kết hợp cơ sở dữ liệu **Microsoft SQL Server**.
+Hệ thống Website Bán Hàng Trực Tuyến là một ứng dụng web thương mại điện tử đa tầng hoàn chỉnh, được xây dựng trên nền tảng **ASP.NET MVC 5** (.NET Framework 4.8) kết hợp hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ **PostgreSQL**, sử dụng thư viện **Npgsql** làm ADO.NET / EF6 Data Provider và triển khai theo phương pháp **Database First**.
 
 Mục tiêu cốt lõi của đồ án:
 - Hiện thực hóa quy trình mua sắm khép kín: Khám phá sản phẩm &rarr; Tìm kiếm / Lọc đa tiêu chí &rarr; Giỏ hàng Ajax &rarr; Áp dụng Voucher / Flash Sale &rarr; Thanh toán (COD / Chuyển khoản QR) &rarr; Quản lý đơn hàng &rarr; Đánh giá phản hồi 5 sao có kiểm chứng.
 - Phân quyền chặt chẽ 3 cấp (**Customer**, **Store Manager**, **Administrator**) với ASP.NET Identity 2.0.
 - Áp dụng nguyên tắc **Phòng vệ biên (Boundary Defense)** với 100% Action CSDL/File/Thanh toán được bọc `try-catch`, đảm bảo ứng dụng không bao giờ bị dừng đột ngột (Yellow Screen of Death).
-- Quản lý và đồng bộ cơ sở dữ liệu linh hoạt giữa 4 thành viên thông qua **Entity Framework 6** (hỗ trợ cả **Code First Migrations** hoặc **Database First / SQL Scripts** tùy theo phương án nhóm lựa chọn).
+- Quản lý và đồng bộ cơ sở dữ liệu đồng nhất giữa 4 thành viên thông qua **Entity Framework 6 Database First**: Toàn bộ bảng, khóa chính, khóa ngoại, chỉ mục được khởi tạo trước bằng script SQL chuẩn trên PostgreSQL, sau đó reverse-engineer tự động sinh `DbContext` và `Model` entities trong Visual Studio.
 
 ---
 
@@ -43,8 +44,9 @@ Mục tiêu cốt lõi của đồ án:
 | Lớp (Layer) | Công Nghệ & Thư Viện | Mục Đích Sử Dụng |
 | :--- | :--- | :--- |
 | **Backend Framework** | ASP.NET MVC 5, .NET Framework 4.8 | Xây dựng kiến trúc Model-View-Controller chuẩn doanh nghiệp |
-| **ORM / Data Access** | Entity Framework 6 (Code First hoặc Database First) | Truy xuất dữ liệu an toàn, linh hoạt tiếp cận theo Code First hoặc Database First (.edmx / SQL Scripts) |
-| **Cơ sở dữ liệu** | Microsoft SQL Server (2019 / 2022 / LocalDB) | Lưu trữ quan hệ ACID, bảo đảm toàn vẹn giao dịch đặt hàng |
+| **Cơ sở dữ liệu** | PostgreSQL (14 / 15 / 16) | Hệ quản trị CSDL quan hệ ACID mạnh mẽ, tối ưu lưu trữ và chỉ mục |
+| **Database Provider** | Npgsql, EntityFramework6.Npgsql | Data Provider cung cấp kết nối ADO.NET và dịch vụ EF6 cho PostgreSQL |
+| **ORM / Data Access** | Entity Framework 6 (Database First) | Ánh xạ CSDL sang đối tượng Model theo Database First, truy vấn LINQ an toàn |
 | **Bảo mật & Phân quyền** | ASP.NET Identity 2.0, OWIN Cookie Authentication | Xác thực người dùng, mã hóa mật khẩu PBKDF2, phân quyền Role-based |
 | **Frontend UI** | Bootstrap 5, Razor View Engine, FontAwesome | Giao diện hiện đại, responsive hoàn toàn trên Mobile và Desktop |
 | **Client Scripting** | JavaScript, jQuery, Ajax | Cập nhật giỏ hàng mượt mà không tải lại trang (Single Page Feel) |
@@ -58,9 +60,18 @@ Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ
 
 ```
 [Thành viên 1: Team Lead]
-  ├── Base Solution & Identity DbContext
-  ├── Authentication & Authorize Filters
-  └── Admin Dashboard & Phân quyền User
+  ├── Architecture & Foundation (Solution Setup, EF 6, MVC Pattern, Git Flow)
+  ├── Authentication & Passwords (Register, Login, Logout, Change/Reset Password)
+  ├── User Profile Management (Profile, Avatar Upload, Address, Phone)
+  ├── User Management (Admin User List, Search by Name/Email, View Details)
+  ├── Account Management (Lock/Unlock, Activate/Deactivate Accounts)
+  ├── Role Management (Customer, StoreManager, Administrator, Assign/Change Role)
+  ├── Authorization ([Authorize], Role-based Access, Protect Admin/Manager, 403 Forbidden)
+  ├── Admin Panel (Dedicated Admin Layout, Navigation Menu, Centralized Views)
+  ├── Dashboard & Analytics (Total Revenue, Orders, Users, Top Selling, Low Stock < 5)
+  ├── Chart.js Integration (12-Month Revenue Bar Chart, Order Status Pie Chart)
+  ├── Security Defense (Anti-CSRF, PBKDF2 Password Hashing, Error Handling)
+  └── Weekly Integration & Code Review (PR Auditing, Merge Conflict Resolution)
          │
          ▼
 [Thành viên 2] ────────────► [Thành viên 3] ────────────► [Thành viên 4]
@@ -74,7 +85,7 @@ Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ
 
 | Thành Viên | Vai Trò & Phụ Trách | Controller / Deliverables Chính |
 | :--- | :--- | :--- |
-| **Thành viên 1** *(Team Lead)* | **Kiến trúc hệ thống, Auth & Admin:** Khởi tạo Solution, cấu hình EF Code First, phân quyền 3 Role, Admin Dashboard, bảo mật, điều phối tích hợp hàng tuần. | `AccountController`<br>`AdminController`<br>`DashboardController`<br>`Base Architecture` |
+| **Thành viên 1** *(Team Lead)* | **Authentication, User Management, Authorization & Administration:**<br>• Khởi tạo Solution, cấu hình EF 6 Code First Context & Git workflow.<br>• Xác thực: Register, Login Cookie Auth, Logout, Change Password, Forgot/Reset Password.<br>• Quản lý hồ sơ: Xem/sửa Profile cá nhân, Upload Avatar, cập nhật Địa chỉ, Số điện thoại.<br>• Quản trị User: Xem danh sách người dùng phân trang, tìm kiếm User (tên/email/phone), xem chi tiết User Profile.<br>• Quản lý tài khoản: Khóa/Mở khóa (Lock/Unlock), Kích hoạt/Vô hiệu hóa (Activate/Deactivate).<br>• Phân quyền 3 vai trò: Customer / StoreManager / Administrator, Assign & Change Role.<br>• Kiểm soát truy cập: Bộ lọc `[Authorize]`, Role-based access, bảo vệ trang Admin/Manager, trang 403 Forbidden.<br>• Admin Panel: Layout Admin riêng biệt (_AdminLayout.cshtml), menu/sidebar quản trị chuyên nghiệp.<br>• Dashboard: Báo cáo tổng doanh thu, số đơn hàng, số user, top bán chạy, cảnh báo kho &lt; 5.<br>• Thống kê trực quan: Tích hợp Chart.js vẽ biểu đồ doanh thu theo tháng và cơ cấu đơn hàng.<br>• Bảo mật hệ thống: Phòng vệ Anti-CSRF (`@Html.AntiForgeryToken`), băm mật khẩu Identity PBKDF2.<br>• Tích hợp hệ thống: Review PR, hỗ trợ xử lý merge/conflict và tích hợp code tuần hoàn. | `AccountController`<br>`ManageController`<br>`AdminController`<br>`DashboardController`<br>`Identity Models & Services`<br>`Admin Layout & Views` |
 | **Thành viên 2** | **Danh mục, Sản phẩm, Tìm kiếm & Lọc:** CRUD Category, CRUD Product, tải lên nhiều ảnh, phân trang, bộ lọc đa tiêu chí (danh mục, khoảng giá, rating). | `CategoryController`<br>`ProductController`<br>`SearchController`<br>`Product Views` |
 | **Thành viên 3** | **Quy trình Mua bán Khép kín:** Giỏ hàng Ajax, Checkout, Xử lý Đơn hàng (trừ tồn kho an toàn), Mã giảm giá (Voucher), Sự kiện Flash Sale đếm ngược. | `CartController`<br>`CheckoutController`<br>`OrderController`<br>`PromotionController` |
 | **Thành viên 4** | **Tiện ích, Đánh giá & Dịch vụ Phụ thuộc:** Wishlist, Đánh giá 1-5 sao (ràng buộc đơn Delivered), Xuất hóa đơn PDF, Gửi email thông báo tự động (MailKit). | `WishlistController`<br>`ReviewController`<br>`ExportController`<br>`EmailService` |
@@ -86,14 +97,17 @@ Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ
 | Nghiệp vụ / Tính Năng Hệ Thống | Customer | Store Manager | Administrator |
 | :--- | :---: | :---: | :---: |
 | Xem sản phẩm, tìm kiếm, lọc, thao tác giỏ hàng | ✅ | ✅ | ✅ |
+| Xem và cập nhật Profile cá nhân, Upload Avatar, Đổi mật khẩu | ✅ | ✅ | ✅ |
 | Thực hiện Checkout đặt hàng, xem lịch sử mua cá nhân | ✅ | ❌ | ❌ |
 | Tự hủy đơn hàng cá nhân (chỉ khi trạng thái `Pending`) | ✅ | ❌ | ❌ |
 | Đánh giá 1-5 sao (bắt buộc đơn hàng trạng thái `Delivered`) | ✅ | ❌ | ❌ |
 | Quản lý CRUD Danh mục, Sản phẩm, Upload ảnh, Kho hàng | ❌ | ✅ | ✅ |
 | Quản lý và cập nhật tiến trình đơn hàng toàn hệ thống | ❌ | ✅ | ✅ |
 | Thiết lập Voucher khuyến mãi và khung giờ Flash Sale | ❌ | ✅ | ✅ |
-| Xem Dashboard thống kê (doanh thu, đơn hàng, biểu đồ) | ❌ | ✅ *(Giới hạn)* | ✅ *(Toàn quyền)* |
-| Quản lý tài khoản (Khóa/Mở tài khoản, Gán Role) | ❌ | ❌ | ✅ *(Độc quyền)* |
+| Xem Dashboard thống kê (doanh thu, đơn hàng, biểu đồ Chart.js) | ❌ | ✅ *(Giới hạn)* | ✅ *(Toàn quyền)* |
+| Quản trị User (Xem danh sách, tìm kiếm User, xem chi tiết Profile) | ❌ | ❌ | ✅ *(Độc quyền)* |
+| Quản lý tài khoản (Khóa/Mở tài khoản Lock/Unlock, Activate/Deactivate) | ❌ | ❌ | ✅ *(Độc quyền)* |
+| Phân quyền vai trò (Gán và Chuyển đổi Role: Customer/Manager/Admin) | ❌ | ❌ | ✅ *(Độc quyền)* |
 | Kiểm duyệt và xóa bỏ bình luận / đánh giá vi phạm | ❌ | ❌ | ✅ *(Độc quyền)* |
 
 ---
@@ -176,7 +190,7 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
 - **Hệ điều hành:** Windows 10 / 11
 - **IDE:** Visual Studio 2019 hoặc Visual Studio 2022 (khuyến nghị bản Community)
   - Workload cần cài: **ASP.NET and web development**, **.NET Framework 4.8 targeting pack**.
-- **Cơ sở dữ liệu:** Microsoft SQL Server (LocalDB / SQL Express / Developer Edition) & SQL Server Management Studio (SSMS).
+- **Cơ sở dữ liệu:** PostgreSQL 14 / 15 / 16 & công cụ quản trị **pgAdmin 4** (hoặc DBeaver / Datagrip / `psql`).
 
 ### 8.2. Các Bước Cài Đặt & Chạy Ứng Dụng
 
@@ -191,35 +205,45 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
 
 3. **Khôi phục thư viện NuGet (Restore NuGet Packages):**
    - Click chuột phải vào Solution &rarr; Chọn **Restore NuGet Packages**.
-   - Hoặc chạy lệnh trong Package Manager Console:
-     ```powershell
-     Update-Package -reinstall
-     ```
+   - Dự án tích hợp sẵn: `Npgsql` (phiên bản hỗ trợ .NET 4.8) và `EntityFramework6.Npgsql`.
 
-4. **Cấu hình chuỗi kết nối CSDL (Connection String):**
-   - Mở file `Web.config`, điều chỉnh thẻ `connectionStrings` cho phù hợp với máy cá nhân của bạn:
+4. **Khởi tạo Cơ sở dữ liệu PostgreSQL (Phương pháp Database First):**
+   - Mở **pgAdmin 4**, tạo một Database mới có tên: `webecommerce_db`.
+   - Nhấp chuột phải vào `webecommerce_db` &rarr; Chọn **Query Tool**.
+   - Mở file kịch bản SQL tại `Database/Scripts/01_Init_PostgreSQL_Database.sql`.
+   - Nhấn **F5 (Execute)** để khởi tạo toàn bộ 12 bảng dữ liệu và nạp dữ liệu mẫu ban đầu (Roles, Categories, Products, Vouchers).
+
+5. **Cấu hình chuỗi kết nối Npgsql trong `Web.config`:**
+   - Mở file `Web.config`, cập nhật thẻ `connectionStrings` với thông tin đăng nhập PostgreSQL trên máy của bạn:
      ```xml
      <connectionStrings>
        <add name="DefaultConnection" 
-            connectionString="Data Source=.;Initial Catalog=WebEcommerceDb;Integrated Security=True;MultipleActiveResultSets=True;" 
-            providerName="System.Data.SqlClient" />
+            connectionString="Server=localhost;Port=5432;Database=webecommerce_db;User Id=postgres;Password=your_password;" 
+            providerName="Npgsql" />
      </connectionStrings>
      ```
+   - Cấu hình provider Entity Framework 6 cho Npgsql trong `Web.config`:
+     ```xml
+     <entityFramework>
+       <providers>
+         <provider invariantName="Npgsql" type="Npgsql.NpgsqlServices, EntityFramework6.Npgsql" />
+       </providers>
+       <defaultConnectionFactory type="Npgsql.NpgsqlConnectionFactory, EntityFramework6.Npgsql" />
+     </entityFramework>
 
-5. **Đồng bộ Cơ sở dữ liệu (Tùy chọn theo phương pháp nhóm chọn):**
-   - **Lựa chọn A – Nếu sử dụng Code First Migrations:**
-     - Mở **Tools &rarr; NuGet Package Manager &rarr; Package Manager Console**.
-     - Chạy lệnh:
-       ```powershell
-       Update-Database -Verbose
-       ```
-   - **Lựa chọn B – Nếu sử dụng Database First / Script SQL:**
-     - Mở SQL Server Management Studio (SSMS).
-     - Chạy file script tạo cơ sở dữ liệu và dữ liệu mẫu tại `Database/Scripts/01_Init_Database.sql`.
-     - Kiểm tra chuỗi kết nối trong `Web.config` đã trỏ đúng tên database và server của bạn.
-     - *(Nếu dùng `.edmx`)* Mở file `.edmx` trong thư mục `Models/` &rarr; click chuột phải chọn **Update Model from Database...** để đồng bộ cấu trúc bảng.
+     <system.data>
+       <DbProviderFactories>
+         <remove invariant="Npgsql" />
+         <add name="Npgsql Provider" invariant="Npgsql" description=".NET Framework Data Provider for PostgreSQL" type="Npgsql.NpgsqlFactory, Npgsql" />
+       </DbProviderFactories>
+     </system.data>
+     ```
 
-6. **Khởi chạy ứng dụng:**
+6. **Đồng bộ Entity Data Model (EDMX / Database First):**
+   - Mở file `WebEcommerceModel.edmx` trong thư mục `Models/`.
+   - Nhấp chuột phải vào vùng trống &rarr; Chọn **Update Model from Database...** &rarr; Đồng bộ cấu trúc bảng từ PostgreSQL.
+
+7. **Khởi chạy ứng dụng:**
    - Nhấn **F5** hoặc nút **IIS Express (Google Chrome / Edge)** để bắt đầu chạy ứng dụng.
    - Tài khoản mẫu mặc định (sau khi Seed Database):
      - **Admin:** `admin@ecommerce.com` / Mật khẩu: `Admin@123456`

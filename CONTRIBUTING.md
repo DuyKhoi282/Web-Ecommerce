@@ -68,17 +68,28 @@ Mỗi commit phải giải quyết một vấn đề cụ thể, không dồn qu
 | :--- | :--- | :--- |
 | `feat` | Thêm chức năng/tính năng mới | `feat(cart): implement ajax add to cart` |
 | `fix` | Sửa chữa lỗi (bug) | `fix(checkout): fix null reference when cart is empty` |
-| `docs` | Viết hoặc cập nhật tài liệu | `docs(readme): add database migration guide` |
+| `docs` | Viết hoặc cập nhật tài liệu | `docs(readme): add PostgreSQL database setup guide` |
 | `style` | Sửa giao diện, CSS, HTML, căn chỉnh lề (không đổi logic C#) | `style(product-detail): improve image gallery layout` |
 | `refactor` | Tối ưu, cơ cấu lại code (không thêm tính năng, không sửa bug) | `refactor(order): extract stock deduction to private helper` |
 | `perf` | Cải thiện hiệu năng truy vấn, tải trang | `perf(search): add index and eager loading for category query` |
 | `test` | Thêm hoặc sửa kịch bản kiểm thử | `test(order): verify coupon discount calculation` |
-| `chore` | Cập nhật cấu hình, NuGet package, file build, .gitignore | `chore(nuget): install Rotativa for pdf export` |
+| `chore` | Cập nhật cấu hình, NuGet package, file build, .gitignore | `chore(nuget): install Npgsql and EntityFramework6.Npgsql` |
 
 ### Ví dụ Commit Hợp Chuẩn Cho 4 Thành Viên:
-- **Thành viên 1:**
-  - `feat(auth): add ApplicationUser model and IdentityDbContext`
-  - `feat(admin): implement user lock and role assignment in AdminController`
+- **Thành viên 1 (Team Lead - Auth, User Mgmt, Authz & Administration):**
+  - `feat(arch): setup ASP.NET MVC 5, Npgsql provider and EF 6 Database First`
+  - `feat(auth): implement register, login with cookie authentication and logout`
+  - `feat(auth): add change password and forgot/reset password flows`
+  - `feat(profile): view and update user profile, avatar upload, address and phone`
+  - `feat(authz): configure [Authorize] filters and custom 403 Forbidden error page`
+  - `feat(admin): build admin panel layout and management navigation menu`
+  - `feat(user-mgmt): add paginated user list, search by keyword and view details`
+  - `feat(account-mgmt): implement account lock/unlock and activate/deactivate`
+  - `feat(role-mgmt): manage 3-tier roles and assign/change user roles`
+  - `feat(dashboard): calculate total revenue, orders, users, top selling and low stock`
+  - `feat(analytics): render monthly revenue bar chart and order status pie chart with Chart.js`
+  - `security(csrf): apply ValidateAntiForgeryToken across all POST actions`
+  - `chore(merge): review PRs, resolve branch conflicts and integrate develop to main`
 - **Thành viên 2:**
   - `feat(category): add Category CRUD views with Data Annotations`
   - `feat(product): implement multiple images upload and preview`
