@@ -8,7 +8,7 @@ using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
 {
-    [Authorize(Roles = "Administrator,StoreManager")]
+    [Authorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
     public class AdminDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -39,6 +39,22 @@ CREATE TABLE IF NOT EXISTS "AspNetUserRoles" (
     PRIMARY KEY ("UserId", "RoleId")
 );
 
+-- 3.1 BẢNG CLAIMS NGƯỜI DÙNG (AspNetUserClaims)
+CREATE TABLE IF NOT EXISTS "AspNetUserClaims" (
+    "Id" SERIAL PRIMARY KEY,
+    "UserId" VARCHAR(128) NOT NULL REFERENCES "AspNetUsers"("Id") ON DELETE CASCADE,
+    "ClaimType" TEXT,
+    "ClaimValue" TEXT
+);
+
+-- 3.2 BẢNG ĐĂNG NHẬP BÊN THỨ 3 (AspNetUserLogins)
+CREATE TABLE IF NOT EXISTS "AspNetUserLogins" (
+    "LoginProvider" VARCHAR(128) NOT NULL,
+    "ProviderKey" VARCHAR(128) NOT NULL,
+    "UserId" VARCHAR(128) NOT NULL REFERENCES "AspNetUsers"("Id") ON DELETE CASCADE,
+    PRIMARY KEY ("LoginProvider", "ProviderKey", "UserId")
+);
+
 -- 4. BẢNG DANH MỤC SẢN PHẨM (Categories)
 CREATE TABLE IF NOT EXISTS "Categories" (
     "CategoryID" SERIAL PRIMARY KEY,

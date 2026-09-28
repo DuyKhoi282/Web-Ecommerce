@@ -12,7 +12,7 @@ using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
 {
-    [Authorize(Roles = "Administrator,StoreManager")]
+    [Authorize(Roles = "Administrator,StoreManager", Users = "admin@thechillshop.vn")]
     public class AdminUserController : Controller
     {
         private ApplicationUserManager _userManager;

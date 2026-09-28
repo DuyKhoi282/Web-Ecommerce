@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using WebEcommerce.Models;
@@ -92,8 +93,9 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Register Error] {ex.Message}");
-                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.");
+                var msg = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
+                System.Diagnostics.Debug.WriteLine($"[Register Error] {msg}");
+                ModelState.AddModelError("", $"Đã xảy ra lỗi trong quá trình đăng ký: {msg}");
             }
 
             return View(model);
@@ -134,6 +136,20 @@ namespace WebEcommerce.Controllers
                     return View(model);
                 }
 
+                // Đảm bảo admin@thechillshop.vn luôn có quyền Administrator
+                if (user != null && user.Email.ToLower() == "admin@thechillshop.vn")
+                {
+                    var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
+                    if (!roleMgr.RoleExists("Administrator"))
+                    {
+                        roleMgr.Create(new IdentityRole("Administrator"));
+                    }
+                    if (!await UserManager.IsInRoleAsync(user.Id, "Administrator"))
+                    {
+                        await UserManager.AddToRoleAsync(user.Id, "Administrator");
+                    }
+                }
+
                 // Nghiệp vụ: shouldLockout = true → đếm lần sai, khóa sau 5 lần / 10 phút
                 var result = await SignInManager.PasswordSignInAsync(
                     model.Email, model.Password, model.RememberMe, shouldLockout: true);
@@ -141,6 +157,10 @@ namespace WebEcommerce.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
+                        if (model.Email.ToLower() == "admin@thechillshop.vn" && string.IsNullOrEmpty(returnUrl))
+                        {
+                            return RedirectToAction("Index", "AdminDashboard");
+                        }
                         return RedirectToLocal(returnUrl);
 
                     case SignInStatus.LockedOut:
@@ -161,8 +181,9 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Login Error] {ex.Message}");
-                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại.");
+                var msg = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
+                System.Diagnostics.Debug.WriteLine($"[Login Error] {msg}");
+                ModelState.AddModelError("", $"Đã xảy ra lỗi trong quá trình đăng nhập: {msg}");
             }
 
             return View(model);
