@@ -84,6 +84,51 @@ namespace WebEcommerce.Controllers
                     // Nghiệp vụ: Gán mặc định Role "Customer" ngay sau khi tạo
                     await UserManager.AddToRoleAsync(user.Id, "Customer");
 
+                            // Phần này Phúc thêm vào để hệ thống gửi mail 
+                    try
+                    {
+                        await UserManager.SendEmailAsync(
+                            user.Id,
+                            "Đăng ký tài khoản thành công - The Chill Shop",
+                            $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                    <h2>Chào mừng bạn đến với The Chill Shop!</h2>
+
+                    <p>
+                        Xin chào <strong>{HttpUtility.HtmlEncode(user.FullName)}</strong>,
+                    </p>
+
+                    <p>
+                        Tài khoản của bạn đã được đăng ký thành công.
+                    </p>
+
+                    <p>
+                        <strong>Email đăng nhập:</strong>
+                        {HttpUtility.HtmlEncode(user.Email)}
+                    </p>
+
+                    <p>
+                        Bạn có thể sử dụng tài khoản này để đăng nhập
+                        và mua sắm trên hệ thống.
+                    </p>
+
+                    <br />
+
+                    <p>
+                        Trân trọng,<br />
+                        <strong>The Chill Shop</strong>
+                    </p>
+                </div>"
+                        );
+                    }
+                    catch (Exception emailEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Register Email Error] {emailEx.Message}");
+                    }
+
+                            // Hết phần của Phúc thêm vào 
+
                     // Nghiệp vụ: KHÔNG tự đăng nhập — redirect đến Login kèm thông báo
                     TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục.";
                     return RedirectToAction("Login", "Account");
