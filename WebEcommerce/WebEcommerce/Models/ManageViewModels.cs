@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Web;
 using Microsoft.AspNet.Identity;
@@ -39,6 +39,8 @@ namespace WebEcommerce.Models
 
         [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "Họ và tên phải từ 2 đến 150 ký tự.")]
+        [RegularExpression(@"^[^<>&""'{}\[\]]+$",
+            ErrorMessage = "Họ và tên không được chứa ký tự đặc biệt như < > & \" ' { }.")]
         [Display(Name = "Họ và tên")]
         public string FullName { get; set; }
 

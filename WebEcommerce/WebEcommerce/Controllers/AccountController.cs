@@ -184,10 +184,13 @@ namespace WebEcommerce.Controllers
                 // Đảm bảo admin@thechillshop.vn luôn có quyền Administrator
                 if (user != null && user.Email.ToLower() == "admin@thechillshop.vn")
                 {
-                    var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
-                    if (!roleMgr.RoleExists("Administrator"))
+                    using (var adminDb = new ApplicationDbContext())
+                    using (var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(adminDb)))
                     {
-                        roleMgr.Create(new IdentityRole("Administrator"));
+                        if (!roleMgr.RoleExists("Administrator"))
+                        {
+                            roleMgr.Create(new IdentityRole("Administrator"));
+                        }
                     }
                     if (!await UserManager.IsInRoleAsync(user.Id, "Administrator"))
                     {
@@ -202,11 +205,21 @@ namespace WebEcommerce.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
-                        if (string.IsNullOrEmpty(returnUrl) && user != null)
+                        if (user != null)
                         {
-                            if (await UserManager.IsInRoleAsync(user.Id, "Administrator") || await UserManager.IsInRoleAsync(user.Id, "StoreManager"))
-                            {
+                            bool isAdminOrManager = await UserManager.IsInRoleAsync(user.Id, "Administrator")
+                                                 || await UserManager.IsInRoleAsync(user.Id, "StoreManager");
+
+                            // Nghiệp vụ: Admin/Manager luôn vào Dashboard (bất kể returnUrl)
+                            if (isAdminOrManager)
                                 return RedirectToAction("Index", "AdminDashboard");
+
+                            // Nghiệp vụ: Customer không được redirect vào trang /Admin
+                            // dù returnUrl có chứa /Admin (ví dụ: ai đó bookmark trang admin cũ)
+                            if (!string.IsNullOrEmpty(returnUrl) &&
+                                returnUrl.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return RedirectToAction("Index", "Home");
                             }
                         }
                         return RedirectToLocal(returnUrl);
