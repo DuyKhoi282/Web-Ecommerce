@@ -139,10 +139,13 @@ namespace WebEcommerce.Controllers
                 // Đảm bảo admin@thechillshop.vn luôn có quyền Administrator
                 if (user != null && user.Email.ToLower() == "admin@thechillshop.vn")
                 {
-                    var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
-                    if (!roleMgr.RoleExists("Administrator"))
+                    using (var adminDb = new ApplicationDbContext())
+                    using (var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(adminDb)))
                     {
-                        roleMgr.Create(new IdentityRole("Administrator"));
+                        if (!roleMgr.RoleExists("Administrator"))
+                        {
+                            roleMgr.Create(new IdentityRole("Administrator"));
+                        }
                     }
                     if (!await UserManager.IsInRoleAsync(user.Id, "Administrator"))
                     {
