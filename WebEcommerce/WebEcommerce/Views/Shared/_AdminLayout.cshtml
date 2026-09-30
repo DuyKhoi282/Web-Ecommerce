@@ -98,11 +98,25 @@
                     </a>
                 }
 
+                <!-- Quản lý danh mục (TV2) -->
+                <a href="@Url.Action("Index", "Category")" 
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Category" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Category" ? "text-[#00b4d8]" : "")">category</span>
+                    <span>Danh mục sản phẩm</span>
+                </a>
+
                 <!-- Quản lý sản phẩm (TV2) -->
-                <a href="#" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-blue-100/80 hover:bg-white/10 hover:text-white transition-all">
-                    <span class="material-symbols-outlined text-xl">inventory_2</span>
+                <a href="@Url.Action("Index", "Product")" 
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Product" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Product" ? "text-[#00b4d8]" : "")">inventory_2</span>
                     <span>Quản lý sản phẩm</span>
+                </a>
+
+                <!-- Quản lý kho & tồn kho (TV2) -->
+                <a href="@Url.Action("Index", "Inventory")" 
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Inventory" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Inventory" ? "text-[#00b4d8]" : "")">warehouse</span>
+                    <span>Kho & Tồn kho</span>
                 </a>
 
                 <!-- Quản lý đơn hàng (TV3) -->

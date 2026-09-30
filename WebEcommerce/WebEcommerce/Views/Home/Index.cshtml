@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "TheChillShop - Thế giới công nghệ & phụ kiện cao cấp";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -343,79 +343,48 @@
 
         <!-- Product Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            
-            <!-- Card 1 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "iPhone 16 Pro Max 256GB - Chính Hãng VN/A" },
-                { "CardCategory", "Điện thoại" },
-                { "CardPrice", 34990000m },
-                { "CardDiscountPrice", 29990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&auto=format&fit=crop&q=80" }
-            })
+            @if (ViewBag.FeaturedProducts != null && ((List<WebEcommerce.Models.Product>)ViewBag.FeaturedProducts).Any())
+            {
+                foreach (var product in (List<WebEcommerce.Models.Product>)ViewBag.FeaturedProducts)
+                {
+                    @Html.Partial("_ProductCard", product)
+                }
+            }
+            else
+            {
+                <!-- Fallback mẫu nếu chưa nạp CSDL -->
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "iPhone 16 Pro Max 256GB - Chính Hãng VN/A" },
+                    { "CardCategory", "Điện thoại" },
+                    { "CardPrice", 34990000m },
+                    { "CardDiscountPrice", 29990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&auto=format&fit=crop&q=80" }
+                })
 
-            <!-- Card 2 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "MacBook Air 13 M3 8GB 256GB Midnight" },
-                { "CardCategory", "Laptop" },
-                { "CardPrice", 27990000m },
-                { "CardDiscountPrice", 24490000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80" }
-            })
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "MacBook Air 13 M3 8GB 256GB Midnight" },
+                    { "CardCategory", "Laptop" },
+                    { "CardPrice", 27990000m },
+                    { "CardDiscountPrice", 24490000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80" }
+                })
 
-            <!-- Card 3 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Tai nghe Sony WH-1000XM5 Chống Ồn Đỉnh Cao" },
-                { "CardCategory", "Tai nghe" },
-                { "CardPrice", 8490000m },
-                { "CardDiscountPrice", 6990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80" }
-            })
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "Tai nghe Sony WH-1000XM5 Chống Ồn Đỉnh Cao" },
+                    { "CardCategory", "Tai nghe" },
+                    { "CardPrice", 8490000m },
+                    { "CardDiscountPrice", 6990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80" }
+                })
 
-            <!-- Card 4 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Apple Watch Series 10 GPS 42mm Nhôm Đen" },
-                { "CardCategory", "Smartwatch" },
-                { "CardPrice", 10990000m },
-                { "CardDiscountPrice", 9990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 5 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Samsung Galaxy S24 Ultra 12GB 256GB Titanium" },
-                { "CardCategory", "Điện thoại" },
-                { "CardPrice", 31990000m },
-                { "CardDiscountPrice", 26990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 6 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Chuột không dây Logitech MX Master 3S Silent" },
-                { "CardCategory", "Phụ kiện" },
-                { "CardPrice", 2490000m },
-                { "CardDiscountPrice", 1990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 7 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Bàn phím cơ không dây Keychron K2 Pro QMK/VIA" },
-                { "CardCategory", "Phụ kiện" },
-                { "CardPrice", 2390000m },
-                { "CardDiscountPrice", 1890000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 8 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Loa Bluetooth Marshall Emberton II Chính Hãng" },
-                { "CardCategory", "Tai nghe" },
-                { "CardPrice", 4590000m },
-                { "CardDiscountPrice", 3890000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500&auto=format&fit=crop&q=80" }
-            })
-
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "Apple Watch Series 10 GPS 42mm Nhôm Đen" },
+                    { "CardCategory", "Smartwatch" },
+                    { "CardPrice", 10990000m },
+                    { "CardDiscountPrice", 9990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=80" }
+                })
+            }
         </div>
 
         <div class="mt-12 text-center">

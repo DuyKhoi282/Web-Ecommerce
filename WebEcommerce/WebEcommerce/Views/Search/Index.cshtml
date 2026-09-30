@@ -1,0 +1,222 @@
+@model WebEcommerce.Models.ProductSearchViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="max-width: 1280px; margin: 0 auto; padding: 24px 16px;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword))
+        {
+            <text>Kết quả tìm kiếm: "@Model.Keyword"</text>
+        }
+        else
+        {
+            <text>Tìm kiếm & Lọc Sản phẩm</text>
+        }
+    </h1>
+    <p style="color: #5c6370; font-size: 0.875rem; margin-bottom: 24px;">Tìm thấy <strong style="color: #0d47a1;">@Model.TotalCount</strong> sản phẩm</p>
+
+    <!-- Bộ lọc -->
+    <div style="background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        @using (Html.BeginForm("Index", "Search", FormMethod.Get))
+        {
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <!-- Từ khóa -->
+                <div style="flex: 1; min-width: 220px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Từ khóa</label>
+                    <div style="position: relative;">
+                        <input type="text" name="keyword" id="searchKeyword" value="@Model.Keyword" placeholder="Nhập tên sản phẩm..."
+                               style="width: 100%; padding: 10px 10px 10px 36px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
+                               onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
+                               onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                               autocomplete="off" />
+                        <span class="material-symbols-outlined" style="position: absolute; left: 10px; top: 10px; color: #94a3b8; font-size: 18px;">search</span>
+                    </div>
+                    <!-- Autocomplete dropdown -->
+                    <div id="autocompleteDropdown" style="display: none; position: absolute; z-index: 100; background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 320px; overflow-y: auto; margin-top: 4px; width: calc(100% - 40px);"></div>
+                </div>
+                <!-- Danh mục -->
+                <div style="width: 180px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Danh mục</label>
+                    @Html.DropDownList("categoryId", Model.CategoryList, new {
+                        style = "width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;"
+                    })
+                </div>
+                <!-- Giá tối thiểu -->
+                <div style="width: 140px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Giá từ (₫)</label>
+                    <input type="number" name="minPrice" value="@Model.MinPrice" placeholder="0" min="0"
+                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;" />
+                </div>
+                <!-- Giá tối đa -->
+                <div style="width: 140px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Giá đến (₫)</label>
+                    <input type="number" name="maxPrice" value="@Model.MaxPrice" placeholder="∞" min="0"
+                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;" />
+                </div>
+                <!-- Xếp hạng sao -->
+                <div style="width: 120px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sao tối thiểu</label>
+                    <select name="minRating" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
+                        <option value="">Tất cả</option>
+                        <option value="1" @(Model.MinRating == 1 ? "selected" : "")>≥ 1 ⭐</option>
+                        <option value="2" @(Model.MinRating == 2 ? "selected" : "")>≥ 2 ⭐</option>
+                        <option value="3" @(Model.MinRating == 3 ? "selected" : "")>≥ 3 ⭐</option>
+                        <option value="4" @(Model.MinRating == 4 ? "selected" : "")>≥ 4 ⭐</option>
+                        <option value="5" @(Model.MinRating == 5 ? "selected" : "")>5 ⭐</option>
+                    </select>
+                </div>
+                <!-- Sắp xếp -->
+                <div style="width: 160px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sắp xếp</label>
+                    <select name="sortBy" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
+                        <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
+                        <option value="price_asc" @(Model.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</option>
+                        <option value="price_desc" @(Model.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</option>
+                        <option value="name_asc" @(Model.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</option>
+                        <option value="rating_desc" @(Model.SortBy == "rating_desc" ? "selected" : "")>Đánh giá cao</option>
+                        <option value="popular" @(Model.SortBy == "popular" ? "selected" : "")>Phổ biến</option>
+                    </select>
+                </div>
+                <!-- Nút lọc -->
+                <button type="submit" style="padding: 10px 24px; background: #0d47a1; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: background 0.2s;"
+                        onmouseover="this.style.background='#0a3880'" onmouseout="this.style.background='#0d47a1'">
+                    Tìm kiếm
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Danh sách sản phẩm dạng grid -->
+    @if (Model.Products.Any())
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+            @foreach (var p in Model.Products)
+            {
+                <div style="background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
+                    <!-- Ảnh -->
+                    <div style="position: relative; padding-top: 100%; overflow: hidden; background: #f1f5f9;">
+                        @if (!string.IsNullOrEmpty(p.MainImageUrl))
+                        {
+                            <img src="@p.MainImageUrl" alt="@p.Name" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
+                                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                        }
+                        else
+                        {
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-symbols-outlined" style="font-size: 48px; color: #cbd5e1;">image</span>
+                            </div>
+                        }
+                        @if (p.DiscountPrice.HasValue)
+                        {
+                            var discountPercent = Math.Round((1 - (double)p.DiscountPrice.Value / (double)p.Price) * 100);
+                            <span style="position: absolute; top: 8px; left: 8px; background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800;">-@discountPercent%</span>
+                        }
+                        @if (p.StockQuantity == 0)
+                        {
+                            <span style="position: absolute; top: 8px; right: 8px; background: #1e293b; color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">Hết hàng</span>
+                        }
+                    </div>
+                    <!-- Info -->
+                    <div style="padding: 14px;">
+                        <p style="font-size: 0.7rem; color: #0d47a1; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">@p.CategoryName</p>
+                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">@p.Name</h3>
+                        <!-- Rating -->
+                        @if (p.ReviewCount > 0)
+                        {
+                            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="material-symbols-outlined" style="font-size: 14px; color: @(i <= Math.Round(p.AverageRating) ? "#f59e0b" : "#cbd5e1"); font-variation-settings: 'FILL' 1;">star</span>
+                                }
+                                <span style="font-size: 0.7rem; color: #64748b;">(@p.ReviewCount)</span>
+                            </div>
+                        }
+                        <!-- Price -->
+                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                            @if (p.DiscountPrice.HasValue)
+                            {
+                                <span style="font-size: 1.1rem; font-weight: 800; color: #dc2626;">@p.DiscountPrice.Value.ToString("N0")₫</span>
+                                <span style="font-size: 0.8rem; color: #94a3b8; text-decoration: line-through;">@p.Price.ToString("N0")₫</span>
+                            }
+                            else
+                            {
+                                <span style="font-size: 1.1rem; font-weight: 800; color: #1e293b;">@p.Price.ToString("N0")₫</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Phân trang -->
+        @if (Model.TotalPages > 1)
+        {
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    var isActive = i == Model.CurrentPage;
+                    <a href="@Url.Action("Index", "Search", new { keyword = Model.Keyword, categoryId = Model.CategoryID, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice, minRating = Model.MinRating, sortBy = Model.SortBy, page = i })"
+                       style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 0.875rem; font-weight: 700; text-decoration: none; transition: all 0.2s;
+                              @(isActive ? "background: #0d47a1; color: #fff; box-shadow: 0 4px 12px rgba(13,71,161,0.3);" : "background: #fff; color: #475569; border: 2px solid #e2e8f0;")"
+                       onmouseover="@(isActive ? "" : "this.style.background='#f1f5f9'")"
+                       onmouseout="@(isActive ? "" : "this.style.background='#fff'")"
+                    >@i</a>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+            <span class="material-symbols-outlined" style="font-size: 64px; display: block; margin-bottom: 12px;">search_off</span>
+            <p style="font-size: 1.1rem; font-weight: 600;">Không tìm thấy sản phẩm nào</p>
+            <p style="font-size: 0.875rem; margin-top: 4px;">Thử thay đổi từ khóa hoặc bộ lọc</p>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        // Autocomplete
+        var searchInput = document.getElementById('searchKeyword');
+        var dropdown = document.getElementById('autocompleteDropdown');
+        var debounceTimer;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                var term = this.value.trim();
+                if (term.length < 2) { dropdown.style.display = 'none'; return; }
+
+                debounceTimer = setTimeout(function () {
+                    fetch('@Url.Action("Autocomplete", "Search")?term=' + encodeURIComponent(term))
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (!data.length) { dropdown.style.display = 'none'; return; }
+                            dropdown.innerHTML = '';
+                            data.forEach(function (item) {
+                                var div = document.createElement('div');
+                                div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;';
+                                div.onmouseover = function () { this.style.background = '#f1f5f9'; };
+                                div.onmouseout = function () { this.style.background = ''; };
+                                div.onclick = function () { searchInput.value = item.name; dropdown.style.display = 'none'; searchInput.form.submit(); };
+                                var imgHtml = item.image ? '<img src="' + item.image + '" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />' : '<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#94a3b8;font-size:18px;">image</span></div>';
+                                div.innerHTML = imgHtml + '<div><div style="font-size:0.85rem;font-weight:600;color:#1e293b;">' + item.name + '</div><div style="font-size:0.7rem;color:#64748b;">' + item.category + ' • ' + Number(item.price).toLocaleString('vi-VN') + '₫</div></div>';
+                                dropdown.appendChild(div);
+                            });
+                            dropdown.style.display = 'block';
+                        });
+                }, 300);
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!dropdown.contains(e.target) && e.target !== searchInput) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

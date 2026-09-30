@@ -1,0 +1,231 @@
+@model WebEcommerce.Models.CategoryListViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Toast thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span class="font-semibold text-sm">@TempData["SuccessMessage"]</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 hover:text-emerald-200"><span class="material-symbols-outlined text-lg">close</span></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="toast-error" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in">
+        <span class="material-symbols-outlined">error</span>
+        <span class="font-semibold text-sm">@TempData["ErrorMessage"]</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 hover:text-red-200"><span class="material-symbols-outlined text-lg">close</span></button>
+    </div>
+}
+
+<!-- Header -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl font-headline font-extrabold text-slate-900">Quản lý Danh mục Sản phẩm</h1>
+        <p class="text-sm text-slate-500 mt-1">Tổng cộng <span class="font-bold text-chill-primary">@Model.TotalCount</span> danh mục</p>
+    </div>
+    <a href="@Url.Action("Create", "Category")" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg hover:shadow-xl">
+        <span class="material-symbols-outlined text-lg">add_circle</span>
+        Thêm danh mục
+    </a>
+</div>
+
+<!-- Thanh tìm kiếm -->
+<div class="admin-card rounded-2xl p-4 mb-6">
+    @using (Html.BeginForm("Index", "Category", FormMethod.Get, new { @class = "flex items-center gap-3" }))
+    {
+        <div class="relative flex-1">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm kiếm danh mục..."
+                   class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all" />
+        </div>
+        <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all">Tìm</button>
+        if (!string.IsNullOrEmpty(Model.SearchTerm))
+        {
+            <a href="@Url.Action("Index", "Category")" class="text-slate-500 hover:text-red-500 text-sm font-medium">Xóa lọc</a>
+        }
+    }
+</div>
+
+<!-- Bảng danh mục dạng cây -->
+<div class="admin-card rounded-2xl overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="bg-slate-50 border-b-2 border-slate-200">
+                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục</th>
+                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục cha</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Sản phẩm</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">DM con</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Thứ tự</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Trạng thái</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Categories.Any())
+            {
+                @RenderCategoryRows(Model.Categories)
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl mb-2 block">folder_off</span>
+                        <span class="text-base font-medium">Chưa có danh mục nào</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div id="deleteModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+        <div class="text-center mb-4">
+            <span class="material-symbols-outlined text-5xl text-red-500 mb-2 block">warning</span>
+            <h3 class="text-lg font-bold text-slate-900">Xác nhận xóa danh mục</h3>
+            <p id="deleteMessage" class="text-sm text-slate-500 mt-2"></p>
+        </div>
+        <div class="flex gap-3 justify-center">
+            <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition-all">Hủy</button>
+            <button id="confirmDeleteBtn" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-all">Xóa</button>
+        </div>
+    </div>
+</div>
+
+@helper RenderCategoryRows(List<WebEcommerce.Models.CategoryItemViewModel> categories)
+{
+    foreach (var cat in categories)
+    {
+        var indent = cat.Level * 24;
+        <tr class="border-b border-slate-100 hover:bg-blue-50/50 transition-colors">
+            <td class="px-5 py-3.5">
+                <div class="flex items-center gap-2" style="padding-left: @(indent)px;">
+                    @if (cat.Level > 0)
+                    {
+                        <span class="text-slate-300 text-xs">└─</span>
+                    }
+                    @if (!string.IsNullOrEmpty(cat.ImageURL))
+                    {
+                        <img src="@cat.ImageURL" alt="@cat.Name" class="w-8 h-8 rounded-lg object-cover border border-slate-200" />
+                    }
+                    else
+                    {
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-500 text-sm">category</span>
+                        </div>
+                    }
+                    <span class="font-semibold text-slate-800">@cat.Name</span>
+                </div>
+            </td>
+            <td class="px-5 py-3.5 text-slate-500">@(cat.ParentCategoryName ?? "—")</td>
+            <td class="px-5 py-3.5 text-center">
+                <span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold">@cat.ProductCount</span>
+            </td>
+            <td class="px-5 py-3.5 text-center">
+                <span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-lg text-xs font-bold">@cat.SubCategoryCount</span>
+            </td>
+            <td class="px-5 py-3.5 text-center text-slate-600 font-medium">@cat.DisplayOrder</td>
+            <td class="px-5 py-3.5 text-center">
+                @if (cat.IsActive)
+                {
+                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Hiển thị</span>
+                }
+                else
+                {
+                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Ẩn</span>
+                }
+            </td>
+            <td class="px-5 py-3.5 text-center">
+                <div class="flex items-center justify-center gap-1">
+                    <a href="@Url.Action("Edit", "Category", new { id = cat.CategoryID })"
+                       class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Sửa">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                    </a>
+                    <button onclick="toggleActive(@cat.CategoryID)" id="toggleBtn-@cat.CategoryID"
+                            class="p-1.5 @(cat.IsActive ? "text-amber-600 hover:bg-amber-100" : "text-emerald-600 hover:bg-emerald-100") rounded-lg transition-colors"
+                            title="@(cat.IsActive ? "Ẩn danh mục" : "Hiển thị danh mục")">
+                        <span class="material-symbols-outlined text-lg">@(cat.IsActive ? "visibility_off" : "visibility")</span>
+                    </button>
+                    <button onclick="openDeleteModal(@cat.CategoryID, '@cat.Name.Replace("'", "\\'")')"
+                            class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Xóa">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        if (cat.Children.Any())
+        {
+            @RenderCategoryRows(cat.Children)
+        }
+    }
+}
+
+<style>
+    @@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .animate-slide-in { animation: slideIn 0.3s ease-out; }
+</style>
+
+@section scripts {
+    <script>
+        // Auto-close toasts
+        setTimeout(function () {
+            var t = document.getElementById('toast-success');
+            if (t) t.remove();
+            var e = document.getElementById('toast-error');
+            if (e) e.remove();
+        }, 5000);
+
+        var deleteId = 0;
+        var antiForgeryToken = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)[1];
+
+        function openDeleteModal(id, name) {
+            deleteId = id;
+            document.getElementById('deleteMessage').textContent = 'Bạn có chắc chắn muốn xóa danh mục "' + name + '"?';
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            fetch('@Url.Action("Delete", "Category")/' + deleteId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(antiForgeryToken)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                closeDeleteModal();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(function() { alert('Có lỗi xảy ra.'); closeDeleteModal(); });
+        });
+
+        function toggleActive(id) {
+            fetch('@Url.Action("ToggleActive", "Category")/' + id, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(antiForgeryToken)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(function() { alert('Có lỗi xảy ra.'); });
+        }
+    </script>
+}
