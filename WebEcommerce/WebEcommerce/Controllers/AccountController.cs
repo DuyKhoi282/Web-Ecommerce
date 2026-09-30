@@ -160,11 +160,21 @@ namespace WebEcommerce.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
-                        if (string.IsNullOrEmpty(returnUrl) && user != null)
+                        if (user != null)
                         {
-                            if (await UserManager.IsInRoleAsync(user.Id, "Administrator") || await UserManager.IsInRoleAsync(user.Id, "StoreManager"))
-                            {
+                            bool isAdminOrManager = await UserManager.IsInRoleAsync(user.Id, "Administrator")
+                                                 || await UserManager.IsInRoleAsync(user.Id, "StoreManager");
+
+                            // Nghiệp vụ: Admin/Manager luôn vào Dashboard (bất kể returnUrl)
+                            if (isAdminOrManager)
                                 return RedirectToAction("Index", "AdminDashboard");
+
+                            // Nghiệp vụ: Customer không được redirect vào trang /Admin
+                            // dù returnUrl có chứa /Admin (ví dụ: ai đó bookmark trang admin cũ)
+                            if (!string.IsNullOrEmpty(returnUrl) &&
+                                returnUrl.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return RedirectToAction("Index", "Home");
                             }
                         }
                         return RedirectToLocal(returnUrl);
