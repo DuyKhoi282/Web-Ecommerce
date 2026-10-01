@@ -267,6 +267,7 @@ namespace WebEcommerce.Controllers
                     // Mở khóa
                     user.IsActive = true;
                     user.LockoutEndDateUtc = null;
+                    await UserManager.UpdateAsync(user); // Lưu IsActive + LockoutEndDateUtc về DB
                     await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.MinValue);
                     await UserManager.ResetAccessFailedCountAsync(userId);
                     TempData["SuccessMessage"] = $"Đã mở khóa tài khoản cho người dùng {user.FullName ?? user.Email}.";
@@ -275,6 +276,7 @@ namespace WebEcommerce.Controllers
                 {
                     // Khóa tài khoản
                     user.IsActive = false;
+                    await UserManager.UpdateAsync(user); // Lưu IsActive về DB
                     await UserManager.SetLockoutEnabledAsync(userId, true);
                     await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.UtcNow.AddYears(100));
                     TempData["SuccessMessage"] = $"Đã khóa tài khoản người dùng {user.FullName ?? user.Email}.";

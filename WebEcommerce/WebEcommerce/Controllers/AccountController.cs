@@ -84,6 +84,51 @@ namespace WebEcommerce.Controllers
                     // Nghiệp vụ: Gán mặc định Role "Customer" ngay sau khi tạo
                     await UserManager.AddToRoleAsync(user.Id, "Customer");
 
+                            // Phần này Phúc thêm vào để hệ thống gửi mail 
+                    try
+                    {
+                        await UserManager.SendEmailAsync(
+                            user.Id,
+                            "Đăng ký tài khoản thành công - The Chill Shop",
+                            $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                    <h2>Chào mừng bạn đến với The Chill Shop!</h2>
+
+                    <p>
+                        Xin chào <strong>{HttpUtility.HtmlEncode(user.FullName)}</strong>,
+                    </p>
+
+                    <p>
+                        Tài khoản của bạn đã được đăng ký thành công.
+                    </p>
+
+                    <p>
+                        <strong>Email đăng nhập:</strong>
+                        {HttpUtility.HtmlEncode(user.Email)}
+                    </p>
+
+                    <p>
+                        Bạn có thể sử dụng tài khoản này để đăng nhập
+                        và mua sắm trên hệ thống.
+                    </p>
+
+                    <br />
+
+                    <p>
+                        Trân trọng,<br />
+                        <strong>The Chill Shop</strong>
+                    </p>
+                </div>"
+                        );
+                    }
+                    catch (Exception emailEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Register Email Error] {emailEx.Message}");
+                    }
+
+                            // Hết phần của Phúc thêm vào 
+
                     // Nghiệp vụ: KHÔNG tự đăng nhập — redirect đến Login kèm thông báo
                     TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục.";
                     return RedirectToAction("Login", "Account");
@@ -139,10 +184,13 @@ namespace WebEcommerce.Controllers
                 // Đảm bảo admin@thechillshop.vn luôn có quyền Administrator
                 if (user != null && user.Email.ToLower() == "admin@thechillshop.vn")
                 {
-                    var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
-                    if (!roleMgr.RoleExists("Administrator"))
+                    using (var adminDb = new ApplicationDbContext())
+                    using (var roleMgr = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(adminDb)))
                     {
-                        roleMgr.Create(new IdentityRole("Administrator"));
+                        if (!roleMgr.RoleExists("Administrator"))
+                        {
+                            roleMgr.Create(new IdentityRole("Administrator"));
+                        }
                     }
                     if (!await UserManager.IsInRoleAsync(user.Id, "Administrator"))
                     {
@@ -157,11 +205,21 @@ namespace WebEcommerce.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
-                        if (string.IsNullOrEmpty(returnUrl) && user != null)
+                        if (user != null)
                         {
-                            if (await UserManager.IsInRoleAsync(user.Id, "Administrator") || await UserManager.IsInRoleAsync(user.Id, "StoreManager"))
-                            {
+                            bool isAdminOrManager = await UserManager.IsInRoleAsync(user.Id, "Administrator")
+                                                 || await UserManager.IsInRoleAsync(user.Id, "StoreManager");
+
+                            // Nghiệp vụ: Admin/Manager luôn vào Dashboard (bất kể returnUrl)
+                            if (isAdminOrManager)
                                 return RedirectToAction("Index", "AdminDashboard");
+
+                            // Nghiệp vụ: Customer không được redirect vào trang /Admin
+                            // dù returnUrl có chứa /Admin (ví dụ: ai đó bookmark trang admin cũ)
+                            if (!string.IsNullOrEmpty(returnUrl) &&
+                                returnUrl.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return RedirectToAction("Index", "Home");
                             }
                         }
                         return RedirectToLocal(returnUrl);
@@ -245,12 +303,189 @@ namespace WebEcommerce.Controllers
                     protocol: Request.Url.Scheme);
 
                 // Gửi email (hiện tại: log ra Debug, sau tích hợp MailKit)
-                await UserManager.SendEmailAsync(user.Id,
+                /*await UserManager.SendEmailAsync(user.Id,
                     "Đặt lại mật khẩu - WebEcommerce",
-                    $"Nhấn vào đường link sau để đặt lại mật khẩu (hết hạn sau 24 giờ):<br/><a href='{callbackUrl}'>{callbackUrl}</a>");
+                    $"Nhấn vào đường link sau để đặt lại mật khẩu (hết hạn sau 24 giờ):<br/><a href='{callbackUrl}'>{callbackUrl}</a>");*/
 
                 // Dev mode: Lưu link vào TempData để test mà không cần email thật
-                TempData["ResetLink"] = callbackUrl;
+                // TempData["ResetLink"] = callbackUrl; ( Phúc ẩn để phát triển mail )
+
+                // Phúc làm lại template email đẹp hơn, gửi HTML email
+                await UserManager.SendEmailAsync(
+    user.Id,
+    "Đặt lại mật khẩu - The Chill Shop",
+    $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+</head>
+
+<body style='margin:0; padding:0; background-color:#f1f5f9; font-family:Arial, Helvetica, sans-serif;'>
+
+    <table width='100%' cellpadding='0' cellspacing='0' border='0'
+           style='background-color:#f1f5f9; padding:40px 15px;'>
+
+        <tr>
+            <td align='center'>
+
+                <table width='100%' cellpadding='0' cellspacing='0' border='0'
+                       style='max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden;'>
+
+                    <!-- Header -->
+                    <tr>
+                        <td align='center'
+                            style='padding:30px 30px 20px 30px; background:#ffffff;'>
+
+                            <div style='font-size:24px; font-weight:bold; color:#0d47a1;'>
+                                The Chill Shop
+                            </div>
+
+                            <div style='margin-top:6px; font-size:13px; color:#64748b;'>
+                                Online Shopping
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- Icon -->
+                    <tr>
+                        <td align='center' style='padding:10px 30px 0 30px;'>
+
+                            <div style='width:64px; height:64px; background:#eff6ff;
+                                        border-radius:16px; line-height:64px;
+                                        font-size:30px; color:#0d47a1;'>
+                                🔐
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style='padding:25px 40px 10px 40px;'>
+
+                            <h1 style='margin:0 0 15px 0;
+                                       text-align:center;
+                                       font-size:24px;
+                                       color:#0f172a;'>
+                                Đặt lại mật khẩu
+                            </h1>
+
+                            <p style='font-size:15px;
+                                      line-height:1.7;
+                                      color:#475569;
+                                      margin:0 0 15px 0;'>
+                                Xin chào,
+                            </p>
+
+                            <p style='font-size:15px;
+                                      line-height:1.7;
+                                      color:#475569;
+                                      margin:0 0 15px 0;'>
+                                Chúng tôi nhận được yêu cầu đặt lại mật khẩu
+                                cho tài khoản <strong>The Chill Shop</strong>
+                                của bạn.
+                            </p>
+
+                            <p style='font-size:15px;
+                                      line-height:1.7;
+                                      color:#475569;
+                                      margin:0 0 25px 0;'>
+                                Nhấn vào nút bên dưới để tạo mật khẩu mới:
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Button -->
+                    <tr>
+                        <td align='center' style='padding:5px 40px 30px 40px;'>
+
+                            <a href='{callbackUrl}'
+                               style='display:inline-block;
+                                      background:#0d47a1;
+                                      color:#ffffff;
+                                      text-decoration:none;
+                                      font-size:15px;
+                                      font-weight:bold;
+                                      padding:14px 30px;
+                                      border-radius:10px;'>
+                                Đặt lại mật khẩu
+                            </a>
+
+                        </td>
+                    </tr>
+
+                    <!-- Expiry -->
+                    <tr>
+                        <td style='padding:0 40px 25px 40px;'>
+
+                            <div style='background:#eff6ff;
+                                        border:1px solid #dbeafe;
+                                        border-radius:10px;
+                                        padding:14px 16px;
+                                        text-align:center;'>
+
+                                <span style='font-size:13px; color:#1e40af;'>
+                                    ⏱ Liên kết này có hiệu lực trong
+                                    <strong>24 giờ</strong>.
+                                </span>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- Security Notice -->
+                    <tr>
+                        <td style='padding:0 40px 25px 40px;'>
+
+                            <p style='font-size:12px;
+                                      line-height:1.6;
+                                      color:#94a3b8;
+                                      margin:0;'>
+                                Nếu bạn không yêu cầu đặt lại mật khẩu,
+                                vui lòng bỏ qua email này.
+                                Tài khoản của bạn vẫn an toàn.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style='border-top:1px solid #e2e8f0;
+                                   padding:20px 40px 25px 40px;
+                                   text-align:center;'>
+
+                            <p style='margin:0;
+                                      font-size:13px;
+                                      color:#64748b;'>
+                                Trân trọng,
+                            </p>
+
+                            <p style='margin:5px 0 0 0;
+                                      font-size:14px;
+                                      font-weight:bold;
+                                      color:#0d47a1;'>
+                                The Chill Shop
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>"
+);
             }
             catch (Exception ex)
             {
@@ -271,8 +506,8 @@ namespace WebEcommerce.Controllers
         //  ĐẶT LẠI MẬT KHẨU
         // ═══════════════════════════════════════════════════
 
-        // GET: /Account/ResetPassword
-        [AllowAnonymous]
+        // GET: /Account/ResetPassword ( của Khôi )
+        /*[AllowAnonymous]
         public ActionResult ResetPassword(string code)
         {
             if (code == null)
@@ -280,6 +515,23 @@ namespace WebEcommerce.Controllers
                 return HttpNotFound();
             }
             return View();
+        }*/
+
+        // GET: /Account/ResetPassword ( Của Phúc )
+        [AllowAnonymous]
+        public ActionResult ResetPassword(string code)
+        {
+            if (code == null)
+            {
+                return HttpNotFound();
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Code = code
+            };
+
+            return View(model);
         }
 
         // POST: /Account/ResetPassword

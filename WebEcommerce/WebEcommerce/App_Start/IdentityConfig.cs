@@ -1,11 +1,17 @@
-using System;
-using System.Threading.Tasks;
+using MailKit.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
+using MimeKit;
+using System;
+using System.Configuration;
+using System.Threading.Tasks;
 using WebEcommerce.Models;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 
 namespace WebEcommerce
 {
@@ -14,13 +20,50 @@ namespace WebEcommerce
     // ──────────────────────────────────────────────
     public class EmailService : IIdentityMessageService
     {
-        public Task SendAsync(IdentityMessage message)
+        public async Task SendAsync(IdentityMessage message)
         {
             // TODO: Tích hợp MailKit khi đến Task của Thành viên 4
             // Hiện tại: ghi log ra Debug để test
-            System.Diagnostics.Debug.WriteLine(
-                $"[EMAIL] To: {message.Destination} | Subject: {message.Subject} | Body: {message.Body}");
-            return Task.FromResult(0);
+            //System.Diagnostics.Debug.WriteLine(
+            //$"[EMAIL] To: {message.Destination} | Subject: {message.Subject} | Body: {message.Body}");
+            //return Task.FromResult(0);
+
+            // Ở trên là của Khôi, dưới đây là Phúc làm 
+            var host = ConfigurationManager.AppSettings["SmtpHost"];
+            var port = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
+            var username = ConfigurationManager.AppSettings["SmtpUsername"];
+            var password = ConfigurationManager.AppSettings["SmtpPassword"];
+            var fromEmail = ConfigurationManager.AppSettings["SmtpFromEmail"];
+            var fromName = ConfigurationManager.AppSettings["SmtpFromName"];
+
+            var email = new MimeMessage();
+
+            email.From.Add(new MailboxAddress(fromName, fromEmail));
+            email.To.Add(new MailboxAddress("", message.Destination));
+            email.Subject = message.Subject;
+
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = message.Body
+            };
+
+            email.Body = bodyBuilder.ToMessageBody();
+
+            using (var smtp = new SmtpClient())
+            {
+                await smtp.ConnectAsync(
+                    host,
+                    port,
+                    SecureSocketOptions.StartTls);
+
+                await smtp.AuthenticateAsync(
+                    username,
+                    password);
+
+                await smtp.SendAsync(email);
+
+                await smtp.DisconnectAsync(true);
+            }
         }
     }
 

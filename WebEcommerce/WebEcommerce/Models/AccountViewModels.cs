@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebEcommerce.Models
@@ -10,6 +10,8 @@ namespace WebEcommerce.Models
     {
         [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "Họ và tên phải từ 2 đến 150 ký tự.")]
+        [RegularExpression(@"^[^<>&""'{}\[\]]+$",
+            ErrorMessage = "Ho va ten khong duoc chua ky tu dac biet nhu < > & ' [ ].")]
         [Display(Name = "Họ và tên")]
         public string FullName { get; set; }
 
