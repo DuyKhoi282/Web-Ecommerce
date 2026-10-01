@@ -55,7 +55,13 @@ namespace WebEcommerce.Controllers
                 // 2. Lọc theo danh mục
                 if (categoryId.HasValue && categoryId.Value > 0)
                 {
-                    query = query.Where(p => p.CategoryID == categoryId.Value);
+                    // Lấy ID của danh mục được chọn và tất cả danh mục con của nó
+                    var catIds = _context.Categories
+                        .Where(c => c.CategoryID == categoryId.Value || c.ParentCategoryID == categoryId.Value)
+                        .Select(c => c.CategoryID)
+                        .ToList();
+                        
+                    query = query.Where(p => catIds.Contains(p.CategoryID));
                 }
 
                 // 3. Lọc theo khoảng giá
