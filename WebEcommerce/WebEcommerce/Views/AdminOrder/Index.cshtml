@@ -1,0 +1,123 @@
+@model IEnumerable<WebEcommerce.Models.Order>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string currentStatus = ViewBag.CurrentStatus as string;
+}
+
+<!-- Tiêu đề trang & Tabs lọc trạng thái -->
+<div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div>
+        <h1 class="font-headline font-extrabold text-2xl text-slate-900 tracking-tight">Quản lý Đơn hàng</h1>
+        <p class="text-sm text-slate-500 mt-1">Theo dõi, kiểm tra và cập nhật trạng thái đơn hàng</p>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold shadow-sm">
+        @TempData["ErrorMessage"]
+    </div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="mb-6 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-semibold shadow-sm">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="admin-card rounded-2xl overflow-hidden mb-6">
+    <!-- Status Filter Tabs -->
+    <div class="flex items-center overflow-x-auto border-b border-slate-200 px-2 bg-slate-50">
+        <a href="@Url.Action("Index")" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(string.IsNullOrEmpty(currentStatus) ? "border-[#0d47a1] text-[#0d47a1]" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Tất cả
+        </a>
+        <a href="@Url.Action("Index", new { status = "Pending" })" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(currentStatus == "Pending" ? "border-yellow-500 text-yellow-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Chờ xử lý
+        </a>
+        <a href="@Url.Action("Index", new { status = "Confirmed" })" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(currentStatus == "Confirmed" ? "border-blue-500 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Đã xác nhận
+        </a>
+        <a href="@Url.Action("Index", new { status = "Shipped" })" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(currentStatus == "Shipped" ? "border-indigo-500 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Đang giao
+        </a>
+        <a href="@Url.Action("Index", new { status = "Delivered" })" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(currentStatus == "Delivered" ? "border-emerald-500 text-emerald-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Thành công
+        </a>
+        <a href="@Url.Action("Index", new { status = "Cancelled" })" class="px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors @(currentStatus == "Cancelled" ? "border-red-500 text-red-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")">
+            Đã hủy
+        </a>
+    </div>
+
+    <!-- Danh sách đơn hàng -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                    <th class="px-6 py-4">Mã Đơn</th>
+                    <th class="px-6 py-4">Khách Hàng</th>
+                    <th class="px-6 py-4">Ngày Đặt</th>
+                    <th class="px-6 py-4 text-right">Tổng Tiền</th>
+                    <th class="px-6 py-4 text-center">Trạng Thái</th>
+                    <th class="px-6 py-4 text-center">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-3">inbox</span>
+                                <p class="font-medium text-base">Không có đơn hàng nào.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var order in Model)
+                    {
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900">#@order.OrderID</td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-slate-800">@order.User.FullName</p>
+                                <p class="text-xs text-slate-500">@order.ReceiverPhone</p>
+                            </td>
+                            <td class="px-6 py-4">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="px-6 py-4 text-right font-extrabold text-[#0d47a1]">@string.Format("{0:N0}đ", order.FinalAmount)</td>
+                            <td class="px-6 py-4 text-center">
+                                @if (order.Status == "Pending")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">Chờ xử lý</span>
+                                }
+                                else if (order.Status == "Confirmed")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">Đã xác nhận</span>
+                                }
+                                else if (order.Status == "Shipped")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">Đang giao</span>
+                                }
+                                else if (order.Status == "Delivered")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Thành công</span>
+                                }
+                                else if (order.Status == "Cancelled")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">Đã hủy</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="@Url.Action("Detail", new { id = order.OrderID })" class="inline-flex items-center gap-1 text-[#0d47a1] hover:text-[#0a3880] hover:underline font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                    Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

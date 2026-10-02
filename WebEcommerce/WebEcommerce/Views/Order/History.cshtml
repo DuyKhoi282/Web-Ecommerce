@@ -1,0 +1,154 @@
+@model IEnumerable<WebEcommerce.Models.Order>
+
+@{
+    ViewBag.Title = "Lịch sử mua hàng";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">
+                receipt_long
+            </span>
+            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">
+                Lịch sử mua hàng
+            </h1>
+        </div>
+        <p class="text-sm text-slate-500">
+            Theo dõi và quản lý các đơn hàng bạn đã đặt tại The Chill Shop.
+        </p>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-10 text-center shadow-sm">
+            <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-slate-50 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-slate-400">
+                    inbox
+                </span>
+            </div>
+            <h2 class="font-headline font-bold text-xl text-slate-900 mb-2">
+                Chưa có đơn hàng nào
+            </h2>
+            <p class="text-sm text-slate-500 mb-6">
+                Bạn chưa thực hiện giao dịch nào. Hãy khám phá các sản phẩm tuyệt vời của chúng tôi nhé!
+            </p>
+            <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">shopping_bag</span>
+                Bắt đầu mua sắm
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-6">
+            @foreach (var order in Model)
+            {
+                <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-[#0d47a1] transition-colors">
+                    
+                    <!-- Header -->
+                    <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-bold text-slate-900">Đơn hàng #@order.OrderID</p>
+                            <p class="text-xs text-slate-500 mt-1">Đặt ngày: @order.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            @if (order.Status == "Pending")
+                            {
+                                <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold border border-yellow-200">Đang chờ xử lý</span>
+                            }
+                            else if (order.Status == "Confirmed")
+                            {
+                                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200">Đã xác nhận</span>
+                            }
+                            else if (order.Status == "Shipped")
+                            {
+                                <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200">Đang giao hàng</span>
+                            }
+                            else if (order.Status == "Delivered")
+                            {
+                                <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold border border-green-200">Giao thành công</span>
+                            }
+                            else if (order.Status == "Cancelled")
+                            {
+                                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold border border-red-200">Đã hủy</span>
+                            }
+
+                            <a href="@Url.Action("Detail", "Order", new { id = order.OrderID })" class="text-sm font-bold text-[#0d47a1] hover:underline">Xem chi tiết</a>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-5">
+                        <div class="space-y-4">
+                            @foreach (var detail in order.OrderDetails.Take(2))
+                            {
+                                var product = detail.Product;
+                                var img = product.ProductImages?.FirstOrDefault(x => x.IsMain)?.ImageURL ?? product.ProductImages?.FirstOrDefault()?.ImageURL ?? "https://placehold.co/100x100/f8faff/0d47a1?text=IMG";
+
+                                <div class="flex items-center gap-4">
+                                    <div class="w-16 h-16 rounded-lg bg-white border p-1 flex-shrink-0">
+                                        <img src="@img" class="w-full h-full object-contain" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="text-sm font-bold text-slate-900 truncate">@product.Name</h3>
+                                        <p class="text-xs text-slate-500">Số lượng: x @detail.Quantity</p>
+                                    </div>
+                                    <div class="text-sm font-bold text-slate-900">
+                                        @string.Format("{0:N0}đ", detail.Subtotal)
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (order.OrderDetails.Count > 2)
+                            {
+                                <div class="text-center mt-2">
+                                    <span class="text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border">
+                                        + @(order.OrderDetails.Count - 2) sản phẩm khác
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="bg-slate-50 px-5 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Thành tiền:</p>
+                            <p class="text-lg font-extrabold text-[#0d47a1]">@string.Format("{0:N0}đ", order.FinalAmount)</p>
+                        </div>
+                        
+                        <div>
+                            @if (order.Status == "Pending")
+                            {
+                                using (Html.BeginForm("Cancel", "Order", new { id = order.OrderID }, FormMethod.Post, new { onsubmit = "return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-bold transition-colors">
+                                        Hủy đơn hàng
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

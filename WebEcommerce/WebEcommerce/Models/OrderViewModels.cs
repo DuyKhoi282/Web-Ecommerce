@@ -26,5 +26,7 @@ namespace WebEcommerce.Models
         [StringLength(500)]
         [Display(Name = "Ghi chú đơn hàng")]
         public string Notes { get; set; }
+
+        public string PromoCode { get; set; }
     }
 }

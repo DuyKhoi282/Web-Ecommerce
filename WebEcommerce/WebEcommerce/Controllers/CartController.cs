@@ -54,6 +54,20 @@ namespace WebEcommerce.Controllers
             }
         }
 
+        [ChildActionOnly]
+        public ActionResult CartCount()
+        {
+            if (!Request.IsAuthenticated) return Content("0");
+            
+            var userId = User.Identity.GetUserId();
+            var count = _context.Carts
+                .Where(c => c.UserID == userId)
+                .SelectMany(c => c.CartItems)
+                .Sum(ci => (int?)ci.Quantity) ?? 0;
+                
+            return Content(count.ToString());
+        }
+
         // POST: /Cart/AddToCart
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -353,8 +367,11 @@ namespace WebEcommerce.Controllers
                     return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
 
                 var cartId = cartItem.CartID;
+                if (cartItem.Cart != null) 
+                {
+                    cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+                }
                 _context.CartItems.Remove(cartItem);
-                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
@@ -381,6 +398,31 @@ namespace WebEcommerce.Controllers
         // ==============================================
         private decimal GetCurrentProductPrice(Product product)
         {
+            var now = DateTime.UtcNow;
+            FlashSaleItem activeFlashSale = null;
+
+            try
+            {
+                activeFlashSale = _context.FlashSaleItems
+                    .Include(f => f.FlashSale)
+                    .Where(f => f.ProductID == product.ProductID && 
+                                f.FlashSale.IsActive && 
+                                f.FlashSale.StartTime <= now && 
+                                f.FlashSale.EndTime >= now &&
+                                f.SoldQuantity < f.StockQuantity)
+                    .OrderByDescending(f => f.FlashSale.EndTime)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[GetCurrentProductPrice] {ex}");
+            }
+
+            if (activeFlashSale != null)
+            {
+                return activeFlashSale.FlashSalePrice;
+            }
+
             if (product.DiscountPrice.HasValue &&
                 product.DiscountPrice.Value > 0)
             {

@@ -107,7 +107,18 @@
                     var total = Model.Cart.CartItems.Sum(x => x.UnitPriceAtAddition * x.Quantity);
                 }
 
-                <div class="space-y-3 text-sm border-t border-slate-200 pt-4">
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Mã giảm giá</label>
+                    <div class="flex gap-2">
+                        @Html.TextBoxFor(m => m.PromoCode, new { @id = "promoCodeInput", @class = "flex-1 p-3 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#0d47a1] focus:border-[#0d47a1] outline-none uppercase", placeholder = "Nhập mã..." })
+                        <button type="button" id="btnApplyPromo" class="px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap">
+                            Áp dụng
+                        </button>
+                    </div>
+                    <p id="promoMessage" class="text-xs font-semibold mt-2 hidden"></p>
+                </div>
+
+                <div class="space-y-3 text-sm border-t border-slate-200 pt-4 mt-4">
                     <div class="flex justify-between text-slate-600">
                         <span>Tạm tính</span>
                         <span class="font-bold">@string.Format("{0:N0}đ", total)</span>
@@ -116,11 +127,15 @@
                         <span>Phí vận chuyển</span>
                         <span class="font-bold text-green-600">Miễn phí</span>
                     </div>
+                    <div id="discountRow" class="flex justify-between text-red-600 hidden">
+                        <span>Giảm giá</span>
+                        <span id="discountAmount" class="font-bold">-0đ</span>
+                    </div>
                 </div>
 
                 <div class="flex justify-between items-center mt-5 pt-5 border-t border-slate-300">
                     <span class="font-bold text-base text-slate-900">Tổng thanh toán</span>
-                    <span class="font-extrabold text-2xl text-[#0d47a1]">@string.Format("{0:N0}đ", total)</span>
+                    <span id="finalTotal" class="font-extrabold text-2xl text-[#0d47a1]" data-original="@total">@string.Format("{0:N0}đ", total)</span>
                 </div>
 
                 <button type="submit" class="w-full mt-6 py-4 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-base flex items-center justify-center gap-2 transition-colors">
@@ -135,10 +150,64 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Hiệu ứng đổi màu viền khi chọn radio button
+            // Radio button border toggle
             $('input[type="radio"]').change(function() {
                 $('input[type="radio"]').parent().removeClass('border-[#0d47a1] bg-blue-50').addClass('border-slate-300');
                 $(this).parent().removeClass('border-slate-300').addClass('border-[#0d47a1] bg-blue-50');
+            });
+
+            // Format Currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+            }
+
+            // Apply Promo Code
+            $('#btnApplyPromo').click(function() {
+                var code = $('#promoCodeInput').val().trim();
+                var msgBox = $('#promoMessage');
+                
+                if (!code) {
+                    msgBox.text('Vui lòng nhập mã giảm giá.').removeClass('text-green-600 hidden').addClass('text-red-600');
+                    return;
+                }
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                var btn = $(this);
+                
+                btn.prop('disabled', true).text('...');
+                
+                $.ajax({
+                    url: '@Url.Action("ApplyPromoCode", "Order")',
+                    type: 'POST',
+                    data: {
+                        code: code,
+                        __RequestVerificationToken: token
+                    },
+                    success: function(res) {
+                        btn.prop('disabled', false).text('Áp dụng');
+                        
+                        if (res.success) {
+                            msgBox.text(res.message).removeClass('text-red-600 hidden').addClass('text-green-600');
+                            $('#promoCodeInput').prop('readonly', true);
+                            
+                            // Update totals
+                            $('#discountRow').removeClass('hidden');
+                            $('#discountAmount').text('-' + formatCurrency(res.discountAmount));
+                            $('#finalTotal').text(formatCurrency(res.finalAmount));
+                        } else {
+                            msgBox.text(res.message).removeClass('text-green-600 hidden').addClass('text-red-600');
+                            
+                            // Reset
+                            $('#discountRow').addClass('hidden');
+                            $('#finalTotal').text(formatCurrency($('#finalTotal').data('original')));
+                            $('#promoCodeInput').val('');
+                        }
+                    },
+                    error: function() {
+                        btn.prop('disabled', false).text('Áp dụng');
+                        msgBox.text('Lỗi kết nối máy chủ.').removeClass('text-green-600 hidden').addClass('text-red-600');
+                    }
+                });
             });
         });
     </script>

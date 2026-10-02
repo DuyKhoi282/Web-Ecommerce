@@ -1,0 +1,167 @@
+@model WebEcommerce.Models.Order
+
+@{
+    ViewBag.Title = "Chi tiết đơn hàng #" + Model.OrderID;
+}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+        <div>
+            <a href="@Url.Action("History")" class="text-sm font-bold text-slate-500 hover:text-[#0d47a1] flex items-center gap-1 mb-2">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Quay lại danh sách
+            </a>
+            <h1 class="font-headline font-extrabold text-2xl text-slate-900">
+                Chi tiết đơn hàng #@Model.OrderID
+            </h1>
+        </div>
+
+        <div>
+            @if (Model.Status == "Pending")
+            {
+                <span class="px-4 py-2 rounded-full bg-yellow-100 text-yellow-700 text-sm font-bold border border-yellow-200">Đang chờ xử lý</span>
+            }
+            else if (Model.Status == "Confirmed")
+            {
+                <span class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold border border-blue-200">Đã xác nhận</span>
+            }
+            else if (Model.Status == "Shipped")
+            {
+                <span class="px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold border border-indigo-200">Đang giao hàng</span>
+            }
+            else if (Model.Status == "Delivered")
+            {
+                <span class="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-bold border border-green-200">Giao thành công</span>
+            }
+            else if (Model.Status == "Cancelled")
+            {
+                <span class="px-4 py-2 rounded-full bg-red-100 text-red-700 text-sm font-bold border border-red-200">Đã hủy</span>
+            }
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Address -->
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-3 border-b pb-2">
+                <span class="material-symbols-outlined text-[#0d47a1]">location_on</span>
+                <h3 class="font-bold text-slate-900">Địa chỉ giao hàng</h3>
+            </div>
+            <p class="text-sm font-semibold text-slate-900 mb-1">@Model.User.FullName</p>
+            <p class="text-sm text-slate-600 mb-1">ĐT: @Model.ReceiverPhone</p>
+            <p class="text-sm text-slate-600">@Model.ShippingAddress</p>
+        </div>
+
+        <!-- Payment -->
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-3 border-b pb-2">
+                <span class="material-symbols-outlined text-[#0d47a1]">payments</span>
+                <h3 class="font-bold text-slate-900">Thanh toán</h3>
+            </div>
+            <p class="text-sm text-slate-600 mb-1">Phương thức: <span class="font-semibold text-slate-900">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : Model.PaymentMethod)</span></p>
+            <p class="text-sm text-slate-600">Trạng thái: 
+                @if (Model.PaymentStatus == "Unpaid")
+                {
+                    <span class="font-bold text-red-600">Chưa thanh toán</span>
+                }
+                else
+                {
+                    <span class="font-bold text-green-600">Đã thanh toán</span>
+                }
+            </p>
+        </div>
+
+        <!-- Order Info -->
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-3 border-b pb-2">
+                <span class="material-symbols-outlined text-[#0d47a1]">info</span>
+                <h3 class="font-bold text-slate-900">Thông tin chung</h3>
+            </div>
+            <p class="text-sm text-slate-600 mb-1">Ngày đặt: <span class="font-semibold text-slate-900">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</span></p>
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <p class="text-sm text-slate-600 mt-2 line-clamp-2">Ghi chú: @Model.Notes</p>
+            }
+        </div>
+    </div>
+
+    <div class="bg-white border-2 border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-8">
+        <div class="bg-slate-50 px-5 py-4 border-b border-slate-200">
+            <h2 class="font-headline font-bold text-lg text-slate-900">Sản phẩm đã mua</h2>
+        </div>
+        <div class="p-5 space-y-4">
+            @foreach (var detail in Model.OrderDetails)
+            {
+                var product = detail.Product;
+                var img = product.ProductImages?.FirstOrDefault(x => x.IsMain)?.ImageURL ?? product.ProductImages?.FirstOrDefault()?.ImageURL ?? "https://placehold.co/100x100/f8faff/0d47a1?text=IMG";
+
+                <div class="flex flex-col sm:flex-row items-center gap-4 py-3 border-b border-slate-100 last:border-0 last:pb-0">
+                    <div class="w-20 h-20 rounded-lg bg-white border p-1 flex-shrink-0">
+                        <img src="@img" class="w-full h-full object-contain" />
+                    </div>
+                    <div class="flex-1 min-w-0 text-center sm:text-left">
+                        <h3 class="text-sm font-bold text-slate-900">@product.Name</h3>
+                        <p class="text-xs text-slate-500 mt-1">Mã SP: @product.ProductID</p>
+                    </div>
+                    <div class="text-sm text-slate-600 font-semibold w-24 text-center sm:text-right">
+                        @string.Format("{0:N0}đ", detail.UnitPrice)
+                    </div>
+                    <div class="text-sm font-bold text-slate-900 w-16 text-center sm:text-right">
+                        x @detail.Quantity
+                    </div>
+                    <div class="text-base font-extrabold text-[#0d47a1] w-32 text-center sm:text-right">
+                        @string.Format("{0:N0}đ", detail.Subtotal)
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="bg-slate-50 p-5 border-t border-slate-200">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-slate-600">Tạm tính:</span>
+                <span class="text-sm font-bold text-slate-900">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-slate-600">Giảm giá:</span>
+                <span class="text-sm font-bold text-red-600">- @string.Format("{0:N0}đ", Model.DiscountAmount)</span>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm text-slate-600">Phí vận chuyển:</span>
+                <span class="text-sm font-bold text-green-600">Miễn phí</span>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t border-slate-300">
+                <span class="text-lg font-bold text-slate-900">Tổng cộng:</span>
+                <span class="text-2xl font-extrabold text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Status == "Pending")
+    {
+        <div class="flex justify-end">
+            @using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post, new { onsubmit = "return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.');" }))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="px-6 py-3 rounded-xl border-2 border-red-200 bg-white text-red-600 hover:bg-red-50 text-base font-bold transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">cancel</span>
+                    Hủy đơn hàng
+                </button>
+            }
+        </div>
+    }
+</div>

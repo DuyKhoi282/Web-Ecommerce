@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" class="h-full">
 <head>
     <meta charset="utf-8" />
@@ -102,7 +102,7 @@
                     <!-- Shopping Cart Icon -->
                     <a href="@Url.Action("Index", "Cart")" class="relative p-2 text-slate-700 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 hover:border-[#0d47a1] rounded-full transition-all shadow-sm flex-shrink-0" title="Giỏ hàng">
                         <span class="material-symbols-outlined text-2xl">shopping_cart</span>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md">0</span>
+                        <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md">@Html.Action("CartCount", "Cart")</span>
                     </a>
 
                     <!-- User Account / Login Partial -->
