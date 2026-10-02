@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -275,6 +275,274 @@ namespace WebEcommerce.Controllers
                     message =
                         "Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại."
                 });
+            }
+        }
+
+        // ==============================================
+        // POST: /Cart/IncreaseQuantity
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> IncreaseQuantity(int cartItemId)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
+                }
+
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.Cart)
+                    .Include(ci => ci.Product)
+                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+
+                if (cartItem == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
+                }
+
+                // Kiểm tra ownership
+                if (cartItem.Cart.UserID != userId)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
+                }
+
+                var product = cartItem.Product;
+                if (product == null || product.Status != 1)
+                {
+                    return Json(new { success = false, message = "Sản phẩm không còn kinh doanh." });
+                }
+
+                // Kiểm tra stock
+                var newQuantity = cartItem.Quantity + 1;
+                if (newQuantity > product.StockQuantity)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Không thể tăng thêm. Kho chỉ còn {product.StockQuantity} sản phẩm."
+                    });
+                }
+
+                cartItem.Quantity = newQuantity;
+                cartItem.UnitPriceAtAddition = GetCurrentProductPrice(product);
+                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var cartItemCount = await _context.CartItems
+                    .Where(ci => ci.CartID == cartItem.CartID)
+                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+
+                var itemTotal = cartItem.UnitPriceAtAddition * cartItem.Quantity;
+                var cartTotal = await _context.CartItems
+                    .Where(ci => ci.CartID == cartItem.CartID)
+                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Đã tăng số lượng.",
+                    quantity = cartItem.Quantity,
+                    itemTotal = itemTotal,
+                    cartTotal = cartTotal,
+                    cartItemCount = cartItemCount
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/IncreaseQuantity] {ex}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
+            }
+        }
+
+        // ==============================================
+        // POST: /Cart/DecreaseQuantity
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> DecreaseQuantity(int cartItemId)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
+                }
+
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.Cart)
+                    .Include(ci => ci.Product)
+                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+
+                if (cartItem == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
+                }
+
+                if (cartItem.Cart.UserID != userId)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
+                }
+
+                // Nếu quantity = 1 thì xóa item
+                if (cartItem.Quantity <= 1)
+                {
+                    _context.CartItems.Remove(cartItem);
+                    cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    var remainCount = await _context.CartItems
+                        .Where(ci => ci.CartID == cartItem.CartID)
+                        .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+
+                    var remainTotal = await _context.CartItems
+                        .Where(ci => ci.CartID == cartItem.CartID)
+                        .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+
+                    return Json(new
+                    {
+                        success = true,
+                        removed = true,
+                        message = "Đã xóa sản phẩm khỏi giỏ hàng.",
+                        cartTotal = remainTotal,
+                        cartItemCount = remainCount
+                    });
+                }
+
+                cartItem.Quantity -= 1;
+                if (cartItem.Product != null)
+                {
+                    cartItem.UnitPriceAtAddition = GetCurrentProductPrice(cartItem.Product);
+                }
+                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var cartItemCount = await _context.CartItems
+                    .Where(ci => ci.CartID == cartItem.CartID)
+                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+
+                var itemTotal = cartItem.UnitPriceAtAddition * cartItem.Quantity;
+                var cartTotal2 = await _context.CartItems
+                    .Where(ci => ci.CartID == cartItem.CartID)
+                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+
+                return Json(new
+                {
+                    success = true,
+                    removed = false,
+                    message = "Đã giảm số lượng.",
+                    quantity = cartItem.Quantity,
+                    itemTotal = itemTotal,
+                    cartTotal = cartTotal2,
+                    cartItemCount = cartItemCount
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/DecreaseQuantity] {ex}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
+            }
+        }
+
+        // ==============================================
+        // POST: /Cart/RemoveItem
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> RemoveItem(int cartItemId)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
+                }
+
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.Cart)
+                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+
+                if (cartItem == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
+                }
+
+                if (cartItem.Cart.UserID != userId)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
+                }
+
+                var cartId = cartItem.CartID;
+                _context.CartItems.Remove(cartItem);
+                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var cartItemCount = await _context.CartItems
+                    .Where(ci => ci.CartID == cartId)
+                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+
+                var cartTotal = await _context.CartItems
+                    .Where(ci => ci.CartID == cartId)
+                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Đã xóa sản phẩm khỏi giỏ hàng.",
+                    cartTotal = cartTotal,
+                    cartItemCount = cartItemCount
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/RemoveItem] {ex}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
+            }
+        }
+
+        // ==============================================
+        // GET: /Cart/GetCartCount (AJAX)
+        // ==============================================
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<JsonResult> GetCartCount()
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                var cart = await _context.Carts
+                    .Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.UserID == userId);
+
+                if (cart == null || cart.CartItems == null)
+                {
+                    return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                var totalCount = cart.CartItems.Sum(ci => ci.Quantity);
+                return Json(new { count = totalCount }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/GetCartCount] {ex}");
+                return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
             }
         }
 

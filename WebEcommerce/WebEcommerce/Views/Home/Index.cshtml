@@ -1,4 +1,5 @@
-﻿@{
+@model List<WebEcommerce.Models.Product>
+@{
     ViewBag.Title = "TheChillShop - Thế giới công nghệ & phụ kiện cao cấp";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -82,52 +83,75 @@
 
                     <!-- Inner Glass Card with Solid High-Contrast Border -->
                     <div class="relative bg-[#0c1d3b]/95 backdrop-blur-2xl border-2 border-cyan-400/40 rounded-[28px] p-6 sm:p-7 shadow-2xl text-white">
+                        @{
+                            // Hiển thị sản phẩm đầu tiên trong hero card (nếu có)
+                            var heroProduct = Model != null && Model.Any() ? Model.First() : null;
+                            var heroName = heroProduct != null ? heroProduct.Name : "Sản phẩm công nghệ cao cấp";
+                            var heroPrice = heroProduct != null ? heroProduct.Price : 29990000m;
+                            var heroDiscount = heroProduct != null ? heroProduct.DiscountPrice : (decimal?)null;
+                            var heroCategory = heroProduct?.Category?.Name ?? "TheChillShop";
+                            var heroImage = heroProduct?.ProductImages?.FirstOrDefault(p => p.IsMain)?.ImageURL
+                                            ?? heroProduct?.ProductImages?.FirstOrDefault()?.ImageURL
+                                            ?? "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80";
+                            var heroStock = heroProduct != null ? heroProduct.StockQuantity : 25;
+                            int heroDiscountPercent = 0;
+                            if (heroDiscount.HasValue && heroDiscount.Value > 0 && heroDiscount.Value < heroPrice && heroPrice > 0)
+                            {
+                                heroDiscountPercent = (int)Math.Round((heroPrice - heroDiscount.Value) / heroPrice * 100);
+                            }
+                        }
                         <div class="flex items-center justify-between mb-5">
                             <span class="px-3.5 py-1 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
-                                🔥 FLASH SALE TUẦN NÀY
+                                🔥 SẢN PHẨM HOT
                             </span>
-                            <span class="text-xs text-cyan-300 font-bold flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-yellow-300">bolt</span> Giảm sốc 14%
-                            </span>
+                            @if (heroDiscountPercent > 0)
+                            {
+                                <span class="text-xs text-cyan-300 font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-yellow-300">bolt</span> Giảm sốc @heroDiscountPercent%
+                                </span>
+                            }
                         </div>
 
                         <!-- Product Image Box -->
                         <div class="w-full aspect-[4/3] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-4 mb-5 relative overflow-hidden group">
-                            <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80" 
-                                 alt="iPhone 16 Pro Max" 
+                            <img src="@heroImage" 
+                                 alt="@heroName" 
                                  class="max-h-56 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500" 
-                                 onerror="this.src='https://placehold.co/500x350/0d47a1/ffffff?text=Flagship+Phone';" />
+                                 onerror="this.src='https://placehold.co/500x350/0d47a1/ffffff?text=TheChillShop';" />
                         </div>
 
                         <!-- Content -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="text-[11px] uppercase tracking-wider font-extrabold text-cyan-300">Apple Official Store</span>
-                                <span class="flex items-center text-xs text-amber-400 gap-0.5 font-bold">
-                                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                                    <strong>4.9</strong> (428)
-                                </span>
+                                <span class="text-[11px] uppercase tracking-wider font-extrabold text-cyan-300">@heroCategory</span>
                             </div>
 
                             <h3 class="font-headline font-bold text-xl text-white line-clamp-1">
-                                iPhone 16 Pro Max 256GB Titan Tự Nhiên
+                                @heroName
                             </h3>
 
                             <div class="flex items-baseline gap-3 pt-1">
-                                <span class="font-headline font-black text-2xl text-cyan-300">29.990.000đ</span>
-                                <span class="text-sm text-slate-400 line-through">34.990.000đ</span>
-                                <span class="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">-14%</span>
+                                @if (heroDiscount.HasValue && heroDiscount.Value > 0)
+                                {
+                                    <span class="font-headline font-black text-2xl text-cyan-300">@string.Format("{0:N0}đ", heroDiscount.Value)</span>
+                                    <span class="text-sm text-slate-400 line-through">@string.Format("{0:N0}đ", heroPrice)</span>
+                                    <span class="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">-@heroDiscountPercent%</span>
+                                }
+                                else
+                                {
+                                    <span class="font-headline font-black text-2xl text-cyan-300">@string.Format("{0:N0}đ", heroPrice)</span>
+                                }
                             </div>
                         </div>
 
-                        <!-- Stock Progress Bar -->
+                        <!-- Stock Info -->
                         <div class="mt-5 pt-4 border-t border-white/15 space-y-1.5 text-xs text-slate-200">
                             <div class="flex items-center justify-between font-semibold">
-                                <span>Đã bán: <strong class="text-cyan-300 font-bold">142/200</strong></span>
-                                <span class="text-amber-300 font-bold">Chỉ còn 58 máy!</span>
-                            </div>
-                            <div class="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
-                                <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 71%"></div>
+                                <span>Tồn kho: <strong class="text-cyan-300 font-bold">@heroStock sản phẩm</strong></span>
+                                @if (heroStock <= 10)
+                                {
+                                    <span class="text-amber-300 font-bold">Sắp hết hàng!</span>
+                                }
                             </div>
                         </div>
                     </div>
@@ -312,9 +336,7 @@
 </section>
 
 <!-- ==========================================================================
-     SECTION 5: SẢN PHẨM BÁN CHẠY & NỔI BẬT (Nền xám nhạt Slate-100)
-     Card sản phẩm màu trắng đặt trên nền xám nhạt + viền border-2 border-slate-300
-     Tạo độ tương phản TUYỆT ĐỐI, không bao giờ bị chìm!
+     SECTION 5: SẢN PHẨM BÁN CHẠY & NỔI BẬT - DỮ LIỆU THẬT TỪ DATABASE
      ========================================================================== -->
 <section id="featured-products" class="py-16 bg-[#f1f5f9] border-b-2 border-slate-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -341,86 +363,32 @@
             </div>
         </div>
 
-        <!-- Product Cards Grid -->
+        <!-- Product Cards Grid - DỮ LIỆU THẬT TỪ DATABASE -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             
-            <!-- Card 1 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "iPhone 16 Pro Max 256GB - Chính Hãng VN/A" },
-                { "CardCategory", "Điện thoại" },
-                { "CardPrice", 34990000m },
-                { "CardDiscountPrice", 29990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 2 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "MacBook Air 13 M3 8GB 256GB Midnight" },
-                { "CardCategory", "Laptop" },
-                { "CardPrice", 27990000m },
-                { "CardDiscountPrice", 24490000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 3 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Tai nghe Sony WH-1000XM5 Chống Ồn Đỉnh Cao" },
-                { "CardCategory", "Tai nghe" },
-                { "CardPrice", 8490000m },
-                { "CardDiscountPrice", 6990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 4 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Apple Watch Series 10 GPS 42mm Nhôm Đen" },
-                { "CardCategory", "Smartwatch" },
-                { "CardPrice", 10990000m },
-                { "CardDiscountPrice", 9990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 5 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Samsung Galaxy S24 Ultra 12GB 256GB Titanium" },
-                { "CardCategory", "Điện thoại" },
-                { "CardPrice", 31990000m },
-                { "CardDiscountPrice", 26990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 6 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Chuột không dây Logitech MX Master 3S Silent" },
-                { "CardCategory", "Phụ kiện" },
-                { "CardPrice", 2490000m },
-                { "CardDiscountPrice", 1990000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 7 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Bàn phím cơ không dây Keychron K2 Pro QMK/VIA" },
-                { "CardCategory", "Phụ kiện" },
-                { "CardPrice", 2390000m },
-                { "CardDiscountPrice", 1890000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&auto=format&fit=crop&q=80" }
-            })
-
-            <!-- Card 8 -->
-            @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                { "CardName", "Loa Bluetooth Marshall Emberton II Chính Hãng" },
-                { "CardCategory", "Tai nghe" },
-                { "CardPrice", 4590000m },
-                { "CardDiscountPrice", 3890000m },
-                { "CardImageUrl", "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500&auto=format&fit=crop&q=80" }
-            })
+            @if (Model != null && Model.Any())
+            {
+                foreach (var product in Model)
+                {
+                    @Html.Partial("_ProductCard", product)
+                }
+            }
+            else
+            {
+                <div class="col-span-full text-center py-12">
+                    <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-[#0d47a1]">inventory_2</span>
+                    </div>
+                    <h3 class="font-headline font-bold text-xl text-slate-900 mb-2">Chưa có sản phẩm</h3>
+                    <p class="text-sm text-slate-500">Các sản phẩm sẽ được hiển thị khi có dữ liệu trong hệ thống.</p>
+                </div>
+            }
 
         </div>
 
         <div class="mt-12 text-center">
             <a href="#" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300">
-                <span>Xem thêm hơn 200+ sản phẩm khác</span>
+                <span>Xem thêm sản phẩm khác</span>
                 <span class="material-symbols-outlined text-base">expand_more</span>
             </a>
         </div>
