@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     "use strict";
 
     function getAntiForgeryToken() {
@@ -309,5 +309,122 @@
             );
         }
     };
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+    }
+
+    $(document).ready(function () {
+        // Increase quantity
+        $('.btn-increase-cart').on('click', function () {
+            var btn = $(this);
+            var cartItemId = btn.data('cart-item-id');
+            var quantitySpan = btn.siblings('.cart-item-quantity');
+            var currentQuantity = parseInt(quantitySpan.text(), 10);
+            updateCartItemQuantity(cartItemId, currentQuantity + 1, btn);
+        });
+
+        // Decrease quantity
+        $('.btn-decrease-cart').on('click', function () {
+            var btn = $(this);
+            var cartItemId = btn.data('cart-item-id');
+            var quantitySpan = btn.siblings('.cart-item-quantity');
+            var currentQuantity = parseInt(quantitySpan.text(), 10);
+            if (currentQuantity > 1) {
+                updateCartItemQuantity(cartItemId, currentQuantity - 1, btn);
+            }
+        });
+
+        // Remove item
+        $('.btn-remove-cart-item').on('click', function () {
+            var btn = $(this);
+            var cartItemId = btn.data('cart-item-id');
+            if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?")) {
+                removeCartItem(cartItemId, btn);
+            }
+        });
+    });
+
+    function updateCartItemQuantity(cartItemId, newQuantity, btnElement) {
+        var token = getAntiForgeryToken();
+        if (!token) {
+            alert("Không tìm thấy mã xác thực bảo mật. Vui lòng tải lại trang.");
+            return;
+        }
+
+        btnElement.prop('disabled', true);
+        
+        $.ajax({
+            url: "/Cart/UpdateQuantity",
+            type: "POST",
+            dataType: "json",
+            data: {
+                cartItemId: cartItemId,
+                newQuantity: newQuantity,
+                __RequestVerificationToken: token
+            },
+            success: function (response) {
+                btnElement.prop('disabled', false);
+                if (response.success) {
+                    var itemRow = btnElement.closest('.cart-item');
+                    itemRow.find('.cart-item-quantity').text(response.quantity);
+                    itemRow.find('.cart-item-total').text(formatCurrency(response.itemTotal));
+                    $('#cart-subtotal').text(formatCurrency(response.cartTotal));
+                    $('#cart-total').text(formatCurrency(response.cartTotal));
+                    updateCartCount(response.cartItemCount);
+                } else {
+                    if (response.currentQuantity) {
+                        btnElement.siblings('.cart-item-quantity').text(response.currentQuantity);
+                    }
+                    alert(response.message || "Không thể cập nhật số lượng.");
+                }
+            },
+            error: function () {
+                btnElement.prop('disabled', false);
+                alert("Đã xảy ra lỗi khi kết nối với máy chủ.");
+            }
+        });
+    }
+
+    function removeCartItem(cartItemId, btnElement) {
+        var token = getAntiForgeryToken();
+        if (!token) {
+            alert("Không tìm thấy mã xác thực bảo mật. Vui lòng tải lại trang.");
+            return;
+        }
+
+        btnElement.prop('disabled', true);
+
+        $.ajax({
+            url: "/Cart/RemoveItem",
+            type: "POST",
+            dataType: "json",
+            data: {
+                cartItemId: cartItemId,
+                __RequestVerificationToken: token
+            },
+            success: function (response) {
+                if (response.success) {
+                    if (response.isEmpty) {
+                        location.reload();
+                    } else {
+                        btnElement.closest('.cart-item').fadeOut(300, function() { 
+                            $(this).remove(); 
+                        });
+                        $('#cart-subtotal').text(formatCurrency(response.cartTotal));
+                        $('#cart-total').text(formatCurrency(response.cartTotal));
+                        updateCartCount(response.cartItemCount);
+                    }
+                } else {
+                    btnElement.prop('disabled', false);
+                    alert(response.message || "Không thể xóa sản phẩm.");
+                }
+            },
+            error: function () {
+                btnElement.prop('disabled', false);
+                alert("Đã xảy ra lỗi khi kết nối với máy chủ.");
+            }
+        });
+    }
 
 })();

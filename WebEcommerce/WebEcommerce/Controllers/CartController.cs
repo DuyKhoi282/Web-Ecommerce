@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -275,6 +275,104 @@ namespace WebEcommerce.Controllers
                     message =
                         "Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại."
                 });
+            }
+        }
+
+        // POST: /Cart/UpdateQuantity
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> UpdateQuantity(int cartItemId, int newQuantity)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                    return Json(new { success = false, message = "Vui lòng đăng nhập." });
+
+                if (newQuantity <= 0)
+                    return Json(new { success = false, message = "Số lượng không hợp lệ." });
+
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.Product)
+                    .Include(ci => ci.Cart)
+                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId);
+
+                if (cartItem == null)
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ." });
+
+                if (newQuantity > cartItem.Product.StockQuantity)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = $"Chỉ còn {cartItem.Product.StockQuantity} sản phẩm trong kho.",
+                        currentQuantity = cartItem.Quantity 
+                    });
+                }
+
+                cartItem.Quantity = newQuantity;
+                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var cartItems = await _context.CartItems.Where(ci => ci.CartID == cartItem.CartID).ToListAsync();
+                var cartTotal = cartItems.Sum(ci => ci.UnitPriceAtAddition * ci.Quantity);
+                var itemTotal = cartItem.UnitPriceAtAddition * cartItem.Quantity;
+                var cartItemCount = cartItems.Sum(ci => ci.Quantity);
+
+                return Json(new {
+                    success = true,
+                    itemTotal = itemTotal,
+                    cartTotal = cartTotal,
+                    cartItemCount = cartItemCount,
+                    quantity = newQuantity
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/UpdateQuantity] {ex}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi khi cập nhật số lượng." });
+            }
+        }
+
+        // POST: /Cart/RemoveItem
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> RemoveItem(int cartItemId)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                    return Json(new { success = false, message = "Vui lòng đăng nhập." });
+
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.Cart)
+                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId);
+
+                if (cartItem == null)
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
+
+                var cartId = cartItem.CartID;
+                _context.CartItems.Remove(cartItem);
+                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var cartItems = await _context.CartItems.Where(ci => ci.CartID == cartId).ToListAsync();
+                var cartTotal = cartItems.Sum(ci => ci.UnitPriceAtAddition * ci.Quantity);
+                var cartItemCount = cartItems.Sum(ci => ci.Quantity);
+
+                return Json(new {
+                    success = true,
+                    cartTotal = cartTotal,
+                    cartItemCount = cartItemCount,
+                    isEmpty = !cartItems.Any()
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Cart/RemoveItem] {ex}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi khi xóa sản phẩm." });
             }
         }
 

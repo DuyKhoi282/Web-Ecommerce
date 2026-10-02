@@ -1,8 +1,10 @@
-﻿@model WebEcommerce.Models.Cart
+@model WebEcommerce.Models.Cart
 
 @{
     ViewBag.Title = "Giỏ hàng";
 }
+
+@Html.AntiForgeryToken()
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
