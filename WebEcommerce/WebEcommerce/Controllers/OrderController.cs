@@ -38,7 +38,7 @@ namespace WebEcommerce.Controllers
                 }
 
                 // Lấy thông tin user để pre-fill
-                var user = await _context.Users.FindAsync(userId);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 var vm = new CheckoutViewModel
                 {
                     ShippingAddress = user?.Address ?? "",
