@@ -1,0 +1,186 @@
+@model WebEcommerce.Models.Order
+@{
+    ViewBag.Title = "Chi tiết đơn hàng #" + Model.OrderID;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var statusColor = "bg-slate-100 text-slate-700";
+    switch (Model.Status)
+    {
+        case "Pending": statusColor = "bg-amber-100 text-amber-700"; break;
+        case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; break;
+        case "Shipped": statusColor = "bg-purple-100 text-purple-700"; break;
+        case "Delivered": statusColor = "bg-green-100 text-green-700"; break;
+        case "Cancelled": statusColor = "bg-red-100 text-red-700"; break;
+    }
+
+    // Determine allowed next statuses
+    var nextStatuses = new System.Collections.Generic.List<string>();
+    switch (Model.Status)
+    {
+        case "Pending": nextStatuses.AddRange(new[] { "Confirmed", "Cancelled" }); break;
+        case "Confirmed": nextStatuses.AddRange(new[] { "Shipped", "Cancelled" }); break;
+        case "Shipped": nextStatuses.Add("Delivered"); break;
+    }
+}
+
+<div class="p-6 lg:p-8">
+    <a href="@Url.Action("Index", "AdminOrder")" class="text-sm text-[#0d47a1] hover:underline font-semibold flex items-center gap-1 mb-4">
+        <span class="material-symbols-outlined text-base">arrow_back</span> Quay lại danh sách
+    </a>
+
+    <div class="flex flex-wrap items-center gap-3 mb-8">
+        <h1 class="font-headline font-extrabold text-2xl text-slate-900">Đơn hàng #@Model.OrderID</h1>
+        <span class="px-3 py-1 rounded-full text-xs font-bold @statusColor">@Model.Status</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Products + Customer Info -->
+        <div class="lg:col-span-2 space-y-4">
+            <!-- Products -->
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Sản phẩm</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-2 font-semibold text-slate-600">Sản phẩm</th>
+                                <th class="text-right py-2 font-semibold text-slate-600">Đơn giá</th>
+                                <th class="text-center py-2 font-semibold text-slate-600">SL</th>
+                                <th class="text-right py-2 font-semibold text-slate-600">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @if (Model.OrderDetails != null)
+                            {
+                                foreach (var d in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td class="py-3 font-medium text-slate-900">@(d.Product?.Name ?? "Sản phẩm #" + d.ProductID)</td>
+                                        <td class="py-3 text-right text-slate-600">@string.Format("{0:N0}đ", d.UnitPrice)</td>
+                                        <td class="py-3 text-center text-slate-600">@d.Quantity</td>
+                                        <td class="py-3 text-right font-bold text-slate-900">@string.Format("{0:N0}đ", d.Subtotal)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thông tin khách hàng</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-slate-500">Họ tên</span>
+                        <p class="font-semibold text-slate-900">@(Model.User?.FullName ?? "N/A")</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">Email</span>
+                        <p class="font-semibold text-slate-900">@(Model.User?.Email ?? "N/A")</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">Địa chỉ giao hàng</span>
+                        <p class="font-semibold text-slate-900">@Model.ShippingAddress</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">SĐT người nhận</span>
+                        <p class="font-semibold text-slate-900">@Model.ReceiverPhone</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="sm:col-span-2">
+                            <span class="text-slate-500">Ghi chú</span>
+                            <p class="font-semibold text-slate-900">@Model.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Summary + Actions -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thanh toán</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Ngày đặt</span>
+                        <span class="font-semibold">@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">PT thanh toán</span>
+                        <span class="font-semibold">@Model.PaymentMethod</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">TT thanh toán</span>
+                        <span class="font-semibold">@Model.PaymentStatus</span>
+                    </div>
+                    @if (Model.PromotionalCode != null)
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Mã giảm giá</span>
+                            <span class="font-semibold text-green-600">@Model.PromotionalCode.Code</span>
+                        </div>
+                    }
+                    <div class="border-t border-slate-200 pt-3">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Tạm tính</span>
+                            <span class="font-semibold">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
+                        </div>
+                        @if (Model.DiscountAmount > 0)
+                        {
+                            <div class="flex justify-between text-green-600 mt-1">
+                                <span>Giảm giá</span>
+                                <span class="font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</span>
+                            </div>
+                        }
+                        <div class="flex justify-between mt-2 pt-2 border-t border-slate-200">
+                            <span class="font-bold text-slate-900">Tổng cộng</span>
+                            <span class="font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (nextStatuses.Any())
+            {
+                <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Cập nhật trạng thái</h2>
+                    <div class="space-y-2">
+                        @foreach (var ns in nextStatuses)
+                        {
+                            var btnClass = ns == "Cancelled"
+                                ? "border-red-300 text-red-600 hover:bg-red-50"
+                                : "border-[#0d47a1] text-[#0d47a1] hover:bg-[#0d47a1] hover:text-white";
+
+                            using (Html.BeginForm("UpdateStatus", "AdminOrder", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="orderId" value="@Model.OrderID" />
+                                <input type="hidden" name="newStatus" value="@ns" />
+                                <button type="submit"
+                                        onclick="@(ns == "Cancelled" ? "return confirm('Bạn có chắc muốn hủy đơn hàng này?');" : "")"
+                                        class="w-full py-2.5 rounded-xl border-2 @btnClass font-bold text-sm transition-all">
+                                    → Chuyển sang @ns
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

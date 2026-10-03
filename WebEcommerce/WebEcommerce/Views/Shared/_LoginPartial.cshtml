@@ -50,8 +50,17 @@
                         <span class="material-symbols-outlined text-lg text-purple-600">admin_panel_settings</span>
                         <span>Trang Quản trị Admin</span>
                     </a>
+                    <a href="@Url.Action("Index", "AdminOrder")" class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors">
+                        <span class="material-symbols-outlined text-lg text-purple-600">assignment</span>
+                        <span>Quản lý đơn hàng</span>
+                    </a>
                     <div class="border-t border-slate-100 my-1"></div>
                 }
+
+                <a href="@Url.Action("Index", "Order")" class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-[#0d47a1] transition-colors">
+                    <span class="material-symbols-outlined text-lg text-slate-400">receipt_long</span>
+                    <span>Đơn hàng của tôi</span>
+                </a>
 
                 <a href="@Url.Action("Profile", "Manage")" class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-[#0d47a1] transition-colors">
                     <span class="material-symbols-outlined text-lg text-slate-400">person</span>

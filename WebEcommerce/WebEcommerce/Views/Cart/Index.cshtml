@@ -1,4 +1,4 @@
-﻿@model WebEcommerce.Models.Cart
+@model WebEcommerce.Models.Cart
 
 @{
     ViewBag.Title = "Giỏ hàng";
@@ -272,19 +272,19 @@
 
                     </div>
 
-                    <button type="button"
-                            class="w-full py-3.5 rounded-xl
-                                   bg-[#0d47a1] hover:bg-[#0a3880]
-                                   text-white font-bold text-sm
-                                   flex items-center justify-center gap-2
-                                   transition-colors">
+                    <a href="@Url.Action("Checkout", "Order")"
+                       class="w-full py-3.5 rounded-xl
+                              bg-[#0d47a1] hover:bg-[#0a3880]
+                              text-white font-bold text-sm
+                              flex items-center justify-center gap-2
+                              transition-colors">
 
                         <span class="material-symbols-outlined text-lg">
                             payments
                         </span>
 
                         Tiến hành thanh toán
-                    </button>
+                    </a>
 
                     <a href="@Url.Action("Index", "Home")"
                        class="mt-3 w-full py-3 rounded-xl

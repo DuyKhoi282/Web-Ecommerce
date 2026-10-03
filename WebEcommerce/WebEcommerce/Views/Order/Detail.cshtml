@@ -1,0 +1,152 @@
+@model WebEcommerce.Models.Order
+@{
+    ViewBag.Title = "Chi tiết đơn hàng #" + Model.OrderID;
+
+    var statusColor = "bg-slate-100 text-slate-700";
+    var statusIcon = "schedule";
+    switch (Model.Status)
+    {
+        case "Pending": statusColor = "bg-amber-100 text-amber-700"; statusIcon = "schedule"; break;
+        case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; statusIcon = "check_circle"; break;
+        case "Shipped": statusColor = "bg-purple-100 text-purple-700"; statusIcon = "local_shipping"; break;
+        case "Delivered": statusColor = "bg-green-100 text-green-700"; statusIcon = "verified"; break;
+        case "Cancelled": statusColor = "bg-red-100 text-red-700"; statusIcon = "cancel"; break;
+    }
+    var canCancel = (Model.Status == "Pending" || Model.Status == "Confirmed");
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+        <a href="@Url.Action("Index", "Order")" class="text-sm text-[#0d47a1] hover:underline font-semibold flex items-center gap-1 mb-3">
+            <span class="material-symbols-outlined text-base">arrow_back</span> Quay lại lịch sử đơn hàng
+        </a>
+        <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">receipt</span>
+            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">Đơn hàng #@Model.OrderID</h1>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @statusColor">
+                <span class="material-symbols-outlined text-sm">@statusIcon</span>
+                @Model.Status
+            </span>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Products -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Sản phẩm đã đặt</h2>
+                <div class="space-y-4">
+                    @if (Model.OrderDetails != null)
+                    {
+                        foreach (var detail in Model.OrderDetails)
+                        {
+                            var product = detail.Product;
+                            <div class="flex gap-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                <div class="w-20 h-20 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    @{
+                                        var img = product?.ProductImages?.FirstOrDefault(x => x.IsMain) ?? product?.ProductImages?.FirstOrDefault();
+                                    }
+                                    @if (img != null)
+                                    {
+                                        <img src="@img.ImageURL" alt="@product?.Name" class="w-full h-full object-contain p-1" onerror="this.src='https://placehold.co/80x80/f8faff/0d47a1?text=SP';" />
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined text-2xl text-slate-300">image</span>
+                                    }
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-bold text-sm text-slate-900 truncate">@(product?.Name ?? "Sản phẩm")</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Đơn giá: @string.Format("{0:N0}đ", detail.UnitPrice) × @detail.Quantity</p>
+                                    <p class="font-headline font-bold text-sm text-[#0d47a1] mt-1">@string.Format("{0:N0}đ", detail.Subtotal)</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Summary -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thông tin đơn hàng</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Ngày đặt</span>
+                        <span class="font-semibold">@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Thanh toán</span>
+                        <span class="font-semibold">@Model.PaymentMethod</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">TT thanh toán</span>
+                        <span class="font-semibold">@Model.PaymentStatus</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Địa chỉ</span>
+                        <span class="font-semibold text-right max-w-[180px]">@Model.ShippingAddress</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">SĐT</span>
+                        <span class="font-semibold">@Model.ReceiverPhone</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Ghi chú</span>
+                            <span class="font-semibold text-right max-w-[180px]">@Model.Notes</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thanh toán</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Tạm tính</span>
+                        <span class="font-semibold">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="flex justify-between text-green-600">
+                            <span>Giảm giá</span>
+                            <span class="font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</span>
+                        </div>
+                    }
+                    <div class="border-t border-slate-200 pt-3 flex justify-between">
+                        <span class="font-headline font-bold text-slate-900">Tổng cộng</span>
+                        <span class="font-headline font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (canCancel)
+            {
+                using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');" class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                        <span class="material-symbols-outlined text-lg">cancel</span>
+                        Hủy đơn hàng
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
