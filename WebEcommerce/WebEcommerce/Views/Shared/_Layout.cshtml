@@ -105,6 +105,14 @@
                         <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md">0</span>
                     </a>
 
+                    @if (Request.IsAuthenticated)
+                    {
+                        <!-- Order History Icon -->
+                        <a href="@Url.Action("Index", "Order")" class="relative p-2 text-slate-700 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 hover:border-[#0d47a1] rounded-full transition-all shadow-sm flex-shrink-0" title="Lịch sử đơn hàng">
+                            <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                        </a>
+                    }
+
                     <!-- User Account / Login Partial -->
                     @Html.Partial("_LoginPartial")
                 </div>

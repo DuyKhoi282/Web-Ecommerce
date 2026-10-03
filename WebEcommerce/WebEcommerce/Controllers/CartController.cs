@@ -391,8 +391,9 @@ namespace WebEcommerce.Controllers
                 // Nếu quantity = 1 thì xóa item
                 if (cartItem.Quantity <= 1)
                 {
+                    var cart = cartItem.Cart;
                     _context.CartItems.Remove(cartItem);
-                    cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+                    cart.UpdatedAt = DateTime.UtcNow;
                     await _context.SaveChangesAsync();
 
                     var remainCount = await _context.CartItems
@@ -479,8 +480,9 @@ namespace WebEcommerce.Controllers
                 }
 
                 var cartId = cartItem.CartID;
+                var cart2 = cartItem.Cart;
                 _context.CartItems.Remove(cartItem);
-                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+                cart2.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
