@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using WebEcommerce.Helpers;
 using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
@@ -23,23 +24,66 @@ namespace WebEcommerce.Controllers
         {
             try
             {
-                var userId = User.Identity.GetUserId();
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
 
-                if (string.IsNullOrWhiteSpace(userId))
+                if (!cookieItems.Any())
                 {
-                    return RedirectToAction("Login", "Account");
+                    return View(new CartViewModel());
                 }
 
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems.Select(ci => ci.Product))
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
+                // Load product details from DB for each cookie item
+                var productIds = cookieItems.Select(ci => ci.ProductID).ToList();
+                var products = await _context.Products
+                    .Include(p => p.ProductImages)
+                    .Where(p => productIds.Contains(p.ProductID))
+                    .ToListAsync();
 
-                if (cart == null)
+                var vm = new CartViewModel();
+
+                foreach (var ci in cookieItems)
                 {
-                    return View((object)null);
+                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
+
+                    if (product == null)
+                    {
+                        // Product was deleted from DB → remove from cookie
+                        continue;
+                    }
+
+                    var unitPrice = GetCurrentProductPrice(product);
+                    var image = product.ProductImages?
+                        .FirstOrDefault(x => x.IsMain)
+                        ?? product.ProductImages?.FirstOrDefault();
+
+                    vm.Items.Add(new CartItemViewModel
+                    {
+                        ProductID = product.ProductID,
+                        ProductName = product.Name,
+                        ImageURL = image?.ImageURL,
+                        UnitPrice = unitPrice,
+                        Quantity = ci.Quantity,
+                        ItemTotal = unitPrice * ci.Quantity,
+                        StockQuantity = product.StockQuantity
+                    });
                 }
 
-                return View(cart);
+                vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
+
+                // Clean up cookie: remove items whose products no longer exist
+                if (vm.Items.Count < cookieItems.Count)
+                {
+                    var validItems = vm.Items
+                        .Select(i => new CookieCartItem
+                        {
+                            ProductID = i.ProductID,
+                            Quantity = i.Quantity
+                        })
+                        .ToList();
+
+                    CookieCartHelper.SaveCartItems(Response, validItems);
+                }
+
+                return View(vm);
             }
             catch (Exception ex)
             {
@@ -50,7 +94,7 @@ namespace WebEcommerce.Controllers
                 TempData["ErrorMessage"] =
                     "Đã xảy ra lỗi khi tải giỏ hàng.";
 
-                return View((object)null);
+                return View(new CartViewModel());
             }
         }
 
@@ -166,101 +210,61 @@ namespace WebEcommerce.Controllers
                 }
 
                 // ==========================================
-                // 7. Find Cart of Current User
+                // 7. Read current cookie cart
                 // ==========================================
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems)
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
+                var existing = cookieItems
+                    .FirstOrDefault(i => i.ProductID == productId);
 
                 // ==========================================
-                // 8. Create Cart if not exists
+                // 8. Check total quantity (existing + new)
                 // ==========================================
-                if (cart == null)
+                if (existing != null)
                 {
-                    cart = new Cart
-                    {
-                        UserID = userId,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
+                    var newQuantity = existing.Quantity + quantity;
 
-                    _context.Carts.Add(cart);
-
-                    await _context.SaveChangesAsync();
-                }
-
-                // ==========================================
-                // 9. Find Existing CartItem
-                // ==========================================
-                var cartItem = cart.CartItems
-                    .FirstOrDefault(ci => ci.ProductID == productId);
-
-                // ==========================================
-                // 10. Add New CartItem
-                // ==========================================
-                if (cartItem == null)
-                {
-                    cartItem = new CartItem
-                    {
-                        CartID = cart.CartID,
-                        ProductID = product.ProductID,
-                        Quantity = quantity,
-                        UnitPriceAtAddition =
-                            GetCurrentProductPrice(product)
-                    };
-
-                    _context.CartItems.Add(cartItem);
-                }
-                else
-                {
-                    // ======================================
-                    // 11. Calculate New Quantity
-                    // ======================================
-                    var newQuantity = cartItem.Quantity + quantity;
-
-                    // ======================================
-                    // 12. Re-check Stock
-                    // ======================================
                     if (newQuantity > product.StockQuantity)
                     {
                         return Json(new
                         {
                             success = false,
                             message =
-                                $"Trong giỏ đã có {cartItem.Quantity} sản phẩm. " +
+                                $"Trong giỏ đã có {existing.Quantity} sản phẩm. " +
                                 $"Kho chỉ còn {product.StockQuantity} sản phẩm."
                         });
                     }
-
-                    cartItem.Quantity = newQuantity;
-
-                    // Keep the current product price
-                    cartItem.UnitPriceAtAddition =
-                        GetCurrentProductPrice(product);
                 }
 
                 // ==========================================
-                // 13. Update Cart Timestamp
+                // 9. Save to Cookie
                 // ==========================================
-                cart.UpdatedAt = DateTime.UtcNow;
+                CookieCartHelper.AddItem(Request, Response, productId, quantity);
 
                 // ==========================================
-                // 14. Save Database
+                // 10. Calculate Cart Item Count
                 // ==========================================
-                await _context.SaveChangesAsync();
+                var cartItemCount = CookieCartHelper.GetTotalQuantity(Request);
 
-                // ==========================================
-                // 15. Calculate Cart Item Count
-                // ==========================================
-                var cartItemCount = await _context.CartItems
-                    .Where(ci => ci.CartID == cart.CartID)
-                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+                // After AddItem, re-read to get accurate count
+                var updatedItems = CookieCartHelper.GetCartItems(Request);
+
+                // Because AddItem modified the Response cookie but 
+                // Request cookie is stale, calculate from what we know
+                int totalCount;
+                if (existing != null)
+                {
+                    totalCount = cookieItems.Sum(i => i.Quantity) + quantity;
+                }
+                else
+                {
+                    totalCount = cookieItems.Sum(i => i.Quantity) + quantity;
+                }
 
                 return Json(new
                 {
                     success = true,
                     message = "Đã thêm sản phẩm vào giỏ hàng.",
-                    cartItemCount = cartItemCount
+                    cartItemCount = totalCount
                 });
             }
             catch (Exception ex)
@@ -283,7 +287,7 @@ namespace WebEcommerce.Controllers
         // ==============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> IncreaseQuantity(int cartItemId)
+        public async Task<JsonResult> IncreaseQuantity(int productId)
         {
             try
             {
@@ -293,30 +297,27 @@ namespace WebEcommerce.Controllers
                     return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
                 }
 
-                var cartItem = await _context.CartItems
-                    .Include(ci => ci.Cart)
-                    .Include(ci => ci.Product)
-                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+                // Find product in DB
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductID == productId);
 
-                if (cartItem == null)
-                {
-                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
-                }
-
-                // Kiểm tra ownership
-                if (cartItem.Cart.UserID != userId)
-                {
-                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
-                }
-
-                var product = cartItem.Product;
                 if (product == null || product.Status != 1)
                 {
                     return Json(new { success = false, message = "Sản phẩm không còn kinh doanh." });
                 }
 
-                // Kiểm tra stock
-                var newQuantity = cartItem.Quantity + 1;
+                // Read cookie
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
+                var existing = cookieItems
+                    .FirstOrDefault(i => i.ProductID == productId);
+
+                if (existing == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
+                }
+
+                // Check stock
+                var newQuantity = existing.Quantity + 1;
                 if (newQuantity > product.StockQuantity)
                 {
                     return Json(new
@@ -326,26 +327,50 @@ namespace WebEcommerce.Controllers
                     });
                 }
 
-                cartItem.Quantity = newQuantity;
-                cartItem.UnitPriceAtAddition = GetCurrentProductPrice(product);
-                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+                // Update cookie
+                CookieCartHelper.UpdateQuantity(Request, Response, productId, newQuantity);
 
-                await _context.SaveChangesAsync();
+                // Calculate totals
+                var unitPrice = GetCurrentProductPrice(product);
+                var itemTotal = unitPrice * newQuantity;
 
-                var cartItemCount = await _context.CartItems
-                    .Where(ci => ci.CartID == cartItem.CartID)
-                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+                // Recalculate cart total
+                var allItems = CookieCartHelper.GetCartItems(Request);
+                // Update the in-memory list since Request cookie is stale
+                var itemInList = allItems.FirstOrDefault(i => i.ProductID == productId);
+                if (itemInList != null) itemInList.Quantity = newQuantity;
 
-                var itemTotal = cartItem.UnitPriceAtAddition * cartItem.Quantity;
-                var cartTotal = await _context.CartItems
-                    .Where(ci => ci.CartID == cartItem.CartID)
-                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+                // We need product prices for all items to calculate cart total
+                var otherProductIds = allItems
+                    .Where(i => i.ProductID != productId)
+                    .Select(i => i.ProductID)
+                    .ToList();
+
+                decimal cartTotal = itemTotal;
+                if (otherProductIds.Any())
+                {
+                    var otherProducts = await _context.Products
+                        .Where(p => otherProductIds.Contains(p.ProductID))
+                        .ToListAsync();
+
+                    foreach (var ci in allItems.Where(i => i.ProductID != productId))
+                    {
+                        var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                        if (op != null)
+                        {
+                            cartTotal += GetCurrentProductPrice(op) * ci.Quantity;
+                        }
+                    }
+                }
+
+                var cartItemCount = allItems.Sum(i =>
+                    i.ProductID == productId ? newQuantity : i.Quantity);
 
                 return Json(new
                 {
                     success = true,
                     message = "Đã tăng số lượng.",
-                    quantity = cartItem.Quantity,
+                    quantity = newQuantity,
                     itemTotal = itemTotal,
                     cartTotal = cartTotal,
                     cartItemCount = cartItemCount
@@ -363,7 +388,7 @@ namespace WebEcommerce.Controllers
         // ==============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> DecreaseQuantity(int cartItemId)
+        public async Task<JsonResult> DecreaseQuantity(int productId)
         {
             try
             {
@@ -373,36 +398,46 @@ namespace WebEcommerce.Controllers
                     return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
                 }
 
-                var cartItem = await _context.CartItems
-                    .Include(ci => ci.Cart)
-                    .Include(ci => ci.Product)
-                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+                // Read cookie
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
+                var existing = cookieItems
+                    .FirstOrDefault(i => i.ProductID == productId);
 
-                if (cartItem == null)
+                if (existing == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
                 }
 
-                if (cartItem.Cart.UserID != userId)
+                // If quantity = 1 → remove item
+                if (existing.Quantity <= 1)
                 {
-                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
-                }
+                    CookieCartHelper.RemoveItem(Request, Response, productId);
 
-                // Nếu quantity = 1 thì xóa item
-                if (cartItem.Quantity <= 1)
-                {
-                    var cart = cartItem.Cart;
-                    _context.CartItems.Remove(cartItem);
-                    cart.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
+                    // Calculate remaining totals
+                    var remainingItems = cookieItems
+                        .Where(i => i.ProductID != productId)
+                        .ToList();
 
-                    var remainCount = await _context.CartItems
-                        .Where(ci => ci.CartID == cartItem.CartID)
-                        .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+                    decimal remainTotal = 0;
+                    int remainCount = 0;
 
-                    var remainTotal = await _context.CartItems
-                        .Where(ci => ci.CartID == cartItem.CartID)
-                        .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+                    if (remainingItems.Any())
+                    {
+                        var remainIds = remainingItems.Select(i => i.ProductID).ToList();
+                        var remainProducts = await _context.Products
+                            .Where(p => remainIds.Contains(p.ProductID))
+                            .ToListAsync();
+
+                        foreach (var ri in remainingItems)
+                        {
+                            var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
+                            if (rp != null)
+                            {
+                                remainTotal += GetCurrentProductPrice(rp) * ri.Quantity;
+                            }
+                            remainCount += ri.Quantity;
+                        }
+                    }
 
                     return Json(new
                     {
@@ -414,30 +449,57 @@ namespace WebEcommerce.Controllers
                     });
                 }
 
-                cartItem.Quantity -= 1;
-                if (cartItem.Product != null)
+                // Decrease by 1
+                var newQuantity = existing.Quantity - 1;
+                CookieCartHelper.UpdateQuantity(Request, Response, productId, newQuantity);
+
+                // Get product for price calculation
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductID == productId);
+
+                decimal unitPrice = 0;
+                if (product != null)
                 {
-                    cartItem.UnitPriceAtAddition = GetCurrentProductPrice(cartItem.Product);
+                    unitPrice = GetCurrentProductPrice(product);
                 }
-                cartItem.Cart.UpdatedAt = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
+                var itemTotal = unitPrice * newQuantity;
 
-                var cartItemCount = await _context.CartItems
-                    .Where(ci => ci.CartID == cartItem.CartID)
-                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
+                // Calculate cart total
+                var allItems = cookieItems.ToList();
+                var itemInList = allItems.FirstOrDefault(i => i.ProductID == productId);
+                if (itemInList != null) itemInList.Quantity = newQuantity;
 
-                var itemTotal = cartItem.UnitPriceAtAddition * cartItem.Quantity;
-                var cartTotal2 = await _context.CartItems
-                    .Where(ci => ci.CartID == cartItem.CartID)
-                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
+                var otherProductIds = allItems
+                    .Where(i => i.ProductID != productId)
+                    .Select(i => i.ProductID)
+                    .ToList();
+
+                decimal cartTotal2 = itemTotal;
+                if (otherProductIds.Any())
+                {
+                    var otherProducts = await _context.Products
+                        .Where(p => otherProductIds.Contains(p.ProductID))
+                        .ToListAsync();
+
+                    foreach (var ci in allItems.Where(i => i.ProductID != productId))
+                    {
+                        var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                        if (op != null)
+                        {
+                            cartTotal2 += GetCurrentProductPrice(op) * ci.Quantity;
+                        }
+                    }
+                }
+
+                var cartItemCount = allItems.Sum(i => i.Quantity);
 
                 return Json(new
                 {
                     success = true,
                     removed = false,
                     message = "Đã giảm số lượng.",
-                    quantity = cartItem.Quantity,
+                    quantity = newQuantity,
                     itemTotal = itemTotal,
                     cartTotal = cartTotal2,
                     cartItemCount = cartItemCount
@@ -455,7 +517,7 @@ namespace WebEcommerce.Controllers
         // ==============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> RemoveItem(int cartItemId)
+        public async Task<JsonResult> RemoveItem(int productId)
         {
             try
             {
@@ -465,34 +527,42 @@ namespace WebEcommerce.Controllers
                     return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ." });
                 }
 
-                var cartItem = await _context.CartItems
-                    .Include(ci => ci.Cart)
-                    .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId);
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
+                var existing = cookieItems
+                    .FirstOrDefault(i => i.ProductID == productId);
 
-                if (cartItem == null)
+                if (existing == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng." });
                 }
 
-                if (cartItem.Cart.UserID != userId)
+                CookieCartHelper.RemoveItem(Request, Response, productId);
+
+                // Calculate remaining totals
+                var remainingItems = cookieItems
+                    .Where(i => i.ProductID != productId)
+                    .ToList();
+
+                decimal cartTotal = 0;
+                int cartItemCount = 0;
+
+                if (remainingItems.Any())
                 {
-                    return Json(new { success = false, message = "Bạn không có quyền thao tác giỏ hàng này." });
+                    var remainIds = remainingItems.Select(i => i.ProductID).ToList();
+                    var remainProducts = await _context.Products
+                        .Where(p => remainIds.Contains(p.ProductID))
+                        .ToListAsync();
+
+                    foreach (var ri in remainingItems)
+                    {
+                        var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
+                        if (rp != null)
+                        {
+                            cartTotal += GetCurrentProductPrice(rp) * ri.Quantity;
+                        }
+                        cartItemCount += ri.Quantity;
+                    }
                 }
-
-                var cartId = cartItem.CartID;
-                var cart2 = cartItem.Cart;
-                _context.CartItems.Remove(cartItem);
-                cart2.UpdatedAt = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-
-                var cartItemCount = await _context.CartItems
-                    .Where(ci => ci.CartID == cartId)
-                    .SumAsync(ci => (int?)ci.Quantity) ?? 0;
-
-                var cartTotal = await _context.CartItems
-                    .Where(ci => ci.CartID == cartId)
-                    .SumAsync(ci => (decimal?)(ci.UnitPriceAtAddition * ci.Quantity)) ?? 0;
 
                 return Json(new
                 {
@@ -514,7 +584,7 @@ namespace WebEcommerce.Controllers
         // ==============================================
         [HttpGet]
         [AllowAnonymous]
-        public async Task<JsonResult> GetCartCount()
+        public JsonResult GetCartCount()
         {
             try
             {
@@ -523,22 +593,7 @@ namespace WebEcommerce.Controllers
                     return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
-                var userId = User.Identity.GetUserId();
-                if (string.IsNullOrWhiteSpace(userId))
-                {
-                    return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
-                }
-
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems)
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
-
-                if (cart == null || cart.CartItems == null)
-                {
-                    return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
-                }
-
-                var totalCount = cart.CartItems.Sum(ci => ci.Quantity);
+                var totalCount = CookieCartHelper.GetTotalQuantity(Request);
                 return Json(new { count = totalCount }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
