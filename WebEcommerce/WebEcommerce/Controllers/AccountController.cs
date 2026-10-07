@@ -95,6 +95,9 @@ namespace WebEcommerce.Controllers
 
                 var otpExpiresAt =
                     Session["PendingRegistration.OtpExpiresAt"] as DateTime?;
+                var otpAttempts =
+                    Session["PendingRegistration.OtpAttempts"] != null
+                     ? (int)Session["PendingRegistration.OtpAttempts"]: 0;
 
 
                 // ==========================================
@@ -122,6 +125,14 @@ namespace WebEcommerce.Controllers
 
                 if (DateTime.UtcNow > otpExpiresAt.Value)
                 {
+                    // Xóa thông tin đăng ký tạm thời
+                    Session.Remove("PendingRegistration.FullName");
+                    Session.Remove("PendingRegistration.Email");
+                    Session.Remove("PendingRegistration.PasswordHash");
+                    Session.Remove("PendingRegistration.Otp");
+                    Session.Remove("PendingRegistration.OtpExpiresAt");
+                    Session.Remove("PendingRegistration.OtpAttempts");
+
                     ModelState.AddModelError(
                         "Code",
                         "Mã xác thực đã hết hạn. Vui lòng đăng ký lại."
@@ -136,13 +147,41 @@ namespace WebEcommerce.Controllers
                 // ==========================================
 
                 if (!string.Equals(
-                        model.Code.Trim(),
-                        storedOtp,
-                        StringComparison.Ordinal))
+                    model.Code.Trim(),
+                    storedOtp,
+                    StringComparison.Ordinal))
                 {
+                    // Tăng số lần nhập sai
+                    otpAttempts++;
+
+                    Session["PendingRegistration.OtpAttempts"] =
+                        otpAttempts;
+
+                    // Đã sai đủ 5 lần
+                    if (otpAttempts >= 5)
+                    {
+                        // Xóa toàn bộ thông tin đăng ký tạm thời
+                        Session.Remove("PendingRegistration.FullName");
+                        Session.Remove("PendingRegistration.Email");
+                        Session.Remove("PendingRegistration.PasswordHash");
+                        Session.Remove("PendingRegistration.Otp");
+                        Session.Remove("PendingRegistration.OtpExpiresAt");
+                        Session.Remove("PendingRegistration.OtpAttempts");
+
+                        ModelState.AddModelError(
+                            "Code",
+                            "Bạn đã nhập sai mã xác thực quá 5 lần. Vui lòng đăng ký lại để nhận mã mới."
+                        );
+
+                        return View(model);
+                    }
+
+                    // Vẫn còn lượt thử
+                    var remainingAttempts = 5 - otpAttempts;
+
                     ModelState.AddModelError(
                         "Code",
-                        "Mã xác thực không chính xác."
+                        $"Mã xác thực không chính xác. Bạn còn {remainingAttempts} lần thử."
                     );
 
                     return View(model);
@@ -267,7 +306,7 @@ namespace WebEcommerce.Controllers
                 Session.Remove("PendingRegistration.PasswordHash");
                 Session.Remove("PendingRegistration.Otp");
                 Session.Remove("PendingRegistration.OtpExpiresAt");
-
+                Session.Remove("PendingRegistration.OtpAttempts");
 
                 // ==========================================
                 // 10. Chuyển về Login
@@ -298,6 +337,201 @@ namespace WebEcommerce.Controllers
             }
 
             return View(model);
+        }
+
+        //======================================
+        //  GỬI LẠI OTP
+        //======================================
+        // POST: /Account/ResendOtp
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ResendOtp()
+        {
+            try
+            {
+                // ==========================================
+                // 1. Kiểm tra đăng ký tạm thời
+                // ==========================================
+
+                var fullName =
+                    Session["PendingRegistration.FullName"] as string;
+
+                var email =
+                    Session["PendingRegistration.Email"] as string;
+
+                var passwordHash =
+                    Session["PendingRegistration.PasswordHash"] as string;
+
+                if (string.IsNullOrEmpty(fullName) ||
+                    string.IsNullOrEmpty(email) ||
+                    string.IsNullOrEmpty(passwordHash))
+                {
+                    TempData["OtpError"] =
+                        "Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.";
+
+                    return RedirectToAction("Register", "Account");
+                }
+
+
+                // ==========================================
+                // 2. Kiểm tra cooldown 60 giây
+                // ==========================================
+
+                var lastSentAt =
+                    Session["PendingRegistration.OtpLastSentAt"] as DateTime?;
+
+                if (lastSentAt.HasValue)
+                {
+                    var elapsed =
+                        DateTime.UtcNow - lastSentAt.Value;
+
+                    if (elapsed.TotalSeconds < 60)
+                    {
+                        var remainingSeconds =
+                            60 - (int)elapsed.TotalSeconds;
+
+                        TempData["OtpError"] =
+                            $"Vui lòng chờ {remainingSeconds} giây trước khi gửi lại mã.";
+
+                        return RedirectToAction("VerifyOtp", "Account");
+                    }
+                }
+
+
+                // ==========================================
+                // 3. Tạo OTP mới
+                // ==========================================
+
+                var newOtp = GenerateOtp();
+
+
+                // ==========================================
+                // 4. Cập nhật OTP mới
+                // ==========================================
+
+                Session["PendingRegistration.Otp"] =
+                    newOtp;
+
+                Session["PendingRegistration.OtpExpiresAt"] =
+                    DateTime.UtcNow.AddMinutes(10);
+
+                // Reset số lần nhập sai
+                Session["PendingRegistration.OtpAttempts"] = 0;
+
+                // Cập nhật thời điểm gửi
+                Session["PendingRegistration.OtpLastSentAt"] =
+                    DateTime.UtcNow;
+
+
+                // ==========================================
+                // 5. Gửi OTP mới
+                // ==========================================
+
+                try
+                {
+                    var emailService =
+                        new EmailService();
+
+                    await emailService.SendAsync(
+                        new IdentityMessage
+                        {
+                            Destination = email,
+
+                            Subject =
+                                "Mã xác thực mới - The Chill Shop",
+
+                            Body = $@"
+<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+    <h2>Mã xác thực mới</h2>
+
+    <p>
+        Xin chào
+        <strong>{HttpUtility.HtmlEncode(fullName)}</strong>,
+    </p>
+
+    <p>
+        Đây là mã xác thực mới cho tài khoản
+        <strong>The Chill Shop</strong>.
+    </p>
+
+    <div style='
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 8px;
+        margin: 20px 0;
+    '>
+        {newOtp}
+    </div>
+
+    <p>
+        Mã xác thực có hiệu lực trong
+        <strong>10 phút</strong>.
+    </p>
+
+    <p>
+        Mã xác thực trước đó đã không còn hiệu lực.
+    </p>
+
+    <br />
+
+    <p>
+        Trân trọng,<br />
+        <strong>The Chill Shop</strong>
+    </p>
+</div>"
+                        }
+                    );
+                }
+                catch (Exception emailEx)
+                {
+                    // Nếu gửi email thất bại,
+                    // xóa OTP mới để không sử dụng mã chưa được gửi thành công.
+
+                    Session.Remove("PendingRegistration.Otp");
+                    Session.Remove("PendingRegistration.OtpExpiresAt");
+                    Session.Remove("PendingRegistration.OtpLastSentAt");
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Resend OTP Email Error] {emailEx.Message}"
+                    );
+
+                    TempData["OtpError"] =
+                        "Không thể gửi mã xác thực. Vui lòng thử lại.";
+
+                    return RedirectToAction(
+                        "VerifyOtp",
+                        "Account"
+                    );
+                }
+
+
+                // ==========================================
+                // 6. Thông báo thành công
+                // ==========================================
+
+                TempData["OtpSuccess"] =
+                    "Mã xác thực mới đã được gửi đến email của bạn.";
+
+                return RedirectToAction(
+                    "VerifyOtp",
+                    "Account"
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"[ResendOtp Error] {ex.Message}"
+                );
+
+                TempData["OtpError"] =
+                    "Đã xảy ra lỗi. Vui lòng thử lại.";
+
+                return RedirectToAction(
+                    "VerifyOtp",
+                    "Account"
+                );
+            }
         }
 
         // ═══════════════════════════════════════════════════
@@ -386,6 +620,11 @@ namespace WebEcommerce.Controllers
 
                 Session["PendingRegistration.OtpExpiresAt"] =
                     DateTime.UtcNow.AddMinutes(10);
+
+                Session["PendingRegistration.OtpAttempts"] = 0;
+
+                Session["PendingRegistration.OtpLastSentAt"] =
+                    DateTime.UtcNow;
 
                 // 6. Gửi OTP đến email
                 try

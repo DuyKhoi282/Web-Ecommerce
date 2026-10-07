@@ -154,6 +154,35 @@
         margin-top: 3px;
     }
 
+    .resend-section {
+        text-align: center;
+        margin-top: 22px;
+    }
+
+    .resend-text {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .resend-button {
+        border: none;
+        background: transparent;
+        color: #08a9cf;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 8px;
+    }
+
+        .resend-button:hover {
+            text-decoration: underline;
+        }
+
+    .resend-form {
+        display: inline;
+    }
+
     /* =========================
        RIGHT FORM
        ========================= */
@@ -505,9 +534,22 @@
             </div>
 
 
-            <h2>
-                Xác thực email
-            </h2>
+            <h2> Xác thực email </h2>
+
+            @if (TempData["OtpSuccess"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["OtpSuccess"]
+                </div>
+            }
+
+            @if (TempData["OtpError"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["OtpError"]
+                </div>
+            }
+
 
             <p class="subtitle">
                 Nhập mã xác thực 6 chữ số được gửi đến
@@ -577,14 +619,33 @@
 
             }
 
+            <div class="resend-section">
 
-            <div class="back-register">
+                <div class="resend-text">
+                    Không nhận được mã?
+                </div>
 
-                Nhập sai email?
+                @using (Html.BeginForm(
+                    "ResendOtp",
+                    "Account",
+                    FormMethod.Post,
+                    new { @class = "resend-form" }))
+                {
+                    @Html.AntiForgeryToken()
 
-                <a href="@Url.Action("Register", "Account")">
-                    Đăng ký lại
-                </a>
+                    <button type="submit"
+                            class="resend-button">
+                        Gửi lại mã
+                    </button>
+                }
+
+                <div class="back-register">
+                    Nhập sai email?
+
+                    <a href="@Url.Action("Register", "Account")">
+                        Đăng ký lại
+                    </a>
+                </div>
 
             </div>
 
