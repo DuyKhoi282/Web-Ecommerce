@@ -1,0 +1,610 @@
+﻿@model WebEcommerce.Models.VerifyOtpViewModel
+
+@{
+    ViewBag.Title = "Xác thực email";
+}
+
+<style>
+    .verify-page {
+        min-height: calc(100vh - 70px);
+        display: flex;
+        background: #ffffff;
+    }
+
+    /* =========================
+       LEFT BRAND PANEL
+       ========================= */
+    .verify-left {
+        width: 50%;
+        min-height: 700px;
+        background: linear-gradient(135deg, #1456a0 0%, #087fbd 50%, #08afd0 100%);
+        color: white;
+        padding: 55px 7%;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .verify-left::before {
+            content: "";
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            top: -150px;
+            right: -120px;
+        }
+
+        .verify-left::after {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            bottom: -130px;
+            left: -100px;
+        }
+
+    .brand-area {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .brand-icon {
+        width: 50px;
+        height: 50px;
+        border: 1px solid rgba(255,255,255,0.45);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .brand-name {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+        .brand-name .blue {
+            color: #8beaff;
+        }
+
+    .brand-slogan {
+        margin-top: 8px;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .left-content {
+        position: relative;
+        z-index: 2;
+        margin-top: 90px;
+        max-width: 570px;
+    }
+
+        .left-content .badge {
+            display: inline-block;
+            padding: 9px 17px;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .left-content h1 {
+            font-size: 46px;
+            line-height: 1.12;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
+        }
+
+            .left-content h1 span {
+                color: #8beaff;
+            }
+
+        .left-content p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.92);
+            margin-bottom: 35px;
+        }
+
+    .feature-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(255,255,255,0.16);
+    }
+
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.22);
+        flex-shrink: 0;
+    }
+
+    .feature-title {
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .feature-text {
+        font-size: 13px;
+        opacity: 0.82;
+        margin-top: 3px;
+    }
+
+    /* =========================
+       RIGHT FORM
+       ========================= */
+    .verify-right {
+        width: 50%;
+        min-height: 700px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 7%;
+        background: #ffffff;
+    }
+
+    .verify-card {
+        width: 100%;
+        max-width: 515px;
+    }
+
+    .form-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .form-brand-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 13px;
+        background: #0754a4;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 5px 14px rgba(7,84,164,0.18);
+    }
+
+    .form-brand-name {
+        font-size: 27px;
+        font-weight: 800;
+        color: #0754a4;
+        letter-spacing: -1px;
+    }
+
+        .form-brand-name span {
+            color: #08a9cf;
+        }
+
+    .verify-card h2 {
+        font-size: 38px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0 0 8px;
+        letter-spacing: -1px;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .email-box {
+        background: #f4f9fc;
+        border: 1px solid #dbeaf2;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 25px;
+        color: #4b5563;
+        font-size: 14px;
+    }
+
+        .email-box strong {
+            color: #0754a4;
+            word-break: break-word;
+        }
+
+    .otp-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .otp-input {
+        width: 100%;
+        height: 62px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        background: #ffffff;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 12px;
+        text-align: center;
+        color: #0754a4;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+        .otp-input:focus {
+            border-color: #08a9cf;
+            box-shadow: 0 0 0 4px rgba(8,169,207,0.10);
+        }
+
+        .otp-input::placeholder {
+            color: #cbd5e1;
+            letter-spacing: 8px;
+            font-size: 22px;
+        }
+
+    .expire-text {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        margin: 12px 0 22px;
+    }
+
+    .verify-button {
+        width: 100%;
+        height: 58px;
+        border: none;
+        border-radius: 12px;
+        background: #1456a0;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 7px 18px rgba(20,86,160,0.18);
+    }
+
+        .verify-button:hover {
+            background: #0d4788;
+            transform: translateY(-1px);
+            box-shadow: 0 9px 22px rgba(20,86,160,0.24);
+        }
+
+    .back-register {
+        text-align: center;
+        margin-top: 25px;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+        .back-register a {
+            color: #08a9cf;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+            .back-register a:hover {
+                text-decoration: underline;
+            }
+
+    .validation-summary {
+        margin-bottom: 15px;
+    }
+
+    .security-note {
+        margin-top: 35px;
+        padding-top: 18px;
+        border-top: 1px solid #edf0f2;
+        display: flex;
+        justify-content: space-between;
+        color: #8b949e;
+        font-size: 12px;
+    }
+
+    /* =========================
+       RESPONSIVE
+       ========================= */
+    @@media (max-width: 900px) {
+        .verify-page {
+            display: block;
+        }
+
+        .verify-left {
+            width: 100%;
+            min-height: auto;
+            padding: 35px 30px;
+        }
+
+        .left-content {
+            margin-top: 45px;
+        }
+
+            .left-content h1 {
+                font-size: 36px;
+            }
+
+        .verify-right {
+            width: 100%;
+            min-height: auto;
+            padding: 45px 30px;
+        }
+    }
+
+    @@media (max-width: 500px) {
+        .verify-left {
+            padding: 30px 20px;
+        }
+
+        .verify-right {
+            padding: 35px 20px;
+        }
+
+        .left-content h1 {
+            font-size: 31px;
+        }
+
+        .verify-card h2 {
+            font-size: 31px;
+        }
+
+        .security-note {
+            display: block;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="verify-page">
+
+    <!-- =========================
+         LEFT SIDE
+         ========================= -->
+    <div class="verify-left">
+
+        <div class="brand-area">
+
+            <div class="brand-icon">
+                <span>♧</span>
+            </div>
+
+            <div>
+                <div class="brand-name">
+                    TheChill<span class="blue">Shop</span>
+                </div>
+
+                <div class="brand-slogan">
+                    Mua sắm thông minh - Sống chất lượng
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="left-content">
+
+            <div class="badge">
+                ✦ BẢO MẬT TÀI KHOẢN
+            </div>
+
+            <h1>
+                Xác thực email<br />
+                <span>An toàn & nhanh chóng</span>
+            </h1>
+
+            <p>
+                Chúng tôi đã gửi một mã xác thực đến email của bạn.
+                Nhập mã để hoàn tất quá trình đăng ký tài khoản
+                tại TheChillShop.
+            </p>
+
+
+            <div class="feature-box">
+
+                <div class="feature-icon">
+                    ✓
+                </div>
+
+                <div>
+                    <div class="feature-title">
+                        Xác thực an toàn
+                    </div>
+
+                    <div class="feature-text">
+                        Bảo vệ tài khoản bằng mã xác thực riêng của bạn.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="feature-box">
+
+                <div class="feature-icon">
+                    ✉
+                </div>
+
+                <div>
+                    <div class="feature-title">
+                        Kiểm tra email
+                    </div>
+
+                    <div class="feature-text">
+                        Mã xác thực được gửi trực tiếp đến hộp thư của bạn.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="feature-box">
+
+                <div class="feature-icon">
+                    🔒
+                </div>
+
+                <div>
+                    <div class="feature-title">
+                        Bảo mật thông tin
+                    </div>
+
+                    <div class="feature-text">
+                        Thông tin đăng ký của bạn được bảo vệ an toàn.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         RIGHT SIDE
+         ========================= -->
+    <div class="verify-right">
+
+        <div class="verify-card">
+
+            <div class="form-brand">
+
+                <div class="form-brand-icon">
+                    ♧
+                </div>
+
+                <div class="form-brand-name">
+                    TheChill<span>Shop</span>
+                </div>
+
+            </div>
+
+
+            <h2>
+                Xác thực email
+            </h2>
+
+            <p class="subtitle">
+                Nhập mã xác thực 6 chữ số được gửi đến
+                email của bạn để hoàn tất đăng ký.
+            </p>
+
+
+            <div class="email-box">
+                Mã xác thực đã được gửi đến:
+                <br />
+                <strong>@Model.Email</strong>
+            </div>
+
+
+            @using (Html.BeginForm(
+                "VerifyOtp",
+                "Account",
+                FormMethod.Post,
+                new { @class = "verify-form" }))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.HiddenFor(m => m.Email)
+
+                <div class="validation-summary">
+                    @Html.ValidationSummary(
+                        true,
+                        "",
+                        new { @class = "text-danger" })
+                </div>
+
+
+                <div class="form-group">
+
+                    @Html.LabelFor(
+                        m => m.Code,
+                        new { @class = "otp-label" })
+
+                    @Html.TextBoxFor(
+                        m => m.Code,
+                        new
+                        {
+                            @class = "otp-input",
+                            maxlength = "6",
+                            autocomplete = "one-time-code",
+                            inputmode = "numeric",
+                            placeholder = "••••••"
+                        })
+
+                    @Html.ValidationMessageFor(
+                        m => m.Code,
+                        "",
+                        new { @class = "text-danger" })
+
+                </div>
+
+
+                <div class="expire-text">
+                    ⏱ Mã xác thực có hiệu lực trong
+                    <strong>10 phút</strong>
+                </div>
+
+
+                <button type="submit" class="verify-button">
+                    Xác thực email&nbsp;&nbsp; →
+                </button>
+
+            }
+
+
+            <div class="back-register">
+
+                Nhập sai email?
+
+                <a href="@Url.Action("Register", "Account")">
+                    Đăng ký lại
+                </a>
+
+            </div>
+
+
+            <div class="security-note">
+
+                <span>🔒 Bảo mật 256-bit SSL tiêu chuẩn</span>
+
+                <span>✓ TheChillShop</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

@@ -34,6 +34,28 @@ namespace WebEcommerce.Models
     }
 
     // ──────────────────────────────────────────────────────
+    // XÁC THỰC OTP 
+    // ──────────────────────────────────────────────────────
+    public class VerifyOtpViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập mã xác thực.")]
+        [StringLength(
+            6,
+            MinimumLength = 6,
+            ErrorMessage = "Mã xác thực phải gồm 6 chữ số."
+        )]
+        [RegularExpression(
+            @"^\d{6}$",
+            ErrorMessage = "Mã xác thực phải gồm 6 chữ số."
+        )]
+        [Display(Name = "Mã xác thực")]
+        public string Code { get; set; }
+
+        public string Email { get; set; }
+    }
+
+
+    // ──────────────────────────────────────────────────────
     //  ĐĂNG NHẬP
     // ──────────────────────────────────────────────────────
     public class LoginViewModel

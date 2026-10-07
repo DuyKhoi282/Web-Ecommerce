@@ -330,6 +330,7 @@
     <Content Include="Views\Order\Detail.cshtml" />
     <Content Include="Views\AdminOrder\Index.cshtml" />
     <Content Include="Views\AdminOrder\Detail.cshtml" />
+    <Content Include="Views\Account\VerifyOtp.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -43,8 +43,281 @@ namespace WebEcommerce.Controllers
         }
 
         // ═══════════════════════════════════════════════════
+        // XÁC THỰC OTP (One-Time Password)
+        // ═══════════════════════════════════════════════════
+        // GET: /Account/VerifyOtp
+        [AllowAnonymous]
+        public ActionResult VerifyOtp()
+        {
+            var email =
+                Session["PendingRegistration.Email"] as string;
+
+            // Không có thông tin đăng ký tạm thời
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Register", "Account");
+            }
+
+            var model = new VerifyOtpViewModel
+            {
+                Email = email
+            };
+
+            return View(model);
+        }
+
+        // POST: /Account/VerifyOtp
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> VerifyOtp(VerifyOtpViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                // ==========================================
+                // 1. Lấy thông tin đăng ký tạm thời
+                // ==========================================
+
+                var fullName =
+                    Session["PendingRegistration.FullName"] as string;
+
+                var email =
+                    Session["PendingRegistration.Email"] as string;
+
+                var passwordHash =
+                    Session["PendingRegistration.PasswordHash"] as string;
+
+                var storedOtp =
+                    Session["PendingRegistration.Otp"] as string;
+
+                var otpExpiresAt =
+                    Session["PendingRegistration.OtpExpiresAt"] as DateTime?;
+
+
+                // ==========================================
+                // 2. Kiểm tra thông tin tạm thời
+                // ==========================================
+
+                if (string.IsNullOrEmpty(fullName) ||
+                    string.IsNullOrEmpty(email) ||
+                    string.IsNullOrEmpty(passwordHash) ||
+                    string.IsNullOrEmpty(storedOtp) ||
+                    !otpExpiresAt.HasValue)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "Thông tin đăng ký đã hết hạn. Vui lòng đăng ký lại."
+                    );
+
+                    return View(model);
+                }
+
+
+                // ==========================================
+                // 3. Kiểm tra OTP hết hạn
+                // ==========================================
+
+                if (DateTime.UtcNow > otpExpiresAt.Value)
+                {
+                    ModelState.AddModelError(
+                        "Code",
+                        "Mã xác thực đã hết hạn. Vui lòng đăng ký lại."
+                    );
+
+                    return View(model);
+                }
+
+
+                // ==========================================
+                // 4. Kiểm tra OTP
+                // ==========================================
+
+                if (!string.Equals(
+                        model.Code.Trim(),
+                        storedOtp,
+                        StringComparison.Ordinal))
+                {
+                    ModelState.AddModelError(
+                        "Code",
+                        "Mã xác thực không chính xác."
+                    );
+
+                    return View(model);
+                }
+
+
+                // ==========================================
+                // 5. Tạo tài khoản
+                // ==========================================
+
+                var user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+
+                    FullName = fullName,
+
+                    // Password đã được hash từ bước Register
+                    PasswordHash = passwordHash,
+
+                    // OTP đúng => Email đã được xác thực
+                    EmailConfirmed = true,
+
+                    IsActive = true,
+
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var result = await UserManager.CreateAsync(user);
+
+
+                // ==========================================
+                // 6. Kiểm tra tạo tài khoản
+                // ==========================================
+
+                if (!result.Succeeded)
+                {
+                    AddErrors(result);
+                    return View(model);
+                }
+
+
+                // ==========================================
+                // 7. Gán Role Customer
+                // ==========================================
+
+                var roleResult =
+                    await UserManager.AddToRoleAsync(
+                        user.Id,
+                        "Customer"
+                    );
+
+                if (!roleResult.Succeeded)
+                {
+                    AddErrors(roleResult);
+                    return View(model);
+                }
+
+
+                // ==========================================
+                // 8. Gửi mail chào mừng
+                // ==========================================
+
+                try
+                {
+                    await UserManager.SendEmailAsync(
+                        user.Id,
+                        "Đăng ký tài khoản thành công - The Chill Shop",
+                        $@"
+<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+    <h2>Chào mừng bạn đến với The Chill Shop!</h2>
+
+    <p>
+        Xin chào
+        <strong>{HttpUtility.HtmlEncode(user.FullName)}</strong>,
+    </p>
+
+    <p>
+        Tài khoản của bạn đã được đăng ký thành công.
+    </p>
+
+    <p>
+        <strong>Email đăng nhập:</strong>
+        {HttpUtility.HtmlEncode(user.Email)}
+    </p>
+
+    <p>
+        Email của bạn đã được xác thực thành công.
+    </p>
+
+    <p>
+        Bạn có thể sử dụng tài khoản này để đăng nhập
+        và mua sắm trên hệ thống.
+    </p>
+
+    <br />
+
+    <p>
+        Trân trọng,<br />
+        <strong>The Chill Shop</strong>
+    </p>
+</div>"
+                    );
+                }
+                catch (Exception emailEx)
+                {
+                    // Tài khoản vẫn được tạo thành công
+                    // dù mail chào mừng không gửi được.
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Welcome Email Error] {emailEx.Message}"
+                    );
+                }
+
+
+                // ==========================================
+                // 9. Xóa dữ liệu đăng ký tạm thời
+                // ==========================================
+
+                Session.Remove("PendingRegistration.FullName");
+                Session.Remove("PendingRegistration.Email");
+                Session.Remove("PendingRegistration.PasswordHash");
+                Session.Remove("PendingRegistration.Otp");
+                Session.Remove("PendingRegistration.OtpExpiresAt");
+
+
+                // ==========================================
+                // 10. Chuyển về Login
+                // ==========================================
+
+                TempData["SuccessMessage"] =
+                    "Xác thực email thành công! Tài khoản đã được tạo. Vui lòng đăng nhập.";
+
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.InnerException != null
+                    ? $"{ex.Message} -> {ex.InnerException.Message}"
+                    : ex.Message;
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[VerifyOtp Error] {msg}"
+                );
+
+                ModelState.AddModelError(
+                    "",
+                    $"Đã xảy ra lỗi trong quá trình xác thực: {msg}"
+                );
+            }
+
+            return View(model);
+        }
+
+        // ═══════════════════════════════════════════════════
         //  ĐĂNG KÝ
         // ═══════════════════════════════════════════════════
+
+        // Tạo mã OTP 6 chữ số ngẫu nhiên
+        private string GenerateOtp()
+        {
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                var bytes = new byte[4];
+
+                rng.GetBytes(bytes);
+
+                var number = BitConverter.ToUInt32(bytes, 0) % 1000000;
+
+                return number.ToString("D6");
+            }
+        }
 
         // GET: /Account/Register
         [AllowAnonymous]
@@ -67,83 +340,187 @@ namespace WebEcommerce.Controllers
 
             try
             {
-                // Nghiệp vụ: Gán FullName, IsActive = true, CreatedAt = now
-                var user = new ApplicationUser
+                // 1. Kiểm tra email đã tồn tại chưa
+                var existingUser = await UserManager.FindByEmailAsync(model.Email);
+
+                if (existingUser != null)
                 {
-                    UserName   = model.Email,
-                    Email      = model.Email,
-                    FullName   = model.FullName.Trim(),
-                    IsActive   = true,
-                    CreatedAt  = DateTime.UtcNow
-                };
+                    ModelState.AddModelError(
+                        "Email",
+                        "Email này đã được sử dụng."
+                    );
 
-                var result = await UserManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    // Nghiệp vụ: Gán mặc định Role "Customer" ngay sau khi tạo
-                    await UserManager.AddToRoleAsync(user.Id, "Customer");
-
-                            // Phần này Phúc thêm vào để hệ thống gửi mail 
-                    try
-                    {
-                        await UserManager.SendEmailAsync(
-                            user.Id,
-                            "Đăng ký tài khoản thành công - The Chill Shop",
-                            $@"
-                <div style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                    <h2>Chào mừng bạn đến với The Chill Shop!</h2>
-
-                    <p>
-                        Xin chào <strong>{HttpUtility.HtmlEncode(user.FullName)}</strong>,
-                    </p>
-
-                    <p>
-                        Tài khoản của bạn đã được đăng ký thành công.
-                    </p>
-
-                    <p>
-                        <strong>Email đăng nhập:</strong>
-                        {HttpUtility.HtmlEncode(user.Email)}
-                    </p>
-
-                    <p>
-                        Bạn có thể sử dụng tài khoản này để đăng nhập
-                        và mua sắm trên hệ thống.
-                    </p>
-
-                    <br />
-
-                    <p>
-                        Trân trọng,<br />
-                        <strong>The Chill Shop</strong>
-                    </p>
-                </div>"
-                        );
-                    }
-                    catch (Exception emailEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine(
-                            $"[Register Email Error] {emailEx.Message}");
-                    }
-
-                            // Hết phần của Phúc thêm vào 
-
-                    // Nghiệp vụ: KHÔNG tự đăng nhập — redirect đến Login kèm thông báo
-                    TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục.";
-                    return RedirectToAction("Login", "Account");
+                    return View(model);
                 }
 
-                AddErrors(result);
+                // 2. Kiểm tra password theo cấu hình Identity
+                var passwordValidation =
+                    await UserManager.PasswordValidator.ValidateAsync(model.Password);
+
+                if (!passwordValidation.Succeeded)
+                {
+                    AddErrors(passwordValidation);
+                    return View(model);
+                }
+
+                // 3. Tạo mã OTP 6 chữ số
+                var otp = GenerateOtp();
+
+                // 4. Hash password trước khi lưu tạm
+                // Không lưu password gốc vào Session
+                var passwordHash =
+                    UserManager.PasswordHasher.HashPassword(model.Password);
+
+                // 5. Lưu thông tin đăng ký tạm thời vào Session
+                Session["PendingRegistration.FullName"] =
+                    model.FullName.Trim();
+
+                Session["PendingRegistration.Email"] =
+                    model.Email.Trim();
+
+                Session["PendingRegistration.PasswordHash"] =
+                    passwordHash;
+
+                Session["PendingRegistration.Otp"] =
+                    otp;
+
+                Session["PendingRegistration.OtpExpiresAt"] =
+                    DateTime.UtcNow.AddMinutes(10);
+
+                // 6. Gửi OTP đến email
+                try
+                {
+                    // Email chưa có UserId vì tài khoản chưa được tạo.
+                    // Vì vậy gửi trực tiếp thông qua EmailService.
+                    var emailService = new EmailService();
+
+                    await emailService.SendAsync(
+                        new IdentityMessage
+                        {
+                            Destination = model.Email,
+                            Subject = "Mã xác thực đăng ký - The Chill Shop",
+                            Body = $@"
+<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+    <h2>Xác thực email đăng ký</h2>
+
+    <p>
+        Xin chào <strong>{HttpUtility.HtmlEncode(model.FullName)}</strong>,
+    </p>
+
+    <p>
+        Cảm ơn bạn đã đăng ký tài khoản tại <strong>The Chill Shop</strong>.
+    </p>
+
+    <p>
+        Mã xác thực của bạn là:
+    </p>
+
+    <div style='
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 8px;
+        margin: 20px 0;
+    '>
+        {otp}
+    </div>
+
+    <p>
+        Mã xác thực có hiệu lực trong <strong>10 phút</strong>.
+    </p>
+
+    <p>
+        Nếu bạn không thực hiện đăng ký tài khoản,
+        vui lòng bỏ qua email này.
+    </p>
+
+    <br />
+
+    <p>
+        Trân trọng,<br />
+        <strong>The Chill Shop</strong>
+    </p>
+</div>"
+                        }
+                    );
+                }
+                catch (Exception emailEx)
+                {
+                    // Nếu gửi mail thất bại thì xóa dữ liệu đăng ký tạm
+                    Session.Remove("PendingRegistration.FullName");
+                    Session.Remove("PendingRegistration.Email");
+                    Session.Remove("PendingRegistration.PasswordHash");
+                    Session.Remove("PendingRegistration.Otp");
+                    Session.Remove("PendingRegistration.OtpExpiresAt");
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Register OTP Email Error] {emailEx.Message}"
+                    );
+
+                    ModelState.AddModelError(
+                        "",
+                        "Không thể gửi mã xác thực đến email. Vui lòng thử lại."
+                    );
+
+                    return View(model);
+                }
+
+                // 7. Chuyển sang trang nhập OTP
+                return RedirectToAction("VerifyOtp", "Account");
             }
             catch (Exception ex)
             {
-                var msg = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
-                System.Diagnostics.Debug.WriteLine($"[Register Error] {msg}");
-                ModelState.AddModelError("", $"Đã xảy ra lỗi trong quá trình đăng ký: {msg}");
+                var msg = ex.InnerException != null
+                    ? $"{ex.Message} -> {ex.InnerException.Message}"
+                    : ex.Message;
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[Register OTP Error] {msg}"
+                );
+
+                ModelState.AddModelError(
+                    "",
+                    $"Đã xảy ra lỗi trong quá trình đăng ký: {msg}"
+                );
             }
 
             return View(model);
+        }
+
+        //=======================
+        //  XÁC THỰC EMAIL (Email Confirmation)
+        //=======================
+        // GET: /Account/ConfirmEmail
+        [AllowAnonymous]
+        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return HttpNotFound();
+            }
+
+            try
+            {
+                var result = await UserManager.ConfirmEmailAsync(userId, code);
+
+                if (result.Succeeded)
+                {
+                    ViewBag.Message = "Email của bạn đã được xác thực thành công.";
+                    return View();
+                }
+
+                ViewBag.Message = "Liên kết xác thực không hợp lệ hoặc đã hết hạn.";
+                return View();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"[ConfirmEmail Error] {ex.Message}");
+
+                ViewBag.Message =
+                    "Đã xảy ra lỗi trong quá trình xác thực email.";
+
+                return View();
+            }
         }
 
         // ═══════════════════════════════════════════════════
@@ -495,6 +872,7 @@ namespace WebEcommerce.Controllers
             return RedirectToAction("ForgotPasswordConfirmation", "Account");
         }
 
+        
         // GET: /Account/ForgotPasswordConfirmation
         [AllowAnonymous]
         public ActionResult ForgotPasswordConfirmation()
