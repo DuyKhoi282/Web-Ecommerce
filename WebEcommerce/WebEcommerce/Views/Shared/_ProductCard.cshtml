@@ -1,4 +1,4 @@
-﻿@model WebEcommerce.Models.Product
+@model WebEcommerce.Models.Product
 @{
     // TheChillShop Standard Product Card Component
     // Dành cho Thành viên 2 (Hiển thị sản phẩm), Thành viên 3 (Thêm giỏ hàng Ajax), Thành viên 4 (Đánh giá)
@@ -47,7 +47,7 @@
         </button>
 
         <!-- Product Image -->
-        <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" class="block w-full h-full p-4 flex items-center justify-center">
+        <a href="@(id > 0 ? Url.Action("Details", "Shop", new { id = id }) : "#")" class="block w-full h-full p-4 flex items-center justify-center">
             <img src="@imageUrl" 
                  alt="@name" 
                  class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 ease-out" 
@@ -65,7 +65,7 @@
 
             <!-- Product Title -->
             <h3 class="font-headline font-bold text-slate-900 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-[#0d47a1] transition-colors duration-200 mb-2">
-                <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" title="@name">
+                <a href="@(id > 0 ? Url.Action("Details", "Shop", new { id = id }) : "#")" title="@name">
                     @name
                 </a>
             </h3>
@@ -113,7 +113,7 @@
                     <span>Thêm giỏ</span>
                 </button>
                 
-                <a href="@(id > 0 ? Url.Action("Details", "Products", new { id = id }) : "#")" 
+                <a href="@(id > 0 ? Url.Action("Details", "Shop", new { id = id }) : "#")" 
                    class="w-10 h-10 rounded-xl border-2 border-slate-300 text-slate-700 hover:text-[#0d47a1] hover:border-[#0d47a1] bg-white flex items-center justify-center transition-colors shadow-sm"
                    title="Xem chi tiết">
                     <span class="material-symbols-outlined text-lg">visibility</span>

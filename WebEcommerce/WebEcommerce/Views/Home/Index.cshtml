@@ -1,3 +1,4 @@
+
 @model List<WebEcommerce.Models.Product>
 @{
     ViewBag.Title = "TheChillShop - Thế giới công nghệ & phụ kiện cao cấp";
@@ -365,25 +366,47 @@
 
         <!-- Product Cards Grid - DỮ LIỆU THẬT TỪ DATABASE -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            
-            @if (Model != null && Model.Any())
+            @if (ViewBag.FeaturedProducts != null && ((List<WebEcommerce.Models.Product>)ViewBag.FeaturedProducts).Any())
             {
-                foreach (var product in Model)
                 {
                     @Html.Partial("_ProductCard", product)
                 }
             }
             else
             {
-                <div class="col-span-full text-center py-12">
-                    <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-4xl text-[#0d47a1]">inventory_2</span>
-                    </div>
-                    <h3 class="font-headline font-bold text-xl text-slate-900 mb-2">Chưa có sản phẩm</h3>
-                    <p class="text-sm text-slate-500">Các sản phẩm sẽ được hiển thị khi có dữ liệu trong hệ thống.</p>
-                </div>
-            }
+                <!-- Fallback mẫu nếu chưa nạp CSDL -->
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "iPhone 16 Pro Max 256GB - Chính Hãng VN/A" },
+                    { "CardCategory", "Điện thoại" },
+                    { "CardPrice", 34990000m },
+                    { "CardDiscountPrice", 29990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&auto=format&fit=crop&q=80" }
+                })
 
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "MacBook Air 13 M3 8GB 256GB Midnight" },
+                    { "CardCategory", "Laptop" },
+                    { "CardPrice", 27990000m },
+                    { "CardDiscountPrice", 24490000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80" }
+                })
+
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "Tai nghe Sony WH-1000XM5 Chống Ồn Đỉnh Cao" },
+                    { "CardCategory", "Tai nghe" },
+                    { "CardPrice", 8490000m },
+                    { "CardDiscountPrice", 6990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80" }
+                })
+
+                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
+                    { "CardName", "Apple Watch Series 10 GPS 42mm Nhôm Đen" },
+                    { "CardCategory", "Smartwatch" },
+                    { "CardPrice", 10990000m },
+                    { "CardDiscountPrice", 9990000m },
+                    { "CardImageUrl", "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=80" }
+                })
+            }
         </div>
 
         <div class="mt-12 text-center">

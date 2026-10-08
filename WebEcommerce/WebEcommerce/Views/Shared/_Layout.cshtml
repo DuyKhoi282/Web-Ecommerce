@@ -85,17 +85,17 @@
                 <!-- Desktop Navigation Links (Nowrap + Flex-shrink-0 to prevent text breaking) -->
                 <nav class="hidden lg:flex items-center gap-3 xl:gap-6 flex-shrink-0">
                     <a href="@Url.Action("Index", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Trang chủ</a>
-                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Sản phẩm</a>
+                    <a href="@Url.Action("Index", "Shop")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Sản phẩm</a>
                     <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Bộ sưu tập</a>
                     <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Khuyến mãi</a>
                     <a href="@Url.Action("Contact", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Liên hệ</a>
                 </nav>
 
                 <!-- Search Input Bar (Fixed min-width, never shrinks to a tiny circle) -->
-                <div class="hidden md:flex items-center relative flex-1 max-w-[220px] xl:max-w-xs min-w-[170px]">
-                    <input type="text" placeholder="Tìm sản phẩm..." class="w-full pl-9 pr-3 py-2 text-xs xl:text-sm bg-slate-50 border-2 border-slate-300 rounded-full focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none text-[#1a1a2e]" />
-                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg pointer-events-none">search</span>
-                </div>
+                <form action="@Url.Action("Index", "Shop")" method="get" class="hidden md:flex items-center relative flex-1 max-w-[220px] xl:max-w-xs min-w-[170px]">
+                    <input type="text" name="keyword" placeholder="Tìm sản phẩm..." class="w-full pl-9 pr-3 py-2 text-xs xl:text-sm bg-slate-50 border-2 border-slate-300 rounded-full focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none text-[#1a1a2e]" />
+                    <button type="submit" class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg hover:text-[#0d47a1]">search</button>
+                </form>
 
                 <!-- Right Actions: Cart & Auth Partial (No wrapping) -->
                 <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
