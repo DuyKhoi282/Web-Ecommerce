@@ -1,0 +1,101 @@
+@model WebEcommerce.Models.UpdateStockViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-lg mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+        <a href="@Url.Action("Index", "Inventory")" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-slate-600">arrow_back</span>
+        </a>
+        <div>
+            <h1 class="text-2xl font-headline font-extrabold text-slate-900">Nhập / Xuất Kho</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Cập nhật số lượng tồn kho cho sản phẩm</p>
+        </div>
+    </div>
+
+    <!-- Thông tin sản phẩm -->
+    <div class="admin-card rounded-2xl p-5 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-600 text-2xl">inventory_2</span>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">@Model.ProductName</h3>
+                <p class="text-sm text-slate-500">Tồn kho hiện tại:
+                    @{
+                        var stockClass = Model.CurrentStock == 0 ? "text-red-600" : (Model.CurrentStock < 5 ? "text-amber-600" : "text-emerald-600");
+                    }
+                    <span class="font-extrabold @stockClass text-lg">@Model.CurrentStock</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form cập nhật -->
+    <div class="admin-card rounded-2xl p-6">
+        @using (Html.BeginForm("UpdateStock", "Inventory", FormMethod.Post, new { @class = "space-y-5" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.ProductID)
+            @Html.HiddenFor(m => m.ProductName)
+            @Html.HiddenFor(m => m.CurrentStock)
+
+            @Html.ValidationSummary(true, "", new { @class = "bg-red-50 text-red-600 text-sm p-4 rounded-xl border border-red-200 mb-4" })
+
+            <!-- Loại thao tác -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Loại thao tác <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="OperationType" value="import" checked class="sr-only peer" />
+                        <div class="p-4 rounded-xl border-2 border-slate-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 transition-all text-center">
+                            <span class="material-symbols-outlined text-3xl text-emerald-600 mb-1 block">add_circle</span>
+                            <span class="font-bold text-sm text-slate-800">NHẬP KHO</span>
+                            <p class="text-xs text-slate-500 mt-0.5">Tăng số lượng tồn kho</p>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="OperationType" value="export" class="sr-only peer" />
+                        <div class="p-4 rounded-xl border-2 border-slate-200 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all text-center">
+                            <span class="material-symbols-outlined text-3xl text-red-600 mb-1 block">remove_circle</span>
+                            <span class="font-bold text-sm text-slate-800">XUẤT KHO</span>
+                            <p class="text-xs text-slate-500 mt-0.5">Giảm số lượng tồn kho</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Số lượng -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">Số lượng <span class="text-red-500">*</span></label>
+                @Html.TextBoxFor(m => m.QuantityChange, new { @class = "w-full px-4 py-3 text-lg font-bold text-center bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", type = "number", min = "1", placeholder = "0" })
+                @Html.ValidationMessageFor(m => m.QuantityChange, "", new { @class = "text-red-500 text-xs mt-1" })
+            </div>
+
+            <!-- Ghi chú -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">Ghi chú</label>
+                @Html.TextAreaFor(m => m.Note, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", rows = "2", placeholder = "Lý do nhập/xuất kho..." })
+            </div>
+
+            <!-- Preview kết quả -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <p class="text-sm text-blue-800 font-semibold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-600">info</span>
+                    Tồn kho sau khi cập nhật sẽ được tính tự động
+                </p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 pt-4 border-t border-slate-200">
+                <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg">
+                    <span class="material-symbols-outlined text-lg">sync_alt</span>
+                    Xác nhận cập nhật
+                </button>
+                <a href="@Url.Action("Index", "Inventory")" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition-all">Hủy</a>
+            </div>
+        }
+    </div>
+</div>

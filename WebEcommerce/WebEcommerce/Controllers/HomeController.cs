@@ -12,50 +12,54 @@ namespace WebEcommerce.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db = new ApplicationDbContext();
 
-        public HomeController()
-        {
-            _context = new ApplicationDbContext();
-        }
-
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
             try
             {
-                // Lấy sản phẩm còn kinh doanh (Status=1), sắp xếp theo ViewCount giảm dần
-                var products = await _context.Products
+                // Skill [ef6-npgsql-optimization]: AsNoTracking cho read-only & Include eager loading
+                var categories = _db.Categories
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.DisplayOrder)
+                    .Take(5)
+                    .ToList();
+
+                var featuredProducts = _db.Products
+                    .AsNoTracking()
                     .Include(p => p.Category)
                     .Include(p => p.ProductImages)
-                    .Where(p => p.Status == 1)
-                    .OrderByDescending(p => p.ViewCount)
+                    .Where(p => p.Status != 3)
+                    .OrderByDescending(p => p.ProductID)
                     .Take(8)
-                    .ToListAsync();
+                    .ToList();
 
-                return View(products);
+                ViewBag.Categories = categories;
+                ViewBag.FeaturedProducts = featuredProducts;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"[Home/Index] {ex}");
-                return View(new List<Product>());
+                // Skill [security-practices]: Boundary defense try-catch
+                ViewBag.Categories = new List<Category>();
+                ViewBag.FeaturedProducts = new List<Product>();
             }
+
+            return View();
         }
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
+            ViewBag.Message = "Giới thiệu hệ thống TheChillShop.";
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
-
+            ViewBag.Message = "Liên hệ với chúng tôi.";
             return View();
         }
-
-        // GET: /Home/GetCartCount (AJAX)
+     // GET: /Home/GetCartCount (AJAX)
         [HttpGet]
         public async Task<JsonResult> GetCartCount()
         {
@@ -93,12 +97,15 @@ namespace WebEcommerce.Controllers
             }
         }
 
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+
                 _context.Dispose();
             }
+
 
             base.Dispose(disposing);
         }
