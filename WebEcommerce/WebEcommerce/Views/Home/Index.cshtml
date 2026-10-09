@@ -4,6 +4,31 @@
     var featuredProducts = ViewBag.FeaturedProducts as List<Product> ?? new List<Product>();
     var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
     var allProducts = ViewBag.AllProducts as List<Product> ?? new List<Product>();
+
+    // Self-healing database fix for dummy or broken images
+    using (var db = new ApplicationDbContext())
+    {
+        var needsUpdate = db.ProductImages.Any(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org"));
+        if (needsUpdate)
+        {
+            var imagesToUpdate = db.ProductImages.Where(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org")).ToList();
+            foreach (var img in imagesToUpdate)
+            {
+                var p = db.Products.FirstOrDefault(x => x.ProductID == img.ProductID);
+                if (p != null)
+                {
+                    // Tạo placeholder hiển thị tên sản phẩm chính xác
+                    string text = Uri.EscapeDataString(p.Name);
+                    img.ImageURL = $"https://placehold.co/600x600/f4f6f8/1e293b?text={text}";
+                }
+            }
+            db.SaveChanges();
+            
+            // Cập nhật lại viewbag để hiển thị ảnh mới ngay lập tức
+            foreach (var p in featuredProducts) { foreach (var img in p.ProductImages) { if (img.ImageURL.Contains("picsum.photos") || img.ImageURL.Contains("wikimedia.org")) { var match = imagesToUpdate.FirstOrDefault(i => i.ImageID == img.ImageID); if (match != null) { img.ImageURL = match.ImageURL; } } } }
+            foreach (var p in allProducts) { foreach (var img in p.ProductImages) { if (img.ImageURL.Contains("picsum.photos") || img.ImageURL.Contains("wikimedia.org")) { var match = imagesToUpdate.FirstOrDefault(i => i.ImageID == img.ImageID); if (match != null) { img.ImageURL = match.ImageURL; } } } }
+        }
+    }
 }
 
 <!-- VALUE PROPOSITION BAR -->
@@ -279,8 +304,12 @@
 <!-- Product Cards Grid (9 cols -> 3x2 matrix) -->
 <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
 @{
-    var phoneProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Điện thoại") || p.Category.Name.Contains("Phone") || p.Category.Name.Contains("Tablet"))).Take(6).ToList();
-    if (!phoneProducts.Any()) { phoneProducts = allProducts.Take(6).ToList(); }
+    var phoneProducts = allProducts.Where(p => p.Category != null && (
+        p.Category.Name.IndexOf("Điện thoại", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Phone", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Máy tính bảng", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Tablet", StringComparison.OrdinalIgnoreCase) >= 0
+    )).Take(6).ToList();
 }
 @foreach (var product in phoneProducts)
 {
@@ -356,9 +385,11 @@
 <!-- Product Cards Grid (9 cols) -->
 <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
 @{
-    var laptopProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Laptop") || p.Category.Name.Contains("MacBook") || p.Category.Name.Contains("Máy tính"))).Take(6).ToList();
-    if (!laptopProducts.Any()) { laptopProducts = allProducts.Skip(2).Take(6).ToList(); }
-    if (!laptopProducts.Any()) { laptopProducts = allProducts.Take(6).ToList(); }
+    var laptopProducts = allProducts.Where(p => p.Category != null && (
+        p.Category.Name.IndexOf("Laptop", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("MacBook", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        (p.Category.Name.IndexOf("Máy tính", StringComparison.OrdinalIgnoreCase) >= 0 && p.Category.Name.IndexOf("bảng", StringComparison.OrdinalIgnoreCase) < 0)
+    )).Take(6).ToList();
 }
 @foreach (var product in laptopProducts)
 {
@@ -431,9 +462,13 @@
 <!-- Product Cards Grid (9 cols) -->
 <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
 @{
-    var audioProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Âm thanh") || p.Category.Name.Contains("Tai nghe") || p.Category.Name.Contains("Loa") || p.Category.Name.Contains("Đồng hồ") || p.Category.Name.Contains("Phụ kiện"))).Take(6).ToList();
-    if (!audioProducts.Any()) { audioProducts = allProducts.Skip(4).Take(6).ToList(); }
-    if (!audioProducts.Any()) { audioProducts = allProducts.Take(6).ToList(); }
+    var audioProducts = allProducts.Where(p => p.Category != null && (
+        p.Category.Name.IndexOf("Âm thanh", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Tai nghe", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Loa", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Đồng hồ", StringComparison.OrdinalIgnoreCase) >= 0 || 
+        p.Category.Name.IndexOf("Phụ kiện", StringComparison.OrdinalIgnoreCase) >= 0
+    )).Take(6).ToList();
 }
 @foreach (var product in audioProducts)
 {
