@@ -1,449 +1,709 @@
+@using WebEcommerce.Models
 @{
-    ViewBag.Title = "TheChillShop - Thế giới công nghệ & phụ kiện cao cấp";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var featuredProducts = ViewBag.FeaturedProducts as List<Product> ?? new List<Product>();
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var allProducts = ViewBag.AllProducts as List<Product> ?? new List<Product>();
 }
 
-<!-- ==========================================================================
-     SECTION 1: HERO BANNER (Deep Navy Cyber Tech)
-     ========================================================================== -->
-<section class="relative bg-gradient-to-b from-[#071329] via-[#0a1b38] to-[#0d2246] text-white overflow-hidden border-b border-slate-800">
-    <!-- Ambient Radial Mesh Glows -->
-    <div class="absolute -top-32 -right-32 w-[550px] h-[550px] bg-gradient-to-br from-[#00b4d8]/25 to-[#0d47a1]/40 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-tr from-[#7209b7]/30 to-[#0077b6]/35 rounded-full blur-[110px] pointer-events-none"></div>
-    
-    <!-- Tech Grid Pattern -->
-    <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] pointer-events-none"></div>
-
-    <!-- Main Hero Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 lg:pt-20 lg:pb-20 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            <!-- Left Column: Copy & Actions -->
-            <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <!-- Badge Pill -->
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-cyan-400/40 text-xs font-bold tracking-wide text-cyan-300 shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                    <span>THECHILLSHOP • CÔNG NGHỆ TIÊN PHONG 2026</span>
-                </div>
-
-                <!-- Main Title -->
-                <h1 class="font-headline font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-[1.15]">
-                    Trải nghiệm đỉnh cao <br />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-white drop-shadow-sm">
-                        Phong cách sống tương lai
-                    </span>
-                </h1>
-
-                <!-- Subtitle -->
-                <p class="text-slate-200 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                    Hệ thống bán lẻ thiết bị di động, laptop, âm thanh và phụ kiện chính hãng hàng đầu. Bảo hành 12 tháng 1 đổi 1, trả góp 0% và giao hàng hỏa tốc trong 2 giờ.
-                </p>
-
-                <!-- Action CTA Buttons -->
-                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                    <a href="#featured-products" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-cyan-400 hover:to-[#0096c7] text-white font-extrabold text-sm shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 border border-cyan-300/30">
-                        <span class="material-symbols-outlined text-xl">shopping_cart</span>
-                        <span>Khám phá ngay</span>
-                    </a>
-                    <a href="#categories-section" class="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-2 border-white/30 text-white font-bold text-sm hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
-                        <span>Danh mục sản phẩm</span>
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
-
-                <!-- Trust Badges with Glowing Icons -->
-                <div class="pt-6 border-t border-white/15 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-200 font-semibold">
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
-                            <span class="material-symbols-outlined text-base">verified</span>
-                        </span>
-                        <span>100% Chính hãng VN/A</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
-                            <span class="material-symbols-outlined text-base">local_shipping</span>
-                        </span>
-                        <span>Freeship từ 500.000đ</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40">
-                            <span class="material-symbols-outlined text-base">published_with_changes</span>
-                        </span>
-                        <span>15 ngày đổi mới</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Interactive Flagship Showcase Card -->
-            <div class="lg:col-span-5 flex justify-center">
-                <div class="relative w-full max-w-md">
-                    <!-- Outer Decorative Glow -->
-                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-600 rounded-[32px] blur-xl opacity-70 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
-
-                    <!-- Inner Glass Card with Solid High-Contrast Border -->
-                    <div class="relative bg-[#0c1d3b]/95 backdrop-blur-2xl border-2 border-cyan-400/40 rounded-[28px] p-6 sm:p-7 shadow-2xl text-white">
-                        <div class="flex items-center justify-between mb-5">
-                            <span class="px-3.5 py-1 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
-                                🔥 FLASH SALE TUẦN NÀY
-                            </span>
-                            <span class="text-xs text-cyan-300 font-bold flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-yellow-300">bolt</span> Giảm sốc 14%
-                            </span>
-                        </div>
-
-                        <!-- Product Image Box -->
-                        <div class="w-full aspect-[4/3] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-4 mb-5 relative overflow-hidden group">
-                            <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80" 
-                                 alt="iPhone 16 Pro Max" 
-                                 class="max-h-56 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500" 
-                                 onerror="this.src='https://placehold.co/500x350/0d47a1/ffffff?text=Flagship+Phone';" />
-                        </div>
-
-                        <!-- Content -->
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[11px] uppercase tracking-wider font-extrabold text-cyan-300">Apple Official Store</span>
-                                <span class="flex items-center text-xs text-amber-400 gap-0.5 font-bold">
-                                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                                    <strong>4.9</strong> (428)
-                                </span>
-                            </div>
-
-                            <h3 class="font-headline font-bold text-xl text-white line-clamp-1">
-                                iPhone 16 Pro Max 256GB Titan Tự Nhiên
-                            </h3>
-
-                            <div class="flex items-baseline gap-3 pt-1">
-                                <span class="font-headline font-black text-2xl text-cyan-300">29.990.000đ</span>
-                                <span class="text-sm text-slate-400 line-through">34.990.000đ</span>
-                                <span class="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">-14%</span>
-                            </div>
-                        </div>
-
-                        <!-- Stock Progress Bar -->
-                        <div class="mt-5 pt-4 border-t border-white/15 space-y-1.5 text-xs text-slate-200">
-                            <div class="flex items-center justify-between font-semibold">
-                                <span>Đã bán: <strong class="text-cyan-300 font-bold">142/200</strong></span>
-                                <span class="text-amber-300 font-bold">Chỉ còn 58 máy!</span>
-                            </div>
-                            <div class="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
-                                <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 71%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ======================================================================
-         SECTION 2: 4 USPs DARK GLASS RIBBON BAR
-         ====================================================================== -->
-    <div class="border-t-2 border-slate-700/60 bg-[#061124] py-6 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-800">
-                
-                <!-- USP 1 -->
-                <div class="flex items-center gap-4 sm:pr-4 pt-3 sm:pt-0">
-                    <div class="w-13 h-13 rounded-2xl bg-cyan-400/15 border-2 border-cyan-400/40 text-cyan-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/10 p-3">
-                        <span class="material-symbols-outlined text-2xl">local_shipping</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">Giao hàng hỏa tốc 2H</h4>
-                        <p class="text-xs text-slate-300 mt-0.5">Miễn phí ship đơn từ 500k toàn quốc</p>
-                    </div>
-                </div>
-
-                <!-- USP 2 -->
-                <div class="flex items-center gap-4 sm:px-4 pt-3 sm:pt-0">
-                    <div class="w-13 h-13 rounded-2xl bg-emerald-400/15 border-2 border-emerald-400/40 text-emerald-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/10 p-3">
-                        <span class="material-symbols-outlined text-2xl">verified</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">100% Chính hãng</h4>
-                        <p class="text-xs text-slate-300 mt-0.5">Cam kết hoàn tiền gấp đôi nếu giả mạo</p>
-                    </div>
-                </div>
-
-                <!-- USP 3 -->
-                <div class="flex items-center gap-4 sm:px-4 pt-3 sm:pt-0">
-                    <div class="w-13 h-13 rounded-2xl bg-amber-400/15 border-2 border-amber-400/40 text-amber-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/10 p-3">
-                        <span class="material-symbols-outlined text-2xl">published_with_changes</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">15 ngày 1 đổi 1</h4>
-                        <p class="text-xs text-slate-300 mt-0.5">Đổi mới ngay nếu lỗi kỹ thuật NSX</p>
-                    </div>
-                </div>
-
-                <!-- USP 4 -->
-                <div class="flex items-center gap-4 sm:pl-4 pt-3 sm:pt-0">
-                    <div class="w-13 h-13 rounded-2xl bg-purple-400/15 border-2 border-purple-400/40 text-purple-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/10 p-3">
-                        <span class="material-symbols-outlined text-2xl">support_agent</span>
-                    </div>
-                    <div>
-                        <h4 class="font-headline font-bold text-white text-sm sm:text-base">Hỗ trợ kỹ thuật 24/7</h4>
-                        <p class="text-xs text-slate-300 mt-0.5">Hotline miễn cước: 1900 6868</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
+<!-- VALUE PROPOSITION BAR -->
+<section class="w-full bg-surface-card shadow-sm py-3 px-4">
+<div class="max-w-[1280px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-canvas/60">
+<span class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</span>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm text-on-surface leading-tight text-xs md:text-sm font-semibold truncate">Chính hãng - Xuất VAT</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Hóa đơn điện tử đầy đủ 100%</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-canvas/60">
+<span class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</span>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm text-on-surface leading-tight text-xs md:text-sm font-semibold truncate">Giao nhanh 2h miễn phí</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Áp dụng cho đơn từ 300.000đ</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-canvas/60">
+<span class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">currency_exchange</span>
+</span>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm text-on-surface leading-tight text-xs md:text-sm font-semibold truncate">Thu cũ giá ngon</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Lên đời trợ giá đến 5 triệu</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-canvas/60">
+<span class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-[20px]">published_with_changes</span>
+</span>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm text-on-surface leading-tight text-xs md:text-sm font-semibold truncate">Bảo hành 1 đổi 1</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Yên tâm 30 ngày trải nghiệm</p>
+</div>
+</div>
+</div>
 </section>
-
-<!-- ==========================================================================
-     SECTION 3: FLASH SALE / GIỜ VÀNG GIÁ SỐC (Nền xám nhạt Slate-100)
-     Đưa lên đầu sau USPs để thu hút sự chú ý tức thì của khách hàng!
-     ========================================================================== -->
-<section class="py-12 bg-[#f1f5f9] border-b-2 border-slate-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="relative bg-gradient-to-r from-[#d90429] via-[#ef233c] to-[#f77f00] rounded-3xl p-6 sm:p-10 text-white shadow-xl border-2 border-red-300/40 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-            
-            <!-- Ambient Pattern in banner -->
-            <div class="absolute -right-20 -top-20 w-80 h-80 bg-yellow-400/25 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="space-y-2 text-center md:text-left relative z-10">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-xs font-black tracking-wider uppercase border border-white/20">
-                    <span class="material-symbols-outlined text-yellow-300 text-base animate-bounce">local_fire_department</span>
-                    GIỜ VÀNG GIÁ SỐC - HÔM NAY
-                </div>
-                <h2 class="font-headline font-black text-2xl sm:text-4xl tracking-tight leading-tight">
-                    Flash Sale Chớp Nhoáng - Giảm Tới 50%
-                </h2>
-                <p class="text-white/95 text-sm sm:text-base font-medium">Ưu đãi độc quyền trong ngày hôm nay, số lượng có hạn!</p>
-            </div>
-
-            <!-- Countdown Timer Glass Boxes -->
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-white/30 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
-                    <span class="font-headline font-black text-2xl sm:text-3xl text-white">02</span>
-                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Giờ</span>
-                </div>
-                <span class="font-black text-2xl text-white animate-pulse">:</span>
-                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-white/30 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
-                    <span class="font-headline font-black text-2xl sm:text-3xl text-white">45</span>
-                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Phút</span>
-                </div>
-                <span class="font-black text-2xl text-white animate-pulse">:</span>
-                <div class="flex flex-col items-center bg-black/45 backdrop-blur-md border-2 border-yellow-300/50 rounded-2xl px-4 py-3 min-w-[70px] shadow-xl">
-                    <span class="font-headline font-black text-2xl sm:text-3xl text-yellow-300">18</span>
-                    <span class="text-[10px] text-white/90 font-extrabold uppercase tracking-wider">Giây</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- HERO SHOWCASE SECTION (BENTO GRID WITH VERTICAL MENU + CAROUSEL + PROMO CARDS) -->
+<section class="max-w-[1280px] mx-auto px-4 py-4 w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- LEFT CATEGORIES MENU (2.5 COLS) -->
+<div class="hidden lg:block lg:col-span-3 bg-surface-card rounded-xl shadow-sm p-3 space-y-1">
+<div class="px-2 py-1.5 text-caption-sm font-caption-sm text-text-muted font-bold tracking-wider uppercase">Khám phá danh mục</div>
+@foreach (var cat in categories)
+{
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-body-medium font-body-medium text-on-surface hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors group" href="@Url.Action("Index", "Search", new { categoryId = cat.CategoryID })">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-text-muted group-hover:text-badge-discount-text">label</span>
+<span>@cat.Name</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-text-muted group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+}
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-body-medium font-body-medium text-badge-discount-text font-bold bg-badge-discount-bg/60 hover:bg-badge-discount-bg transition-colors" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+<span>Thu cũ đổi mới</span>
+</div>
+<span class="text-[10px] uppercase tracking-wide bg-primary-container text-on-primary px-1.5 py-0.5 rounded font-bold">Trợ 5TR</span>
+</a>
+</div>
+<!-- CENTER HERO BANNER CAROUSEL (6.5 COLS) -->
+<div class="lg:col-span-6 flex flex-col gap-3">
+<div class="relative bg-surface-card rounded-2xl overflow-hidden shadow-sm aspect-[1036/450] group">
+<img alt="iPhone 18 Pro Flagship Campaign" class="w-full h-full object-cover transition-opacity duration-300" id="mainHeroImage" src="https://lh3.googleusercontent.com/aida/AEtjO1X_k8mu8wZuhrHDY7v862Du_L2YoQl4cRa40IdulogSnXuE4uhtQirTTT3sBMiXqKCNyXpFYAPU6BdwyUHiYcdLFx76zIWbta4nj0F7HhYnZoK90oay4RlIhxNVJPc_ljLcz9gH0szVM7rEwjE57-i57udLp2y1gs8ENj62IGEr2Liqxbz2Xhc6icGSGDDocF2Yekdr0u-NPGYVYJZLaQgU4KtKo1PyqV3Yx33c0MPKNQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4 lg:p-6">
+<div class="text-on-primary space-y-1">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-container font-badge-label text-badge-label uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-card animate-pulse"></span> Flagship Khủng
+              </span>
+<h2 class="font-headline-lg text-headline-lg leading-tight font-extrabold drop-shadow">iPhone 18 Pro | 18 Pro Max</h2>
+<p class="font-body-default text-body-default text-surface-container-high max-w-md line-clamp-1">Trợ giá thu cũ 5.000.000đ - Trả góp 0% lãi suất xét duyệt nhanh 3 phút</p>
+</div>
+</div>
+<button class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-surface-card/80 backdrop-blur-md text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow hover:bg-surface-card" id="heroPrev">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-surface-card/80 backdrop-blur-md text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow hover:bg-surface-card" id="heroNext">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+<!-- HERO CAMPAIGN SELECTOR TABS -->
+<div class="grid grid-cols-3 gap-2">
+<button class="hero-tab active-tab text-left p-2.5 rounded-xl bg-surface-card hover:bg-surface-container transition-all shadow-sm" onclick="setHeroBanner('https://lh3.googleusercontent.com/aida/AEtjO1X_k8mu8wZuhrHDY7v862Du_L2YoQl4cRa40IdulogSnXuE4uhtQirTTT3sBMiXqKCNyXpFYAPU6BdwyUHiYcdLFx76zIWbta4nj0F7HhYnZoK90oay4RlIhxNVJPc_ljLcz9gH0szVM7rEwjE57-i57udLp2y1gs8ENj62IGEr2Liqxbz2Xhc6icGSGDDocF2Yekdr0u-NPGYVYJZLaQgU4KtKo1PyqV3Yx33c0MPKNQ')">
+<p class="font-title-sm text-title-sm text-primary-container text-xs font-bold truncate">IPHONE 18 PRO</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Lên đời trợ giá 5 Triệu</p>
+</button>
+<button class="hero-tab text-left p-2.5 rounded-xl bg-surface-card hover:bg-surface-container transition-all shadow-sm" onclick="setHeroBanner('https://lh3.googleusercontent.com/aida/AEtjO1WremtGVKeBCr7I2BkwFtSO-KwIvLndGSagC9jkINvQuvryGhco7W6PAraSSg4T-wi0XDEc5KOP4x4fhthGzsmyAkafC61Dvyse-ZXNqyF_vrKBtVn4LxG6TP-Xa3QJnoZWdF76dpmkAv29zmxP07DD4eKmvyrOstF35WaCn6v-jwQNWwEMPENPgRmJ7EKjQJUP2O2-vo7CWU73mD9kT_gZdhpQbxNFiYQKzWk8ky2Vdw')">
+<p class="font-title-sm text-title-sm text-on-surface text-xs font-bold truncate">GALAXY Z8 SERIES</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Gập mở chuẩn AI đỉnh cao</p>
+</button>
+<button class="hero-tab text-left p-2.5 rounded-xl bg-surface-card hover:bg-surface-container transition-all shadow-sm" onclick="setHeroBanner('https://lh3.googleusercontent.com/aida/AEtjO1VdfjAuEew1SEnfTGRbXas__zgtPySR0HGChvyru6gaHfJ43M99Id7QvF-Q5_MLFpzJuH9qqSYEKf8AOsbb4XfNPnwON1Vtiq8VI_R7fajZ8HTqbiDhkQcLvIWLhzFAcC9h68kMozj16qSwDMwg9JqS4MBq2efTJccfKC46ap1JciZqrIe1CC_9y-beW5KDEVhYQQXRaEFSRV_IuEZaZTyhAeDUiJsNqEWtidfQxLfh')">
+<p class="font-title-sm text-title-sm text-on-surface text-xs font-bold truncate">TUẦN LỄ ASUS</p>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Giảm thêm 1 Triệu Sinh Viên</p>
+</button>
+</div>
+</div>
+<!-- RIGHT PROMO BANNERS + QUICK ACTIONS (3 COLS) -->
+<div class="lg:col-span-3 flex flex-col gap-3">
+<!-- Stacked Card 1 -->
+<a class="rounded-xl overflow-hidden shadow-sm relative group bg-surface-card aspect-[690/300] block" href="#">
+<img alt="Samsung Galaxy A37 A57 5G" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1XXSzQ44Ps_Sk7621ScBI0bGd5NJAa9jWPqG0tm0PWez6829eK1EGqH07vzU4cVkXYE2VZVqF2_HIfRoBn0No_nStzuLnG62Zwn8A9Pvw50u4541M88B1_ZmfcGmz8OvfEdXzJqYrvWElH-XUFnLGbIIvJA4YDnrsiUXck7ySr4r6whQLQ9WjRjZs5XfjsiNykL0OvOayJPFthlAfVSWl55yoW7GQSmcxxJ0kuzgqLe9Q"/>
+</a>
+<!-- Stacked Card 2 -->
+<a class="rounded-xl overflow-hidden shadow-sm relative group bg-surface-card aspect-[690/300] block" href="#">
+<img alt="Mac Studio M5 Max and Ultra" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1UGjwKT-vErxyXSkR0mnnmGqli2fKvIFE66nFJzWcRtKdY1KSWxIf-hRIs_rWgzYDc8lpWU_R7HpdZPM7Lx1-prwitj29dm9SkZkdIqztn9xeJa9vuhmE8Y-56sdDghl4U7l-xou-jjTc7VHu_2-rIWsm-br0zR8xvgjTpMMHQUezqv3p3-V9Q-vNIz3a9CNU7kCnZ5sP41g0v7kI1HOnxiQjVfoTyOYYMXZW1uvWcMqw"/>
+</a>
+<!-- Quick Utility Card: Smember & Trade-in -->
+<div class="bg-gradient-to-br from-primary-container via-brand-red-vibrant to-primary rounded-xl p-3 text-on-primary shadow-sm space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-gold-star text-[20px]">stars</span>
+<span class="font-title-sm text-title-sm text-xs font-bold uppercase tracking-wider">Đặc Quyền Smember</span>
+</div>
+<span class="text-[10px] font-bold bg-surface-card/20 px-2 py-0.5 rounded-full">Tích 5%</span>
+</div>
+<p class="font-caption-sm text-caption-sm text-on-primary-container text-xs">Đăng ký thành viên nhận voucher giảm 10% ngay!</p>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="bg-surface-card text-primary-container font-semibold text-xs py-1.5 px-2 rounded-lg text-center hover:bg-on-primary-container transition-colors shadow">
+              Định giá cũ 2p
+            </button>
+<button class="bg-black/20 text-on-primary hover:bg-black/30 font-semibold text-xs py-1.5 px-2 rounded-lg text-center transition-colors">
+              Đăng nhập ngay
+            </button>
+</div>
+</div>
+</div>
+</div>
 </section>
-
-<!-- ==========================================================================
-     SECTION 4: DANH MỤC NỔI BẬT (Nền trắng tinh khiết, Card nền Slate-50)
-     Card có border-2 border-slate-300 cực rõ, không bị chìm vào nền!
-     ========================================================================== -->
-<section id="categories-section" class="py-16 bg-white border-b-2 border-slate-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-            <div>
-                <span class="text-xs font-black uppercase tracking-wider text-[#0d47a1] bg-blue-50 border-2 border-blue-300 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#0d47a1]"></span>
-                    DANH MỤC SẢN PHẨM
-                </span>
-                <h2 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 mt-2.5">
-                    Khám phá theo danh mục
-                </h2>
-                <p class="text-slate-600 text-sm mt-1">Đầy đủ các dòng thiết bị công nghệ hiện đại nhất thị trường</p>
-            </div>
-            <a href="#" class="text-sm font-bold text-[#0d47a1] hover:text-[#00b4d8] flex items-center gap-1.5 transition-colors group">
-                <span>Xem tất cả danh mục</span>
-                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
-            
-            <!-- Category 1: Điện thoại -->
-            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-blue-500/25 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-3xl">smartphone</span>
-                </div>
-                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d47a1] transition-colors">Điện thoại</h3>
-                <span class="text-xs text-slate-600 mt-1 font-semibold">120+ sản phẩm</span>
-            </a>
-
-            <!-- Category 2: Laptop -->
-            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-[#00b4d8] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-600 to-sky-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-cyan-500/25 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-3xl">laptop_mac</span>
-                </div>
-                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#00b4d8] transition-colors">Laptop</h3>
-                <span class="text-xs text-slate-600 mt-1 font-semibold">85+ sản phẩm</span>
-            </a>
-
-            <!-- Category 3: Tai nghe -->
-            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-amber-500 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-amber-500/25 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-3xl">headphones</span>
-                </div>
-                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-amber-600 transition-colors">Tai nghe</h3>
-                <span class="text-xs text-slate-600 mt-1 font-semibold">64+ sản phẩm</span>
-            </a>
-
-            <!-- Category 4: Đồng hồ -->
-            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-emerald-600 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-emerald-500/25 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-3xl">watch</span>
-                </div>
-                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-600 transition-colors">Smartwatch</h3>
-                <span class="text-xs text-slate-600 mt-1 font-semibold">48+ sản phẩm</span>
-            </a>
-
-            <!-- Category 5: Phụ kiện -->
-            <a href="#" class="group bg-slate-50 hover:bg-white rounded-2xl p-6 border-2 border-slate-300 hover:border-purple-600 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center col-span-2 sm:col-span-1">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center mb-4 transition-all duration-300 shadow-md shadow-purple-500/25 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-3xl">power</span>
-                </div>
-                <h3 class="font-headline font-bold text-sm sm:text-base text-slate-900 group-hover:text-purple-600 transition-colors">Phụ kiện</h3>
-                <span class="text-xs text-slate-600 mt-1 font-semibold">250+ sản phẩm</span>
-            </a>
-
-        </div>
-    </div>
-</section>
-
-<!-- ==========================================================================
-     SECTION 5: SẢN PHẨM BÁN CHẠY & NỔI BẬT (Nền xám nhạt Slate-100)
-     Card sản phẩm màu trắng đặt trên nền xám nhạt + viền border-2 border-slate-300
-     Tạo độ tương phản TUYỆT ĐỐI, không bao giờ bị chìm!
-     ========================================================================== -->
-<section id="featured-products" class="py-16 bg-[#f1f5f9] border-b-2 border-slate-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-            <div>
-                <span class="text-xs font-black uppercase tracking-wider text-[#0d47a1] bg-blue-50 border-2 border-blue-300 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#0d47a1]"></span>
-                    SẢN PHẨM NỔI BẬT
-                </span>
-                <h2 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 mt-2.5">
-                    Sản phẩm bán chạy nhất
-                </h2>
-                <p class="text-slate-600 text-sm mt-1">Các sản phẩm công nghệ dẫn đầu xu hướng được lựa chọn nhiều nhất</p>
-            </div>
-            
-            <!-- Category Tabs Navigation with distinct borders -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 text-xs font-bold">
-                <button type="button" class="px-5 py-2.5 rounded-full bg-[#0d47a1] text-white border-2 border-[#0d47a1] shadow-md shadow-[#0d47a1]/25 whitespace-nowrap">Tất cả</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Điện thoại</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Laptop</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Tai nghe</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Phụ kiện</button>
-            </div>
-        </div>
-
-        <!-- Product Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            @if (ViewBag.FeaturedProducts != null && ((List<WebEcommerce.Models.Product>)ViewBag.FeaturedProducts).Any())
+<!-- FLASH SALE & HOT DEALS SECTION (HIGH VELOCITY RED THEME) -->
+<section class="w-full py-6 bg-gradient-to-b from-badge-discount-bg to-surface-canvas">
+<div class="max-w-[1280px] mx-auto px-4 space-y-4">
+<!-- Flash Sale Header with Animated Flame & Countdown -->
+<div class="bg-gradient-to-r from-primary-container via-brand-red-vibrant to-primary rounded-2xl p-4 text-on-primary shadow-lg flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-card/20 backdrop-blur-md flex items-center justify-center animate-bounce">
+<span class="material-symbols-outlined text-[26px] text-gold-star">local_fire_department</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg font-extrabold uppercase tracking-tight">FLASH SALE TỰU TRƯỜNG</h2>
+<span class="px-2 py-0.5 rounded bg-surface-card text-primary-container font-badge-label text-badge-label font-bold uppercase">Giảm Tới 50%</span>
+</div>
+<p class="font-caption-sm text-caption-sm text-on-primary-container text-xs">Số lượng có hạn • Tự động kết thúc khi hết suất</p>
+</div>
+</div>
+<!-- Interactive Countdown -->
+<div class="flex items-center gap-2 font-headline-md text-headline-md">
+<span class="text-xs uppercase tracking-wider font-semibold opacity-90 hidden sm:inline">Kết thúc sau:</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="hoursBox">02</div>
+<span class="text-on-primary font-bold">:</span>
+<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="minsBox">45</div>
+<span class="text-on-primary font-bold">:</span>
+<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="secsBox">18</div>
+</div>
+</div>
+</div>
+<!-- Flash Sale 5-Card Product Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+@foreach (var product in featuredProducts)
+{
+    var mainImage = product.ProductImages != null && product.ProductImages.Count > 0 
+        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+        : "https://via.placeholder.com/400x400";
+    <div class="bg-surface-card rounded-xl p-3 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+        <div class="flex items-center justify-between">
+            @if (product.DiscountPrice.HasValue && product.Price > 0)
             {
-                foreach (var product in (List<WebEcommerce.Models.Product>)ViewBag.FeaturedProducts)
-                {
-                    @Html.Partial("_ProductCard", product)
-                }
+                var discount = Math.Round((1 - (product.DiscountPrice.Value / product.Price)) * 100);
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Giảm @discount%</span>
             }
             else
             {
-                <!-- Fallback mẫu nếu chưa nạp CSDL -->
-                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                    { "CardName", "iPhone 16 Pro Max 256GB - Chính Hãng VN/A" },
-                    { "CardCategory", "Điện thoại" },
-                    { "CardPrice", 34990000m },
-                    { "CardDiscountPrice", 29990000m },
-                    { "CardImageUrl", "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&auto=format&fit=crop&q=80" }
-                })
-
-                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                    { "CardName", "MacBook Air 13 M3 8GB 256GB Midnight" },
-                    { "CardCategory", "Laptop" },
-                    { "CardPrice", 27990000m },
-                    { "CardDiscountPrice", 24490000m },
-                    { "CardImageUrl", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80" }
-                })
-
-                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                    { "CardName", "Tai nghe Sony WH-1000XM5 Chống Ồn Đỉnh Cao" },
-                    { "CardCategory", "Tai nghe" },
-                    { "CardPrice", 8490000m },
-                    { "CardDiscountPrice", 6990000m },
-                    { "CardImageUrl", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80" }
-                })
-
-                @Html.Partial("_ProductCard", null, new ViewDataDictionary {
-                    { "CardName", "Apple Watch Series 10 GPS 42mm Nhôm Đen" },
-                    { "CardCategory", "Smartwatch" },
-                    { "CardPrice", 10990000m },
-                    { "CardDiscountPrice", 9990000m },
-                    { "CardImageUrl", "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=80" }
-                })
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Hot Deal</span>
             }
+            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
         </div>
-
-        <div class="mt-12 text-center">
-            <a href="#" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300">
-                <span>Xem thêm hơn 200+ sản phẩm khác</span>
-                <span class="material-symbols-outlined text-base">expand_more</span>
-            </a>
-        </div>
-
-    </div>
-</section>
-
-<!-- ==========================================================================
-     SECTION 6: ĐẶC QUYỀN THÀNH VIÊN (Nền trắng, Banner xanh Deep Blue)
-     ========================================================================== -->
-<section class="py-14 bg-white border-b-2 border-slate-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="relative rounded-3xl bg-gradient-to-r from-[#0d47a1] via-[#0077b6] to-[#00b4d8] text-white p-8 sm:p-14 overflow-hidden shadow-2xl border-2 border-blue-400/40">
-            <!-- Background circles -->
-            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-
-            <div class="max-w-2xl relative z-10 space-y-4">
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-wider border border-white/20">
-                    <span class="material-symbols-outlined text-sm text-yellow-300">stars</span>
-                    ĐẶC QUYỀN THÀNH VIÊN
-                </span>
-                <h2 class="font-headline font-black text-2xl sm:text-4xl leading-tight">
-                    Đăng ký tài khoản ngay hôm nay - Nhận Voucher 100.000đ!
-                </h2>
-                <p class="text-white/95 text-sm sm:text-base leading-relaxed font-normal">
-                    Tích lũy điểm đổi quà mỗi đơn hàng, nhận ưu đãi độc quyền ngày sinh nhật và được ưu tiên hỗ trợ đổi trả nhanh chóng.
-                </p>
-                <div class="pt-2">
-                    <a href="@Url.Action("Register", "Account")" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white text-[#0d47a1] font-black text-sm shadow-xl hover:bg-slate-100 hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-white">
-                        <span>Đăng ký thành viên miễn phí</span>
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
+        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-lg">
+            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImage"/>
+        </a>
+        <div class="space-y-1.5">
+            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
+                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
+            </h3>
+            <div class="flex flex-wrap gap-1">
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">@(product.Category?.Name ?? "Sản phẩm")</span>
+            </div>
+            <div class="pt-1">
+                @if (product.DiscountPrice.HasValue)
+                {
+                    <div class="font-price-headline text-price-headline text-primary-container font-bold">@string.Format("{0:N0}₫", product.DiscountPrice)</div>
+                    <div class="font-price-original text-price-original text-text-muted line-through text-xs">@string.Format("{0:N0}₫", product.Price)</div>
+                }
+                else
+                {
+                    <div class="font-price-headline text-price-headline text-primary-container font-bold">@string.Format("{0:N0}₫", product.Price)</div>
+                }
+            </div>
+            <div class="w-full bg-surface-canvas rounded-full h-3 overflow-hidden relative">
+                <div class="bg-gradient-to-r from-brand-red-vibrant to-primary-container h-full rounded-full" style="width: 80%"></div>
+                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-on-primary drop-shadow">Đã bán 80/100</span>
             </div>
         </div>
     </div>
+}
+</div>
+</div>
 </section>
-
-<!-- ==========================================================================
-     SECTION 7: ĐỐI TÁC THƯƠNG HIỆU HÀNG ĐẦU (Nền Slate-50)
-     ========================================================================== -->
-<section class="py-12 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p class="text-xs uppercase font-black tracking-widest text-slate-500 mb-6">
-            ĐỐI TÁC THƯƠNG HIỆU CHÍNH HÃNG HÀNG ĐẦU
-        </p>
-        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-800 font-headline font-black text-base sm:text-lg">
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">APPLE</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">SAMSUNG</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">SONY</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">ASUS</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">DELL</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">LOGITECH</span>
-            <span class="px-6 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] shadow-sm transition-all">MARSHALL</span>
+<!-- B2B CORPORATE PARTNERSHIP BANNER -->
+<section class="max-w-[1280px] mx-auto px-4 py-4 w-full">
+<a class="block w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" href="#">
+<img alt="Trở thành Khách hàng Doanh nghiệp cùng CellphoneS S-Business" class="w-full h-auto object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1XBf_C_Et0aedpOZnZDtZ19oQRRmny9EJF_b2V2nFX5DT5_3A3_RKyqljiD1d2skOd2x8sJMGaLtPoYD1io-eD8JoMd_mSTEA4pUwjIOEKS9R_M1bv5fICXC-NlnF7pCbYw1BzVN1FgLQ1Axi5jNZ4C17bdirM2oHq3lLVZo2AEi6sHt6IXAOJH1iOn4KXe9iuVwS9U1RJuJLy3I4jN3YhtjUSZZ9QVDE5qPDQ7Fau2"/>
+</a>
+</section>
+<!-- FEATURED BRANDS STRIP -->
+<section class="max-w-[1280px] mx-auto px-4 py-2 w-full">
+<div class="bg-surface-card rounded-2xl p-4 shadow-sm flex items-center gap-3 overflow-x-auto">
+<span class="font-title-sm text-title-sm text-on-surface text-xs font-bold uppercase tracking-wider shrink-0 text-text-muted">Thương hiệu uy tín:</span>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-badge-discount-text">verified</span> Apple Authorised
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          Samsung Flagship
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          Xiaomi Official
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          ASUS ROG &amp; Zenbook
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          Sony Sound Studio
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          OPPO AI Camera
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-surface-canvas text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:text-badge-discount-text transition-colors cursor-pointer">
+          Marshall Acoustic
+        </span>
+</div>
+</div>
+</section>
+<!-- CATEGORY 1: ĐIỆN THOẠI & TABLET (SIDE SHOWCASE WITH BANNER 63) -->
+<section class="max-w-[1280px] mx-auto px-4 py-5 w-full" id="phones-section">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Điện Thoại &amp; Máy Tính Bảng</h2>
+<div class="hidden sm:flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-badge-discount-text font-badge-label text-badge-label font-bold cursor-pointer">Tất cả</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Apple</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Samsung</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Xiaomi</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">OPPO</span>
+</div>
+</div>
+<a class="font-body-medium text-body-medium text-primary-container font-semibold hover:underline flex items-center gap-1 text-sm" href="#">
+        Xem tất cả <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- Side Tall Promotional Banner (3 cols) -->
+<div class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group relative">
+<img alt="iPhone Duo Collection Campaign" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1WYa9dXzNwqeQij9zxqi_uW9YPxXTDgZWR0TJncbcERzijlWICKKd69uTwBL2lrl_FIHHU01lrwvLNybrjojEq9Gb9oQbk6O2RpB9qYuYngoiH5274h0md0gJPp_lBES-XCq3aH_1iVTX3wK1Xzf_lA-kqse6Sf-_G5zHz7oVpemjPx27LFkimDG2FCWOjXrUUQzJpeW-Klp69wAPNGQMFoBybpQjp-j53mz_3-khGX"/>
+</div>
+<!-- Product Cards Grid (9 cols -> 3x2 matrix) -->
+<div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+@{
+    var phoneProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Điện thoại") || p.Category.Name.Contains("Phone") || p.Category.Name.Contains("Tablet"))).Take(6).ToList();
+    if (!phoneProducts.Any()) { phoneProducts = allProducts.Take(6).ToList(); }
+}
+@foreach (var product in phoneProducts)
+{
+    var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
+        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+        : "https://via.placeholder.com/400x400";
+    <div class="bg-surface-card rounded-xl p-3 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+        <div class="flex items-center justify-between">
+            @if (product.DiscountPrice.HasValue && product.Price > 0)
+            {
+                var discount = Math.Round((1 - (product.DiscountPrice.Value / product.Price)) * 100);
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Giảm @discount%</span>
+            }
+            else
+            {
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Chính hãng</span>
+            }
+            <button class="text-text-muted hover:text-primary-container transition-colors"><span class="material-symbols-outlined text-[18px]">favorite</span></button>
+        </div>
+        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-lg">
+            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImg"/>
+        </a>
+        <div class="space-y-1">
+            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
+                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
+            </h3>
+            <div class="flex flex-wrap gap-1">
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">@(product.Category?.Name ?? "Điện thoại")</span>
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">Bảo hành 12T</span>
+            </div>
+            @if (product.DiscountPrice.HasValue)
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.DiscountPrice)</div>
+                <div class="font-price-original text-price-original text-text-muted line-through text-xs">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            else
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            <div class="p-1.5 rounded bg-surface-canvas text-[11px] text-text-muted truncate">Smember giảm thêm đến 1%</div>
         </div>
     </div>
+}
+</div>
+</div>
 </section>
+<!-- CATEGORY 2: LAPTOP AI, MACBOOK & MÀN HÌNH (WITH BANNER 65 & 62) -->
+<section class="max-w-[1280px] mx-auto px-4 py-5 w-full" id="laptops-section">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Laptop AI, MacBook &amp; Đồ Họa</h2>
+<div class="hidden sm:flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-badge-discount-text font-badge-label text-badge-label font-bold cursor-pointer">Tất cả</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Laptop Copilot+</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">MacBook M4/M5</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Gaming ASUS ROG</span>
+</div>
+</div>
+<a class="font-body-medium text-body-medium text-primary-container font-semibold hover:underline flex items-center gap-1 text-sm" href="#">
+        Xem 140+ Laptop <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- Side Tall Promotional Banner (3 cols) -->
+<div class="hidden lg:flex lg:col-span-3 flex-col gap-3">
+<div class="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex-1">
+<img alt="Laptop AI Giảm Thêm Đến 2 Triệu Đồng" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1W2vA3RZOJJo_aZiasdy9mB6N6RDm-k-HlDbtUUmasSc-wvKkqha6sdVhAzAFbW-v6lZTECkE-7Nc525HvS_tMRehkjoquAR4F7Hq9vCDsxb1ELyIjaWaun3nGFVurZmfmqr643r_Eb97NJFX-_megw1spNQk7pQ2DbPgJ1oPRrSRaCqSuRfb8Twx9jsL6fsMGcvrgCOlxGnxbaWqEtQk8WuZClXp1e96XnZSxgePfCcg"/>
+</div>
+<div class="rounded-xl overflow-hidden shadow-sm aspect-[690/300]">
+<img alt="Ưu Đãi Học Sinh Sinh Viên Mua Laptop" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1URaws4T6lfDLacyDKzsozVqg2OkZZ8nGdoWJFK4XWEUcJvf7qCpmXqAGHdHC7DcyHJ16pZZfLZFu9M8eZFdRBfuWqHxua78Qlr8aQ72OTJvUgyNhPLVd4-uGgUC9N9UOuavhy9vEBIID1AQJP2N0PWA4xm9_t9BorHmu2xFOrqbBxPlg_BQiNovczzSOCTzSRee8BeJZYi6HEIVFh-op0Z_fh44Pq6vYhV9jCTLsX4"/>
+</div>
+</div>
+<!-- Product Cards Grid (9 cols) -->
+<div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+@{
+    var laptopProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Laptop") || p.Category.Name.Contains("MacBook") || p.Category.Name.Contains("Máy tính"))).Take(6).ToList();
+    if (!laptopProducts.Any()) { laptopProducts = allProducts.Skip(2).Take(6).ToList(); }
+    if (!laptopProducts.Any()) { laptopProducts = allProducts.Take(6).ToList(); }
+}
+@foreach (var product in laptopProducts)
+{
+    var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
+        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+        : "https://via.placeholder.com/400x400";
+    <div class="bg-surface-card rounded-xl p-3 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+        <div class="flex items-center justify-between">
+            @if (product.DiscountPrice.HasValue && product.Price > 0)
+            {
+                var discount = Math.Round((1 - (product.DiscountPrice.Value / product.Price)) * 100);
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Giảm @discount%</span>
+            }
+            else
+            {
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Chính hãng</span>
+            }
+            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
+        </div>
+        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-lg">
+            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImg"/>
+        </a>
+        <div class="space-y-1">
+            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
+                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
+            </h3>
+            <div class="flex flex-wrap gap-1">
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">@(product.Category?.Name ?? "Laptop")</span>
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">SSD Tốc độ cao</span>
+            </div>
+            @if (product.DiscountPrice.HasValue)
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.DiscountPrice)</div>
+                <div class="font-price-original text-price-original text-text-muted line-through text-xs">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            else
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            <div class="p-1.5 rounded bg-surface-canvas text-[11px] text-text-muted truncate">Tặng balo cao cấp + Chuột không dây</div>
+        </div>
+    </div>
+}
+</div>
+</div>
+</section>
+<!-- CATEGORY 3: ÂM THANH & ĐỒNG HỒ (WITH BANNER 68 & 58 & 59) -->
+<section class="max-w-[1280px] mx-auto px-4 py-5 w-full" id="audio-wearables">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Đồng Hồ Thông Minh &amp; Âm Thanh</h2>
+<div class="hidden sm:flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-badge-discount-text font-badge-label text-badge-label font-bold cursor-pointer">Đồng hồ chỉ từ 690K</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Apple Watch Series 12</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Tai nghe TWS</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-card text-text-muted hover:text-on-surface font-badge-label text-badge-label cursor-pointer">Loa Bluetooth Sony</span>
+</div>
+</div>
+<a class="font-body-medium text-body-medium text-primary-container font-semibold hover:underline flex items-center gap-1 text-sm" href="#">
+        Xem tất cả <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- Side Tall Promotional Banner (3 cols) -->
+<div class="hidden lg:flex lg:col-span-3 flex-col gap-3">
+<div class="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex-1">
+<img alt="Đồng hồ chỉ từ 690K tại CellphoneS" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1UMlBKcM8vztwCCWOcgYT9cupSy1_Y8L4Rn1T9zPXf219QvFmOC2A9riglXbblKXfWySnNXPXpr_geOcQF3yPur3HHsjMe2APmEA6RztsOhvxiMUaJxe-kG2Gh7eRD2T4VeplBlzmj10vOJQt_sk1hWa7sa1PgCQDCeQjC-VeIPVGj1JAs3fgDhF8uHV-55XS0kNHngHFk5yVANH-prS_Py9ddF4iRKLreqRnATJOz0Vg"/>
+</div>
+</div>
+<!-- Product Cards Grid (9 cols) -->
+<div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+@{
+    var audioProducts = allProducts.Where(p => p.Category != null && (p.Category.Name.Contains("Âm thanh") || p.Category.Name.Contains("Tai nghe") || p.Category.Name.Contains("Loa") || p.Category.Name.Contains("Đồng hồ") || p.Category.Name.Contains("Phụ kiện"))).Take(6).ToList();
+    if (!audioProducts.Any()) { audioProducts = allProducts.Skip(4).Take(6).ToList(); }
+    if (!audioProducts.Any()) { audioProducts = allProducts.Take(6).ToList(); }
+}
+@foreach (var product in audioProducts)
+{
+    var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
+        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+        : "https://via.placeholder.com/400x400";
+    <div class="bg-surface-card rounded-xl p-3 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+        <div class="flex items-center justify-between">
+            @if (product.DiscountPrice.HasValue && product.Price > 0)
+            {
+                var discount = Math.Round((1 - (product.DiscountPrice.Value / product.Price)) * 100);
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Giảm @discount%</span>
+            }
+            else
+            {
+                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Chính hãng</span>
+            }
+            <button class="text-text-muted hover:text-primary-container transition-colors"><span class="material-symbols-outlined text-[18px]">favorite</span></button>
+        </div>
+        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-lg">
+            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImg"/>
+        </a>
+        <div class="space-y-1">
+            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
+                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
+            </h3>
+            <div class="flex flex-wrap gap-1">
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">@(product.Category?.Name ?? "Âm thanh")</span>
+                <span class="bg-badge-spec-bg text-badge-spec-text text-[10px] font-semibold px-1.5 py-0.5 rounded">Bảo hành 12T</span>
+            </div>
+            @if (product.DiscountPrice.HasValue)
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.DiscountPrice)</div>
+                <div class="font-price-original text-price-original text-text-muted line-through text-xs">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            else
+            {
+                <div class="font-price-headline text-price-headline text-primary-container font-bold pt-1">@string.Format("{0:N0}₫", product.Price)</div>
+            }
+            <div class="p-1.5 rounded bg-surface-canvas text-[11px] text-text-muted truncate">Miễn phí giao hàng trong 2h</div>
+        </div>
+    </div>
+}
+</div>
+</div>
+</section>
+<!-- QUICK ACCESS ACCESSORIES CAROUSEL CLUSTER -->
+<section class="max-w-[1280px] mx-auto px-4 py-4 w-full" id="accessories-cluster">
+<div class="bg-surface-card rounded-2xl p-5 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-title-sm text-title-sm font-bold text-on-surface">Sắm Thêm Phụ Kiện Chính Hãng Tiện Ích</h3>
+<a class="font-caption-sm text-caption-sm text-primary-container font-semibold hover:underline" href="#">Xem tất cả phụ kiện →</a>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">power</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Củ cáp sạc nhanh</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">battery_charging_full</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Pin dự phòng 20k</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">shield</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Kính cường lực 9H</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">phone_iphone</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Ốp lưng chính hãng</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">mouse</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Chuột, bàn phím cơ</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">videocam</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Camera hành trình</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">hub</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Hub chuyển đổi Type-C</span>
+</a>
+<a class="p-3 rounded-xl bg-surface-canvas hover:bg-surface-container flex flex-col items-center text-center gap-2 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[28px] text-text-muted group-hover:text-primary-container transition-colors">sd_card</span>
+<span class="text-caption-sm font-caption-sm font-medium text-on-surface">Thẻ nhớ, USB tốc độ cao</span>
+</a>
+</div>
+</div>
+</section>
+<!-- CELLPHONES MEMBER ECOSYSTEM & TECH FORUM (SFORUM) -->
+<section class="max-w-[1280px] mx-auto px-4 py-5 w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+<!-- Sforum Tech News Highlight (8 cols) -->
+<div class="lg:col-span-8 bg-surface-card rounded-2xl p-5 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Tin Công Nghệ Sforum 24/7</h3>
+</div>
+<a class="font-caption-sm text-caption-sm text-primary-container font-semibold hover:underline" href="#">Xem thêm tin tức →</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Article 1 -->
+<a class="flex gap-3 group" href="#">
+<div class="w-28 h-20 rounded-lg overflow-hidden shrink-0 bg-surface-canvas">
+<img alt="Đánh giá chi tiết iPhone 18 Pro Max sau 1 tháng trải nghiệm" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://lh3.googleusercontent.com/aida/AEtjO1X_k8mu8wZuhrHDY7v862Du_L2YoQl4cRa40IdulogSnXuE4uhtQirTTT3sBMiXqKCNyXpFYAPU6BdwyUHiYcdLFx76zIWbta4nj0F7HhYnZoK90oay4RlIhxNVJPc_ljLcz9gH0szVM7rEwjE57-i57udLp2y1gs8ENj62IGEr2Liqxbz2Xhc6icGSGDDocF2Yekdr0u-NPGYVYJZLaQgU4KtKo1PyqV3Yx33c0MPKNQ"/>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-primary-container uppercase">Đánh giá</span>
+<h4 class="font-body-medium text-body-medium text-xs font-semibold text-on-surface group-hover:text-primary-container transition-colors line-clamp-2">
+                Trải nghiệm camera tiềm vọng 10x trên iPhone 18 Pro: Vẫn là nhà vua quay video?
+              </h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px]">2 giờ trước • 4.2k lượt xem</p>
+</div>
+</a>
+<!-- Article 2 -->
+<a class="flex gap-3 group" href="#">
+<div class="w-28 h-20 rounded-lg overflow-hidden shrink-0 bg-surface-canvas">
+<img alt="Galaxy Z Fold8 và bước chuyển mình của kỷ nguyên AI màn hình gập" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://lh3.googleusercontent.com/aida/AEtjO1WremtGVKeBCr7I2BkwFtSO-KwIvLndGSagC9jkINvQuvryGhco7W6PAraSSg4T-wi0XDEc5KOP4x4fhthGzsmyAkafC61Dvyse-ZXNqyF_vrKBtVn4LxG6TP-Xa3QJnoZWdF76dpmkAv29zmxP07DD4eKmvyrOstF35WaCn6v-jwQNWwEMPENPgRmJ7EKjQJUP2O2-vo7CWU73mD9kT_gZdhpQbxNFiYQKzWk8ky2Vdw"/>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-secondary uppercase">Tin tức</span>
+<h4 class="font-body-medium text-body-medium text-xs font-semibold text-on-surface group-hover:text-primary-container transition-colors line-clamp-2">
+                Galaxy Z Fold8 và bí mật bản lề giọt nước siêu bền không còn nếp gấp
+              </h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px]">5 giờ trước • 6.8k lượt xem</p>
+</div>
+</a>
+<!-- Article 3 -->
+<a class="flex gap-3 group" href="#">
+<div class="w-28 h-20 rounded-lg overflow-hidden shrink-0 bg-surface-canvas">
+<img alt="So sánh chi tiết các mẫu Laptop AI sử dụng chip Snapdragon X" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://lh3.googleusercontent.com/aida/AEtjO1VdfjAuEew1SEnfTGRbXas__zgtPySR0HGChvyru6gaHfJ43M99Id7QvF-Q5_MLFpzJuH9qqSYEKf8AOsbb4XfNPnwON1Vtiq8VI_R7fajZ8HTqbiDhkQcLvIWLhzFAcC9h68kMozj16qSwDMwg9JqS4MBq2efTJccfKC46ap1JciZqrIe1CC_9y-beW5KDEVhYQQXRaEFSRV_IuEZaZTyhAeDUiJsNqEWtidfQxLfh"/>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-tertiary-container uppercase">Tư vấn</span>
+<h4 class="font-body-medium text-body-medium text-xs font-semibold text-on-surface group-hover:text-primary-container transition-colors line-clamp-2">
+                Top 5 Laptop AI pin trâu trên 15 tiếng đáng mua nhất cho sinh viên mùa tựu trường
+              </h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px]">Hôm qua • 9.1k lượt xem</p>
+</div>
+</a>
+<!-- Article 4 -->
+<a class="flex gap-3 group" href="#">
+<div class="w-28 h-20 rounded-lg overflow-hidden shrink-0 bg-surface-canvas">
+<img alt="Đánh giá thời lượng pin và cảm biến sức khỏe Huawei Watch GT 7" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://lh3.googleusercontent.com/aida/AEtjO1XrWFwSVf9EwVwOdgnNIRppLULyxDGDz2P6U-uqkenTd4spKabNHM0vJE59xIYuj7udoujsSnuFsG-yeeZNYNIDhZBPGUzCbeDzuPLZChuZqCog-ub8j-fseXmnmrhSgDVY1UpsQ8jba51amxjZjM97V1Uuf2dwcJiz_ou3wzIaAcsu2u5nw87CGzxGB8MCgsSCQZcTQM64qhwzGBrFgUHRfPDVs2QQeoTboLmXNRNKgQ"/>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-gold-star uppercase">Khui hộp</span>
+<h4 class="font-body-medium text-body-medium text-xs font-semibold text-on-surface group-hover:text-primary-container transition-colors line-clamp-2">
+                Trên tay Huawei Watch GT 7: Thiết kế sang trọng, theo dõi nhịp tim chính xác 98%
+              </h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-[11px]">2 ngày trước • 3.5k lượt xem</p>
+</div>
+</a>
+</div>
+</div>
+<!-- Ecosystem Cards (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-3">
+<!-- Dien Thoai Vui -->
+<a class="bg-surface-card rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-badge-discount-bg text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">build_circle</span>
+</div>
+<div>
+<h4 class="font-title-sm text-title-sm text-on-surface text-sm font-bold group-hover:text-primary-container transition-colors">Điện Thoại Vui</h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-xs">Sửa chữa ĐTDĐ, Laptop lấy ngay</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted group-hover:translate-x-1 transition-transform">chevron_right</span>
+</a>
+<!-- CareS -->
+<a class="bg-surface-card rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<div>
+<h4 class="font-title-sm text-title-sm text-on-surface text-sm font-bold group-hover:text-secondary transition-colors">CareS Apple Service</h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-xs">Trung tâm bảo hành ủy quyền Apple AASP</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted group-hover:translate-x-1 transition-transform">chevron_right</span>
+</a>
+<!-- Schannel -->
+<a class="bg-surface-card rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-error-container text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">play_circle</span>
+</div>
+<div>
+<h4 class="font-title-sm text-title-sm text-on-surface text-sm font-bold group-hover:text-primary-container transition-colors">Schannel Review</h4>
+<p class="font-caption-sm text-caption-sm text-text-muted text-xs">Kênh video giải trí &amp; công nghệ số 1</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-muted group-hover:translate-x-1 transition-transform">chevron_right</span>
+</a>
+</div>
+</div>
+</section>
+<!-- NEWSLETTER SIGNUP BANNER (CONVERTING FOOTER LEAD CAPTURE) -->
+<section class="max-w-[1280px] mx-auto px-4 py-4 w-full">
+<div class="bg-gradient-to-r from-surface-card via-surface-card to-badge-discount-bg rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="space-y-1 text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-primary-container text-[24px]">mail</span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Đăng ký nhận bản tin khuyến mãi</h3>
+</div>
+<p class="font-body-default text-body-default text-text-muted">Nhận ngay voucher ưu đãi 10% cùng danh sách deal sốc cập nhật sớm nhất mỗi tuần.</p>
+</div>
+<div class="w-full md:w-auto flex flex-col sm:flex-row items-center gap-2">
+<input class="w-full sm:w-72 bg-surface-canvas text-on-surface px-4 py-2.5 rounded-lg text-body-default font-body-default focus:outline-none focus:bg-surface-card shadow-inner" placeholder="Nhập địa chỉ email của bạn..." type="email"/>
+<button class="w-full sm:w-auto bg-primary-container hover:bg-brand-red-vibrant text-on-primary px-6 py-2.5 rounded-lg font-title-sm text-title-sm font-bold transition-colors whitespace-nowrap shadow">
+          Đăng Ký Ngay
+        </button>
+</div>
+</div>
+</section>
+</div>
+<!-- CLIENT INTERACTIONS FOR HERO BANNER & FLASH SALE COUNTDOWN -->
+<script>
+  // Dynamic Hero Switcher
+  const heroImages = [
+    "https://lh3.googleusercontent.com/aida/AEtjO1X_k8mu8wZuhrHDY7v862Du_L2YoQl4cRa40IdulogSnXuE4uhtQirTTT3sBMiXqKCNyXpFYAPU6BdwyUHiYcdLFx76zIWbta4nj0F7HhYnZoK90oay4RlIhxNVJPc_ljLcz9gH0szVM7rEwjE57-i57udLp2y1gs8ENj62IGEr2Liqxbz2Xhc6icGSGDDocF2Yekdr0u-NPGYVYJZLaQgU4KtKo1PyqV3Yx33c0MPKNQ",
+    "https://lh3.googleusercontent.com/aida/AEtjO1WremtGVKeBCr7I2BkwFtSO-KwIvLndGSagC9jkINvQuvryGhco7W6PAraSSg4T-wi0XDEc5KOP4x4fhthGzsmyAkafC61Dvyse-ZXNqyF_vrKBtVn4LxG6TP-Xa3QJnoZWdF76dpmkAv29zmxP07DD4eKmvyrOstF35WaCn6v-jwQNWwEMPENPgRmJ7EKjQJUP2O2-vo7CWU73mD9kT_gZdhpQbxNFiYQKzWk8ky2Vdw",
+    "https://lh3.googleusercontent.com/aida/AEtjO1VdfjAuEew1SEnfTGRbXas__zgtPySR0HGChvyru6gaHfJ43M99Id7QvF-Q5_MLFpzJuH9qqSYEKf8AOsbb4XfNPnwON1Vtiq8VI_R7fajZ8HTqbiDhkQcLvIWLhzFAcC9h68kMozj16qSwDMwg9JqS4MBq2efTJccfKC46ap1JciZqrIe1CC_9y-beW5KDEVhYQQXRaEFSRV_IuEZaZTyhAeDUiJsNqEWtidfQxLfh"
+  ];
+  let currentHeroIdx = 0;
+  const heroImgEl = document.getElementById('mainHeroImage');
+
+  function setHeroBanner(src) {
+    if (heroImgEl) {
+      heroImgEl.style.opacity = '0.3';
+      setTimeout(() => {
+        heroImgEl.src = src;
+        heroImgEl.style.opacity = '1';
+      }, 150);
+    }
+  }
+
+  const prevBtn = document.getElementById('heroPrev');
+  const nextBtn = document.getElementById('heroNext');
+
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentHeroIdx = (currentHeroIdx - 1 + heroImages.length) % heroImages.length;
+      setHeroBanner(heroImages[currentHeroIdx]);
+    });
+    nextBtn.addEventListener('click', () => {
+      currentHeroIdx = (currentHeroIdx + 1) % heroImages.length;
+      setHeroBanner(heroImages[currentHeroIdx]);
+    });
+  }
+
+  // Flash Sale Timer Countdown Simulation
+  let totalSeconds = 2 * 3600 + 45 * 60 + 18;
+  const hoursBox = document.getElementById('hoursBox');
+  const minsBox = document.getElementById('minsBox');
+  const secsBox = document.getElementById('secsBox');
+
+  setInterval(() => {
+    if (totalSeconds > 0) {
+      totalSeconds--;
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mns = Math.floor((totalSeconds % 3600) / 60);
+      const scs = totalSeconds % 60;
+      if (hoursBox) hoursBox.innerText = String(hrs).padStart(2, '0');
+      if (minsBox) minsBox.innerText = String(mns).padStart(2, '0');
+      if (secsBox) secsBox.innerText = String(scs).padStart(2, '0');
+    }
+  }, 1000);
+</script>
+

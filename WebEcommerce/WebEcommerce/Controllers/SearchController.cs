@@ -41,7 +41,8 @@ namespace WebEcommerce.Controllers
                 {
                     var kw = keyword.ToLower().Trim();
                     query = query.Where(p => p.Name.ToLower().Contains(kw) ||
-                                             (p.Description != null && p.Description.ToLower().Contains(kw)));
+                                             (p.Description != null && p.Description.ToLower().Contains(kw)) ||
+                                             (p.Category != null && p.Category.Name.ToLower().Contains(kw)));
                 }
 
                 // Lọc theo danh mục

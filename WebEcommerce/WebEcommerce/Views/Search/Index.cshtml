@@ -152,7 +152,7 @@
         </div>
 
         <!-- Phân trang -->
-        @if (Model.TotalPages > 1)
+        if (Model.TotalPages > 1)
         {
             <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
                 @for (int i = 1; i <= Model.TotalPages; i++)

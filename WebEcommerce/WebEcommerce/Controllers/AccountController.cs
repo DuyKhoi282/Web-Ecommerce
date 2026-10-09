@@ -320,6 +320,89 @@ namespace WebEcommerce.Controllers
         }
 
         // ═══════════════════════════════════════════════════
+        //  AJAX LOGIN / REGISTER (cho Modal trên trang Index)
+        // ═══════════════════════════════════════════════════
+
+        // POST: /Account/AjaxLogin
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ActionResult> AjaxLogin(string email, string password, bool rememberMe = false)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                    return Json(new { success = false, message = "Vui lòng nhập đầy đủ email và mật khẩu." });
+
+                var user = await UserManager.FindByEmailAsync(email);
+                if (user != null && !user.IsActive)
+                    return Json(new { success = false, message = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên." });
+
+                var result = await SignInManager.PasswordSignInAsync(email, password, rememberMe, shouldLockout: true);
+
+                switch (result)
+                {
+                    case SignInStatus.Success:
+                        var isAdmin = user != null && (await UserManager.IsInRoleAsync(user.Id, "Administrator") || await UserManager.IsInRoleAsync(user.Id, "StoreManager"));
+                        return Json(new { success = true, message = "Đăng nhập thành công!", isAdmin = isAdmin, fullName = user?.FullName ?? "" });
+
+                    case SignInStatus.LockedOut:
+                        return Json(new { success = false, message = "Tài khoản bị tạm khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau." });
+
+                    default:
+                        return Json(new { success = false, message = "Email hoặc mật khẩu không chính xác." });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AjaxLogin Error] {ex.Message}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
+            }
+        }
+
+        // POST: /Account/AjaxRegister
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ActionResult> AjaxRegister(string fullName, string email, string password, string confirmPassword)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||
+                    string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+                    return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin." });
+
+                if (password != confirmPassword)
+                    return Json(new { success = false, message = "Mật khẩu xác nhận không khớp." });
+
+                if (password.Length < 6)
+                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự." });
+
+                var user = new ApplicationUser
+                {
+                    UserName  = email,
+                    Email     = email,
+                    FullName  = fullName.Trim(),
+                    IsActive  = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var result = await UserManager.CreateAsync(user, password);
+                if (result.Succeeded)
+                {
+                    await UserManager.AddToRoleAsync(user.Id, "Customer");
+                    return Json(new { success = true, message = "Đăng ký thành công! Vui lòng đăng nhập." });
+                }
+
+                var errors = string.Join(" ", result.Errors);
+                return Json(new { success = false, message = errors });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AjaxRegister Error] {ex.Message}");
+                return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
         //  HELPERS
         // ═══════════════════════════════════════════════════
 

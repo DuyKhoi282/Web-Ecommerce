@@ -21,7 +21,6 @@ namespace WebEcommerce.Controllers
                     .AsNoTracking()
                     .Where(c => c.IsActive)
                     .OrderBy(c => c.DisplayOrder)
-                    .Take(5)
                     .ToList();
 
                 var featuredProducts = _db.Products
@@ -30,17 +29,27 @@ namespace WebEcommerce.Controllers
                     .Include(p => p.ProductImages)
                     .Where(p => p.Status != 3)
                     .OrderByDescending(p => p.ProductID)
-                    .Take(8)
+                    .Take(10)
+                    .ToList();
+
+                var allProducts = _db.Products
+                    .AsNoTracking()
+                    .Include(p => p.Category)
+                    .Include(p => p.ProductImages)
+                    .Where(p => p.Status != 3)
+                    .OrderByDescending(p => p.ProductID)
                     .ToList();
 
                 ViewBag.Categories = categories;
                 ViewBag.FeaturedProducts = featuredProducts;
+                ViewBag.AllProducts = allProducts;
             }
             catch (Exception)
             {
                 // Skill [security-practices]: Boundary defense try-catch
                 ViewBag.Categories = new List<Category>();
                 ViewBag.FeaturedProducts = new List<Product>();
+                ViewBag.AllProducts = new List<Product>();
             }
 
             return View();

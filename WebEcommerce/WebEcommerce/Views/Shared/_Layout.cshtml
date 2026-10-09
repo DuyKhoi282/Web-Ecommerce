@@ -1,220 +1,468 @@
+@using WebEcommerce.Models
+
 <!DOCTYPE html>
-<html lang="vi" class="h-full">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "TheChillShop" : ViewBag.Title + " - TheChillShop")</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Material Symbols Outlined -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            primary: '#0d47a1',
-                            primaryDark: '#0a3880',
-                            accent: '#00b4d8',
-                            accentHover: '#0096c7',
-                            surface: '#f8faff',
-                            border: '#e2e8f4',
-                            charcoal: '#1a1a2e',
-                            muted: '#5c6370',
-                        }
-                    },
-                    fontFamily: {
-                        headline: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        body: ['"Inter"', 'sans-serif']
-                    }
-                }
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@@layer base{html,body{margin:0;padding:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "secondary": "#0058be",
+          "on-secondary": "#ffffff",
+          "on-background": "#111c2d",
+          "border-subtle": "#E2E8F0",
+          "badge-discount-text": "#D70018",
+          "on-secondary-fixed": "#001a42",
+          "inverse-on-surface": "#ecf1ff",
+          "surface-container": "#e7eeff",
+          "inverse-primary": "#ffb4ab",
+          "error-container": "#ffdad6",
+          "surface-container-high": "#dee8ff",
+          "surface-dim": "#cfdaf2",
+          "primary-container": "#d70018",
+          "badge-spec-text": "#475569",
+          "on-secondary-fixed-variant": "#004395",
+          "badge-spec-bg": "#F1F5F9",
+          "on-primary-fixed": "#410002",
+          "surface-canvas": "#F4F6F8",
+          "secondary-fixed-dim": "#adc6ff",
+          "surface-card": "#FFFFFF",
+          "surface": "#f9f9ff",
+          "text-muted": "#64748B",
+          "surface-container-highest": "#d8e3fb",
+          "tertiary-fixed-dim": "#4edea3",
+          "on-error": "#ffffff",
+          "secondary-fixed": "#d8e2ff",
+          "outline": "#936e6a",
+          "error": "#ba1a1a",
+          "secondary-container": "#2170e4",
+          "tertiary-container": "#007a53",
+          "tertiary-fixed": "#6ffbbe",
+          "on-surface-variant": "#5e3f3c",
+          "primary": "#a90010",
+          "inverse-surface": "#263143",
+          "surface-tint": "#c00014",
+          "surface-bright": "#f9f9ff",
+          "surface-container-low": "#f0f3ff",
+          "surface-variant": "#d8e3fb",
+          "outline-variant": "#e8bcb7",
+          "on-secondary-container": "#fefcff",
+          "on-error-container": "#93000a",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#a3ffd0",
+          "on-tertiary": "#ffffff",
+          "primary-fixed-dim": "#ffb4ab",
+          "gold-star": "#F59E0B",
+          "on-primary": "#ffffff",
+          "on-primary-container": "#ffe7e4",
+          "on-tertiary-fixed": "#002113",
+          "background": "#f9f9ff",
+          "brand-red-vibrant": "#E0052B",
+          "on-primary-fixed-variant": "#93000d",
+          "on-tertiary-fixed-variant": "#005236",
+          "tertiary": "#005f40",
+          "badge-discount-bg": "#FEF2F2",
+          "primary-fixed": "#ffdad6",
+          "on-surface": "#111c2d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "margin": "1rem",
+          "gutter": "1rem",
+          "margin-tablet": "1.5rem",
+          "gutter-desktop": "1.25rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.25rem",
+          "space-md": "0.75rem",
+          "space-sm": "0.5rem",
+          "margin-desktop": "2.5rem",
+          "space-xl": "2rem"
+        },
+        "fontFamily": {
+          "sans": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+          "jakarta": ["Plus Jakarta Sans", "sans-serif"],
+          "inter": ["Inter", "sans-serif"],
+          "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+          "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+          "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+          "title-lg": ["Plus Jakarta Sans", "sans-serif"],
+          "price-hero": ["Plus Jakarta Sans", "sans-serif"],
+          "title-md": ["Inter", "sans-serif"],
+          "title-sm": ["Inter", "sans-serif"],
+          "price-strike": ["Inter", "sans-serif"],
+          "price-headline": ["Plus Jakarta Sans", "sans-serif"],
+          "price-original": ["Inter", "sans-serif"],
+          "body-md": ["Inter", "sans-serif"],
+          "body-sm": ["Inter", "sans-serif"],
+          "body-default": ["Inter", "sans-serif"],
+          "body-medium": ["Inter", "sans-serif"],
+          "label-md": ["Inter", "sans-serif"],
+          "label-sm": ["Inter", "sans-serif"],
+          "label-xs": ["Inter", "sans-serif"],
+          "badge-label": ["Inter", "sans-serif"],
+          "caption-sm": ["Inter", "sans-serif"],
+          "display-hero": ["Plus Jakarta Sans", "sans-serif"],
+          "display-hero-mobile": ["Plus Jakarta Sans", "sans-serif"],
+          "headline-lg-mobile": ["Plus Jakarta Sans", "sans-serif"]
+        },
+        "fontSize": {
+          "title-sm": [
+            "16px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
             }
+          ],
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-default": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "badge-label": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "display-hero": [
+            "44px",
+            {
+              "lineHeight": "52px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "800"
+            }
+          ],
+          "caption-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ],
+          "display-hero-mobile": [
+            "30px",
+            {
+              "lineHeight": "38px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "800"
+            }
+          ],
+          "price-original": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "body-medium": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "price-headline": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ]
         }
-    </script>
-
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
-</head>
-<body class="bg-[#f8faff] text-[#1a1a2e] font-body min-h-screen flex flex-col justify-between selection:bg-[#00b4d8]/20 selection:text-[#0d47a1]">
-
-    <!-- Top Announcement Bar -->
-    <div class="bg-gradient-to-r from-[#0d47a1] via-[#0077b6] to-[#00b4d8] text-white text-xs py-2 px-4 shadow-sm">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm text-yellow-300">local_shipping</span>
-                <span>Miễn phí vận chuyển toàn quốc cho đơn hàng từ 500.000đ</span>
-            </div>
-            <div class="hidden sm:flex items-center gap-4 text-white/90">
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">support_agent</span>
-                    <span>Hotline: 1900 6868</span>
-                </span>
-                <span>•</span>
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">verified</span>
-                    <span>100% Chính hãng</span>
-                </span>
-            </div>
-        </div>
+      }
+    }
+  }</script></head><body class="bg-surface-canvas font-body-default text-body-default text-on-surface"><header class="fixed top-0 w-full z-50 bg-primary-container text-on-primary shadow-[0_1px_8px_rgba(0,0,0,0.06)]"><div class="bg-primary py-1 px-4 text-caption-sm font-caption-sm text-on-primary-container"><div class="max-w-[1280px] mx-auto flex items-center justify-between"><div class="flex items-center gap-4"><span>Hotline miễn phí: <strong class="text-on-primary">1800.2097</strong></span><span class="opacity-40">|</span><span class="flex items-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-[14px]">location_on</span> Cửa hàng gần bạn: <span class="underline font-medium text-on-primary">TP. Hồ Chí Minh</span></span></div><div class="flex items-center gap-5"><a class="hover:text-on-primary transition-colors" data-path="order-lookup" href="#">Tra cứu đơn hàng</a><a class="hover:text-on-primary transition-colors" data-path="trade-in" href="#">Thu cũ đổi mới</a><a class="hover:text-on-primary transition-colors" data-path="b2b-corporate" href="#">Khách hàng Doanh nghiệp (S-Business)</a><a class="hover:text-on-primary transition-colors flex items-center gap-1" data-path="smember-rewards" href="#"><span class="material-symbols-outlined text-[14px] text-gold-star">workspace_premium</span> Ưu đãi Smember</a></div></div></div><div class="h-20 max-w-[1280px] mx-auto px-4 flex items-center justify-between gap-4"><div class="flex items-center gap-4 flex-shrink-0"><a href="@Url.Action("Index", "Home")" class="flex items-center hover:opacity-90 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" class="h-9 w-auto"><g transform="translate(10, 10)"><rect x="2" y="16" width="46" height="42" rx="10" fill="#ffffff"/><path d="M15 16 V10 C15 4.5 19.5 0 25 0 C30.5 0 35 4.5 35 10 V16" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/><path d="M16 35 Q25 44 34 35" fill="none" stroke="#d70018" stroke-width="3.5" stroke-linecap="round"/><circle cx="34" cy="27" r="2" fill="#d70018"/></g><text x="72" y="49" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="#ffffff" letter-spacing="-0.8">Shope<tspan fill="#ffe7e4">Chill</tspan></text><circle cx="316" cy="45" r="4.5" fill="#ffffff"/></svg></a><button class="flex items-center gap-2 bg-on-primary/10 hover:bg-on-primary/20 text-on-primary px-3 py-2 rounded-lg text-body-medium font-body-medium transition-colors"><span class="material-symbols-outlined text-[18px]">category</span><span class="text-xs">Danh Mục</span><span class="material-symbols-outlined text-[16px]">expand_more</span></button></div><div class="flex-1 max-w-2xl px-2"><form action="@Url.Action("Index", "Search")" method="get" class="relative flex items-center w-full"><input id="mainSearchInput" name="keyword" autocomplete="off" class="w-full bg-surface-card text-on-surface placeholder:text-text-muted text-body-default font-body-default rounded-lg pl-10 pr-24 py-2.5 focus:outline-none shadow-sm" placeholder="Bạn cần tìm gì hôm nay?" type="text"/><span class="material-symbols-outlined text-text-muted absolute left-3 text-[20px]">search</span><div class="absolute right-2 flex items-center gap-1"><button type="submit" class="bg-primary-container text-on-primary px-3 py-1 rounded text-caption-sm font-caption-sm font-semibold hover:bg-brand-red-vibrant transition-colors">Tìm</button></div><div id="searchSuggestions" class="absolute top-full left-0 right-0 bg-surface-card shadow-lg rounded-b-lg mt-1 hidden z-50 max-h-[400px] overflow-y-auto border border-border-subtle text-left"></div></form><div class="flex items-center gap-2 mt-1 text-badge-label font-badge-label text-on-primary/80 overflow-hidden whitespace-nowrap"><span class="opacity-70">Gợi ý:</span><a class="hover:underline" data-path="catalog" href="#">iPhone 16 Series</a><span>•</span><a class="hover:underline" data-path="catalog" href="#">Galaxy S25 Ultra</a><span>•</span><a class="hover:underline" data-path="catalog" href="#">MacBook M4</a><span>•</span><a class="hover:underline" data-path="catalog" href="#">Tai nghe Sony</a></div></div><div class="flex items-center gap-3 flex-shrink-0"><a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-on-primary/10 text-on-primary text-caption-sm font-caption-sm transition-colors" data-path="order-lookup" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="text-left leading-tight"><span class="block text-[10px] opacity-80">Tra cứu</span>đơn hàng</span></a><a class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-on-primary/10 text-on-primary text-caption-sm font-caption-sm transition-colors relative" data-path="cart" href="#"><span class="material-symbols-outlined text-[20px]">shopping_cart</span><span class="text-left leading-tight"><span class="block text-[10px] opacity-80">Giỏ</span>hàng</span><span class="absolute -top-1 -right-1 bg-surface-card text-primary-container font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow">3</span></a><div class="flex items-center gap-2 pl-2"><a class="flex items-center gap-2 bg-on-primary/10 hover:bg-on-primary/20 text-on-primary px-3 py-2 rounded-lg text-caption-sm font-caption-sm transition-colors" data-path="smember-profile" href="javascript:void(0)" onclick="document.getElementById('authModal').classList.remove('hidden')"><span class="material-symbols-outlined text-[20px]">account_circle</span><span class="text-left leading-tight"><span class="block text-[10px] opacity-80">Hội viên</span>Smember</span></a><button onclick="document.getElementById('authModal').classList.remove('hidden')" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:bg-brand-red-vibrant transition-colors cursor-pointer"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></button></div></div></div><div class="bg-surface-card text-on-surface shadow-[0_1px_4px_rgba(0,0,0,0.03)] border-b border-border-subtle"><nav class="max-w-[1280px] mx-auto px-4 flex items-center gap-1 overflow-x-auto py-2">
+  @{
+      var db = new WebEcommerce.Models.ApplicationDbContext();
+      var layoutCategories = db.Categories.Where(c => c.IsActive).ToList();
+  }
+  @foreach (var cat in layoutCategories)
+  {
+      <a class="px-3 py-1.5 text-body-medium font-body-medium text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors" href="@Url.Action("Index", "Search", new { categoryId = cat.CategoryID })">@cat.Name</a>
+  }
+</nav></div></header><main class="w-full pt-20 bg-surface-canvas"><div class="flex flex-col w-full">
+@RenderBody()
+</div></main><footer class="w-full bg-surface-card mt-12 border-t border-border-subtle"><div class="max-w-[1280px] mx-auto px-4 py-10"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Tổng đài hỗ trợ miễn phí</p><div class="space-y-1 text-body-default font-body-default text-text-muted"><p>Gọi mua hàng: <strong class="text-primary-container font-semibold">1800.2097</strong> (7h30 - 22h00)</p><p>Khiếu nại, góp ý: <strong class="text-primary-container font-semibold">1800.2063</strong> (8h00 - 21h30)</p><p>Bảo hành, kỹ thuật: <strong class="text-primary-container font-semibold">1800.2064</strong> (8h00 - 21h00)</p></div><p class="font-title-sm text-title-sm text-on-surface font-bold pt-2">Phương thức thanh toán</p><div class="flex flex-wrap gap-2 text-caption-sm font-caption-sm text-text-muted"><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">Apple Pay</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">VNPAY</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">MoMo</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">Kredivo</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">OnePay</span></div></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Thông tin chính sách</p><ul class="space-y-2 text-body-default font-body-default text-text-muted"><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Mua hàng và thanh toán Online</a></li><li></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách giao hàng 2h siêu tốc</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách đổi trả &amp; bảo hành</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách bảo mật thông tin</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách khui hộp máy Apple</a></li></ul></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Hệ sinh thái thành viên</p><div class="space-y-2 text-body-default font-body-default text-text-muted"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span><span><strong>Điện Thoại Vui:</strong> Hệ thống sửa chữa ĐTDĐ, Laptop</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span><span><strong>CareS:</strong> Trung tâm bảo hành ủy quyền Apple</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gold-star"></span><span><strong>Schannel:</strong> Kênh giải trí &amp; review công nghệ</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span><strong>Sforum:</strong> Chuyên trang tin công nghệ nóng 24/7</span></div></div></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Cam kết chất lượng</p><div class="space-y-2 text-caption-sm font-caption-sm text-text-muted"><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-tertiary text-[18px]">verified</span> 100% hàng chính hãng, đầy đủ VAT</p><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-secondary text-[18px]">rocket_launch</span> Miễn phí giao hàng 2h cho đơn từ 300.000đ</p><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-primary text-[18px]">published_with_changes</span> Bảo hành 1 đổi 1 trong 30 ngày lỗi nhà sản xuất</p></div><div class="pt-2 flex items-center gap-3"><div class="px-2 py-1 bg-badge-spec-bg rounded text-caption-sm text-badge-spec-text border border-border-subtle">Chứng nhận Bộ Công Thương</div><div class="px-2 py-1 bg-badge-spec-bg rounded text-caption-sm text-badge-spec-text border border-border-subtle">DMCA Protected</div></div></div></div><div class="mt-8 pt-6 border-t border-border-subtle text-center text-caption-sm font-caption-sm text-text-muted"><p>© 2025 Công ty TNHH Thương mại Công nghệ ShopeChill - 350-352 Võ Văn Kiệt, Phường Cô Giang, Quận 1, TP. Hồ Chí Minh.</p></div></div></footer><!-- Auth Modal -->
+<div id="authModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
+  <div class="bg-surface-card w-[450px] max-w-[95vw] rounded-2xl p-6 relative shadow-xl">
+    <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-text-muted hover:text-on-surface transition-colors">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    
+    <div class="text-center mb-6">
+      <div class="flex justify-center mb-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" class="h-10 w-auto">
+          <g transform="translate(10, 10)">
+            <rect x="2" y="16" width="46" height="42" rx="10" fill="#d70018"/>
+            <path d="M15 16 V10 C15 4.5 19.5 0 25 0 C30.5 0 35 4.5 35 10 V16" fill="none" stroke="#d70018" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M16 35 Q25 44 34 35" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="34" cy="27" r="2" fill="#ffffff"/>
+          </g>
+          <text x="72" y="49" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="#1e1e24" letter-spacing="-0.8">
+            Shope<tspan fill="#d70018">Chill</tspan>
+          </text>
+          <circle cx="316" cy="45" r="4.5" fill="#d70018"/>
+        </svg>
+      </div>
+      <h3 id="authModalTitle" class="font-title-lg text-lg text-on-surface font-bold mt-3">Đăng ký tài khoản ChillMember</h3>
+      <p class="text-caption-sm text-text-muted mt-1 px-4">Tích luỹ điểm thưởng và nhận ngay 500k điểm sau khi đăng ký lần đầu tiên.</p>
     </div>
 
-    <!-- Main Navigation Header -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 border-slate-300 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20 gap-3 xl:gap-6">
+    <!-- Tabs -->
+    <div class="flex border-b border-border-subtle mb-5">
+      <button type="button" onclick="document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); this.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.classList.remove('text-text-muted', 'font-semibold'); this.nextElementSibling.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.nextElementSibling.classList.add('text-text-muted', 'font-semibold'); document.getElementById('authModalTitle').innerText = 'Đăng nhập tài khoản ChillMember';" class="flex-1 pb-2 text-text-muted font-title-sm font-semibold hover:text-on-surface transition-colors">Đăng nhập</button>
+      <button type="button" onclick="document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); this.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.classList.remove('text-text-muted', 'font-semibold'); this.previousElementSibling.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.previousElementSibling.classList.add('text-text-muted', 'font-semibold'); document.getElementById('authModalTitle').innerText = 'Đăng ký tài khoản ChillMember';" class="flex-1 pb-2 text-primary font-title-sm font-bold border-b-2 border-primary">Đăng ký</button>
+    </div>
 
-                <!-- Logo TheChillShop -->
-                <a href="@Url.Action("Index", "Home")" class="flex items-center gap-3 group flex-shrink-0">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] flex items-center justify-center text-white shadow-md shadow-[#0d47a1]/25 transition-transform group-hover:scale-105 duration-200">
-                        <span class="material-symbols-outlined text-2xl">shopping_bag</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="font-headline font-extrabold text-xl sm:text-2xl tracking-tight text-[#0d47a1] leading-none">TheChill<span class="text-[#00b4d8]">Shop</span></span>
-                        <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-1">Mua sắm thông minh</span>
-                    </div>
-                </a>
-
-                <!-- Desktop Navigation Links (Nowrap + Flex-shrink-0 to prevent text breaking) -->
-                <nav class="hidden lg:flex items-center gap-3 xl:gap-6 flex-shrink-0">
-                    <a href="@Url.Action("Index", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Trang chủ</a>
-                    <a href="@Url.Action("Index", "Shop")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Sản phẩm</a>
-                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Bộ sưu tập</a>
-                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Khuyến mãi</a>
-                    <a href="@Url.Action("Contact", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Liên hệ</a>
-                </nav>
-
-                <!-- Search Input Bar (Fixed min-width, never shrinks to a tiny circle) -->
-                <form action="@Url.Action("Index", "Shop")" method="get" class="hidden md:flex items-center relative flex-1 max-w-[220px] xl:max-w-xs min-w-[170px]">
-                    <input type="text" name="keyword" placeholder="Tìm sản phẩm..." class="w-full pl-9 pr-3 py-2 text-xs xl:text-sm bg-slate-50 border-2 border-slate-300 rounded-full focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none text-[#1a1a2e]" />
-                    <button type="submit" class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg hover:text-[#0d47a1]">search</button>
-                </form>
-
-                <!-- Right Actions: Cart & Auth Partial (No wrapping) -->
-                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <!-- Shopping Cart Icon -->
-                    <a href="#" class="relative p-2 text-slate-700 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 hover:border-[#0d47a1] rounded-full transition-all shadow-sm flex-shrink-0" title="Giỏ hàng">
-                        <span class="material-symbols-outlined text-2xl">shopping_cart</span>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md">0</span>
-                    </a>
-
-                    <!-- User Account / Login Partial -->
-                    @Html.Partial("_LoginPartial")
-                </div>
-            </div>
+    <!-- Login Form -->
+    <form id="loginForm" class="space-y-4 hidden" onsubmit="event.preventDefault();">
+      <div>
+        <label class="block text-xs font-semibold text-text-muted mb-1">Email</label>
+        <input type="text" id="loginEmail" placeholder="Nhập email" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-text-muted mb-1">Mật khẩu</label>
+        <div class="relative">
+          <input type="password" id="loginPassword" placeholder="********" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+          <span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-muted cursor-pointer hover:text-on-surface">visibility_off</span>
         </div>
-    </header>
+      </div>
+      <div class="flex items-center justify-between mt-2">
+        <label class="flex items-center gap-2 cursor-pointer group">
+          <input type="checkbox" id="loginRememberMe" class="accent-primary" />
+          <span class="text-xs text-text-muted group-hover:text-on-surface transition-colors">Ghi nhớ đăng nhập</span>
+        </label>
+        <a href="#" class="text-xs text-primary hover:underline">Quên mật khẩu?</a>
+      </div>
+      <div id="loginError" class="text-red-500 text-xs font-semibold hidden mt-2 text-center"></div>
+      <button type="button" onclick="handleLogin()" class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-title-sm font-bold hover:bg-brand-red-vibrant transition-colors mt-4 shadow-sm">
+        Đăng nhập
+      </button>
+    </form>
 
-    <!-- Main Content Body -->
-    <main class="flex-grow">
-        @RenderBody()
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-[#0b132b] text-slate-300 border-t border-slate-800 mt-20 pt-16 pb-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-                <!-- Col 1: Brand Info -->
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00b4d8] to-[#0d47a1] flex items-center justify-center text-white shadow-lg shadow-[#00b4d8]/20">
-                            <span class="material-symbols-outlined text-2xl">shopping_bag</span>
-                        </div>
-                        <span class="font-headline font-extrabold text-2xl text-white tracking-tight">TheChill<span class="text-[#00b4d8]">Shop</span></span>
-                    </div>
-                    <p class="text-sm text-slate-400 leading-relaxed">
-                        Hệ thống bán lẻ thiết bị công nghệ chính hãng hàng đầu. Cam kết trải nghiệm mua sắm thông minh, chất lượng đỉnh cao và dịch vụ tận tâm.
-                    </p>
-                    <div class="flex flex-wrap items-center gap-3 text-xs pt-1">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-                            <span class="material-symbols-outlined text-sm">lock</span> Bảo mật SSL 256-bit
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
-                            <span class="material-symbols-outlined text-sm">verified</span> 100% Chính hãng
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Col 2: About Us -->
-                <div>
-                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
-                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
-                        Về chúng tôi
-                    </h3>
-                    <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="@Url.Action("About", "Home")" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Giới thiệu TheChillShop</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Hệ thống showroom toàn quốc</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chương trình Khách hàng thân thiết</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách bảo mật thông tin</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Điều khoản & Điều kiện giao dịch</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 3: Customer Support -->
-                <div>
-                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
-                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
-                        Chăm sóc khách hàng
-                    </h3>
-                    <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Trung tâm trợ giúp & FAQ</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách đổi trả 15 ngày 1 đổi 1</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Tra cứu tình trạng đơn hàng</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Hướng dẫn thanh toán & Trả góp 0%</a></li>
-                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách giao hàng siêu tốc 2H</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 4: Contact & Newsletter -->
-                <div>
-                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
-                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
-                        Kết nối với chúng tôi
-                    </h3>
-                    <div class="space-y-2 text-sm text-slate-400 mb-5">
-                        <p class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-cyan-400 text-lg">call</span>
-                            <span>Hotline: <strong class="text-white text-base">1900 6868</strong> (Miễn phí)</span>
-                        </p>
-                        <p class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-cyan-400 text-lg">mail</span>
-                            <span>support@thechillshop.vn</span>
-                        </p>
-                    </div>
-
-                    <p class="text-xs text-slate-400 mb-3">Đăng ký nhận mã giảm giá <strong>100.000đ</strong>:</p>
-                    <form class="space-y-2" onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã đăng ký nhận tin từ TheChillShop!');">
-                        <div class="flex">
-                            <input type="email" placeholder="Nhập email của bạn..." class="w-full px-3.5 py-2.5 text-xs bg-slate-800/80 border border-slate-700 text-white rounded-l-xl focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" required />
-                            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#0d47a1] text-white text-xs font-bold rounded-r-xl transition-all shadow-md">Đăng ký</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Bottom Copyright & Badges -->
-            <div class="border-t border-slate-800/80 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-                <p>&copy; @DateTime.Now.Year TheChillShop. Bản quyền thuộc về Nhóm TheChill - Đồ Án Cuối Kỳ.</p>
-                <div class="flex items-center gap-4 text-slate-400">
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">shield</span> ASP.NET MVC 5</span>
-                    <span>•</span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">database</span> PostgreSQL 17</span>
-                    <span>•</span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">brush</span> Tailwind CSS</span>
-                </div>
-            </div>
+    <!-- Register Form -->
+    <form id="registerForm" class="space-y-4" onsubmit="event.preventDefault();">
+      <div>
+        <label class="block text-xs font-semibold text-text-muted mb-1">Họ và tên</label>
+        <input type="text" id="regFullName" placeholder="Nguyễn Văn A" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+      </div>
+      
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-text-muted mb-1">Số điện thoại</label>
+          <input type="text" id="regPhone" placeholder="0912345678" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
         </div>
-    </footer>
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-text-muted mb-1">Email</label>
+          <input type="email" id="regEmail" placeholder="nguyenvana@gmail.com" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+        </div>
+      </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
-</body>
-</html>
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-text-muted mb-1">Mật khẩu</label>
+          <div class="relative">
+            <input type="password" id="regPassword" placeholder="********" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+            <span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-muted cursor-pointer hover:text-on-surface">visibility_off</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-text-muted mb-1">Xác nhận mật khẩu</label>
+          <div class="relative">
+            <input type="password" id="regConfirmPassword" placeholder="********" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+            <span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-muted cursor-pointer hover:text-on-surface">visibility_off</span>
+          </div>
+        </div>
+      </div>
+
+      <label class="flex items-start gap-2 mt-2 cursor-pointer group">
+        <input type="checkbox" class="mt-1 accent-primary" />
+        <span class="text-xs text-text-muted leading-tight group-hover:text-on-surface transition-colors">
+          Tôi đồng ý với <a href="#" class="text-primary hover:underline">Điều khoản sử dụng</a> & <a href="#" class="text-primary hover:underline">Chính sách bảo mật</a> của ShopeChill
+        </span>
+      </label>
+
+      <div id="regError" class="text-red-500 text-xs font-semibold hidden mt-2 text-center"></div>
+      <button type="button" onclick="handleRegister()" class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-title-sm font-bold hover:bg-brand-red-vibrant transition-colors mt-2 shadow-sm">
+        Đăng ký tài khoản
+      </button>
+    </form>
+
+    <div class="mt-6 flex items-center justify-center gap-2">
+      <div class="h-px bg-border-subtle flex-1"></div>
+      <span class="text-xs text-text-muted px-2">Hoặc tiếp tục bằng</span>
+      <div class="h-px bg-border-subtle flex-1"></div>
+    </div>
+
+    <div class="flex gap-3 mt-4">
+      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google" />
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
+        <img src="https://www.svgrepo.com/show/448222/apple.svg" class="w-4 h-4" alt="Apple" />
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
+        <div class="w-4 h-4 bg-secondary text-white rounded text-[10px] font-bold flex items-center justify-center leading-none">Z</div>
+      </button>
+    </div>
+
+    <div class="mt-6 text-center">
+      <p class="text-xs text-text-muted">Đã có tài khoản ShopeChill? <a href="#" class="text-primary font-bold hover:underline">Đăng nhập ngay</a></p>
+    </div>
+  </div>
+</div>
+<script>
+    // Search Autocomplete Logic
+    const searchInput = document.getElementById('mainSearchInput');
+    const suggestionsBox = document.getElementById('searchSuggestions');
+    let searchTimeout;
+
+    if (searchInput && suggestionsBox) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const term = this.value.trim();
+            if (term.length < 2) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`@Url.Action("Autocomplete", "Search")?term=${encodeURIComponent(term)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data && data.length > 0) {
+                            data.forEach(item => {
+                                const div = document.createElement('a');
+                                div.href = `@Url.Action("Details", "Shop")/${item.id}`;
+                                div.className = 'flex items-center gap-3 p-3 hover:bg-surface-canvas transition-colors border-b border-border-subtle last:border-0';
+                                div.innerHTML = `
+                                    <img src="${item.image}" alt="${item.name}" class="w-10 h-10 object-contain rounded" onerror="this.src='https://placehold.co/100x100/f8faff/0d47a1?text=TheChillShop'" />
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-xs font-semibold text-on-surface line-clamp-1">${item.name}</h4>
+                                        <p class="text-[10px] text-primary-container font-bold">${new Intl.NumberFormat('vi-VN').format(item.price)}₫</p>
+                                    </div>
+                                `;
+                                suggestionsBox.appendChild(div);
+                            });
+                            suggestionsBox.classList.remove('hidden');
+                        } else {
+                            suggestionsBox.innerHTML = '<div class="p-3 text-xs text-text-muted text-center">Không tìm thấy sản phẩm phù hợp.</div>';
+                            suggestionsBox.classList.remove('hidden');
+                        }
+                    })
+                    .catch(err => console.error("Autocomplete error:", err));
+            }, 300);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+    }
+
+    // Auth Modal Logic
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const remember = document.getElementById('loginRememberMe').checked;
+        const errDiv = document.getElementById('loginError');
+        
+        errDiv.classList.add('hidden');
+
+        fetch('@Url.Action("AjaxLogin", "Account")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&rememberMe=${remember}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                errDiv.innerText = data.message;
+                errDiv.classList.remove('hidden');
+            }
+        })
+        .catch(err => {
+            errDiv.innerText = "Đã xảy ra lỗi hệ thống.";
+            errDiv.classList.remove('hidden');
+        });
+    }
+
+    function handleRegister() {
+        const fn = document.getElementById('regFullName').value;
+        const em = document.getElementById('regEmail').value;
+        const pw = document.getElementById('regPassword').value;
+        const cpw = document.getElementById('regConfirmPassword').value;
+        const errDiv = document.getElementById('regError');
+        
+        errDiv.classList.add('hidden');
+
+        fetch('@Url.Action("AjaxRegister", "Account")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `fullName=${encodeURIComponent(fn)}&email=${encodeURIComponent(em)}&password=${encodeURIComponent(pw)}&confirmPassword=${encodeURIComponent(cpw)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('authModal').classList.add('hidden');
+                // Could auto-switch to login tab here
+            } else {
+                errDiv.innerText = data.message;
+                errDiv.classList.remove('hidden');
+            }
+        })
+        .catch(err => {
+            errDiv.innerText = "Đã xảy ra lỗi hệ thống.";
+            errDiv.classList.remove('hidden');
+        });
+    }
+</script>
+@RenderSection("scripts", required: false)</body></html>
+
