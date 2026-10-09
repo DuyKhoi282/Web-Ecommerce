@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebEcommerce.Models
@@ -10,6 +10,8 @@ namespace WebEcommerce.Models
     {
         [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "Họ và tên phải từ 2 đến 150 ký tự.")]
+        [RegularExpression(@"^[^<>&""'{}\[\]]+$",
+            ErrorMessage = "Ho va ten khong duoc chua ky tu dac biet nhu < > & ' [ ].")]
         [Display(Name = "Họ và tên")]
         public string FullName { get; set; }
 
@@ -30,6 +32,28 @@ namespace WebEcommerce.Models
         [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmPassword { get; set; }
     }
+
+    // ──────────────────────────────────────────────────────
+    // XÁC THỰC OTP 
+    // ──────────────────────────────────────────────────────
+    public class VerifyOtpViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập mã xác thực.")]
+        [StringLength(
+            6,
+            MinimumLength = 6,
+            ErrorMessage = "Mã xác thực phải gồm 6 chữ số."
+        )]
+        [RegularExpression(
+            @"^\d{6}$",
+            ErrorMessage = "Mã xác thực phải gồm 6 chữ số."
+        )]
+        [Display(Name = "Mã xác thực")]
+        public string Code { get; set; }
+
+        public string Email { get; set; }
+    }
+
 
     // ──────────────────────────────────────────────────────
     //  ĐĂNG NHẬP

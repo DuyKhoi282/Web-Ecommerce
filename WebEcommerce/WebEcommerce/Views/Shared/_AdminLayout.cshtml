@@ -120,9 +120,9 @@
                 </a>
 
                 <!-- Quản lý đơn hàng (TV3) -->
-                <a href="#" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-blue-100/80 hover:bg-white/10 hover:text-white transition-all">
-                    <span class="material-symbols-outlined text-xl">receipt_long</span>
+                <a href="@Url.Action("Index", "AdminOrder")" 
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminOrder" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "AdminOrder" ? "text-[#00b4d8]" : "")">receipt_long</span>
                     <span>Quản lý đơn hàng</span>
                 </a>
 

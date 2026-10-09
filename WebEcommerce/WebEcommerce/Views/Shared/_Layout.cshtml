@@ -1,4 +1,10 @@
 @using WebEcommerce.Models
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "TheChillShop" : ViewBag.Title + " - TheChillShop")</title>
 
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link rel="preconnect" href="https://fonts.googleapis.com">
@@ -253,17 +259,45 @@
       <button type="button" onclick="document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); this.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.classList.remove('text-text-muted', 'font-semibold'); this.previousElementSibling.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.previousElementSibling.classList.add('text-text-muted', 'font-semibold'); document.getElementById('authModalTitle').innerText = 'Đăng ký tài khoản ChillMember';" class="flex-1 pb-2 text-primary font-title-sm font-bold border-b-2 border-primary">Đăng ký</button>
     </div>
 
-    <!-- Login Form -->
-    <form id="loginForm" class="space-y-4 hidden" onsubmit="event.preventDefault();">
-      <div>
-        <label class="block text-xs font-semibold text-text-muted mb-1">Email</label>
-        <input type="text" id="loginEmail" placeholder="Nhập email" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-text-muted mb-1">Mật khẩu</label>
-        <div class="relative">
-          <input type="password" id="loginPassword" placeholder="********" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
-          <span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-muted cursor-pointer hover:text-on-surface">visibility_off</span>
+                <!-- Logo TheChillShop -->
+                <a href="@Url.Action("Index", "Home")" class="flex items-center gap-3 group flex-shrink-0">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-[#0d47a1] to-[#00b4d8] flex items-center justify-center text-white shadow-md shadow-[#0d47a1]/25 transition-transform group-hover:scale-105 duration-200">
+                        <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-headline font-extrabold text-xl sm:text-2xl tracking-tight text-[#0d47a1] leading-none">TheChill<span class="text-[#00b4d8]">Shop</span></span>
+                        <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-400 mt-1">Mua sắm thông minh</span>
+                    </div>
+                </a>
+
+                <nav class="hidden lg:flex items-center gap-3 xl:gap-6 flex-shrink-0">
+                    <a href="@Url.Action("Index", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Trang chủ</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Sản phẩm</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Bộ sưu tập</a>
+                    <a href="#" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Khuyến mãi</a>
+                    <a href="@Url.Action("Contact", "Home")" class="text-sm font-semibold text-slate-700 hover:text-[#0d47a1] whitespace-nowrap transition-colors py-1">Liên hệ</a>
+                </nav>
+
+                <div class="hidden md:flex items-center relative flex-1 max-w-[220px] xl:max-w-xs min-w-[170px]">
+                    <input type="text" placeholder="Tìm sản phẩm..." class="w-full pl-9 pr-3 py-2 text-xs xl:text-sm bg-slate-50 border-2 border-slate-300 rounded-full focus:bg-white focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none text-[#1a1a2e]" />
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg pointer-events-none">search</span>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <a href="@Url.Action("Index", "Cart")" class="relative p-2 text-slate-700 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 hover:border-[#0d47a1] rounded-full transition-all shadow-sm flex-shrink-0" title="Giỏ hàng">
+                        <span class="material-symbols-outlined text-2xl">shopping_cart</span>
+                        <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md">0</span>
+                    </a>
+
+                    @if (Request.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("Index", "Order")" class="relative p-2 text-slate-700 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 hover:border-[#0d47a1] rounded-full transition-all shadow-sm flex-shrink-0" title="Lịch sử đơn hàng">
+                            <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                        </a>
+                    }
+
+                    @Html.Partial("_LoginPartial")
+                </div>
         </div>
       </div>
       <div class="flex items-center justify-between mt-2">
@@ -279,17 +313,107 @@
       </button>
     </form>
 
-    <!-- Register Form -->
-    <form id="registerForm" class="space-y-4" onsubmit="event.preventDefault();">
-      <div>
-        <label class="block text-xs font-semibold text-text-muted mb-1">Họ và tên</label>
-        <input type="text" id="regFullName" placeholder="Nguyễn Văn A" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
-      </div>
-      
-      <div class="flex gap-3">
-        <div class="flex-1">
-          <label class="block text-xs font-semibold text-text-muted mb-1">Số điện thoại</label>
-          <input type="text" id="regPhone" placeholder="0912345678" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+@Html.AntiForgeryToken()
+
+    <main class="flex-grow">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-[#0b132b] text-slate-300 border-t border-slate-800 mt-20 pt-16 pb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00b4d8] to-[#0d47a1] flex items-center justify-center text-white shadow-lg shadow-[#00b4d8]/20">
+                            <span class="material-symbols-outlined text-2xl">shopping_bag</span>
+                        </div>
+                        <span class="font-headline font-extrabold text-2xl text-white tracking-tight">TheChill<span class="text-[#00b4d8]">Shop</span></span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Hệ thống bán lẻ thiết bị công nghệ chính hãng hàng đầu. Cam kết trải nghiệm mua sắm thông minh, chất lượng đỉnh cao và dịch vụ tận tâm.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 text-xs pt-1">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                            <span class="material-symbols-outlined text-sm">lock</span> Bảo mật SSL 256-bit
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
+                            <span class="material-symbols-outlined text-sm">verified</span> 100% Chính hãng
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
+                        Về chúng tôi
+                    </h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><a href="@Url.Action("About", "Home")" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Giới thiệu TheChillShop</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Hệ thống showroom toàn quốc</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chương trình Khách hàng thân thiết</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách bảo mật thông tin</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Điều khoản & Điều kiện giao dịch</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
+                        Chăm sóc khách hàng
+                    </h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Trung tâm trợ giúp & FAQ</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách đổi trả 15 ngày 1 đổi 1</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Tra cứu tình trạng đơn hàng</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Hướng dẫn thanh toán & Trả góp 0%</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all">Chính sách giao hàng siêu tốc 2H</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-headline font-bold text-sm text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                        <span class="w-1.5 h-4 rounded-full bg-[#00b4d8]"></span>
+                        Kết nối với chúng tôi
+                    </h3>
+                    <div class="space-y-2 text-sm text-slate-400 mb-5">
+                        <p class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-cyan-400 text-lg">call</span>
+                            <span>Hotline: <strong class="text-white text-base">1900 6868</strong> (Miễn phí)</span>
+                        </p>
+                        <p class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-cyan-400 text-lg">mail</span>
+                            <span>support@thechillshop.vn</span>
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-slate-400 mb-3">Đăng ký nhận mã giảm giá <strong>100.000đ</strong>:</p>
+                    <form class="space-y-2" onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã đăng ký nhận tin từ TheChillShop!');">
+                        <div class="flex">
+                            <input type="email" placeholder="Nhập email của bạn..." class="w-full px-3.5 py-2.5 text-xs bg-slate-800/80 border border-slate-700 text-white rounded-l-xl focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" required />
+                            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#0d47a1] text-white text-xs font-bold rounded-r-xl transition-all shadow-md">Đăng ký</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800/80 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; @DateTime.Now.Year TheChillShop. Bản quyền thuộc về Nhóm TheChill - Đồ Án Cuối Kỳ.</p>
+                <div class="flex items-center gap-4 text-slate-400">
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">shield</span> ASP.NET MVC 5</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">database</span> PostgreSQL 17</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-cyan-400">brush</span> Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/cart")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
         </div>
         <div class="flex-1">
           <label class="block text-xs font-semibold text-text-muted mb-1">Email</label>
@@ -468,3 +592,9 @@
 </script>
 @RenderSection("scripts", required: false)</body></html>
 
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/cart")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

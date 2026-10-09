@@ -1,0 +1,87 @@
+@model List<WebEcommerce.Models.Order>
+@{
+    ViewBag.Title = "Lịch sử đơn hàng";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">receipt_long</span>
+            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">Lịch sử đơn hàng</h1>
+        </div>
+        <p class="text-sm text-slate-500">Theo dõi trạng thái và chi tiết các đơn hàng của bạn.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-10 text-center shadow-sm">
+            <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-[#0d47a1]">shopping_bag</span>
+            </div>
+            <h2 class="font-headline font-bold text-xl text-slate-900 mb-2">Chưa có đơn hàng</h2>
+            <p class="text-sm text-slate-500 mb-6">Bạn chưa đặt đơn hàng nào.</p>
+            <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">shopping_bag</span>
+                Bắt đầu mua sắm
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var order in Model)
+            {
+                var statusColor = "bg-slate-100 text-slate-700";
+                var statusIcon = "schedule";
+                switch (order.Status)
+                {
+                    case "Pending": statusColor = "bg-amber-100 text-amber-700"; statusIcon = "schedule"; break;
+                    case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; statusIcon = "check_circle"; break;
+                    case "Shipped": statusColor = "bg-purple-100 text-purple-700"; statusIcon = "local_shipping"; break;
+                    case "Delivered": statusColor = "bg-green-100 text-green-700"; statusIcon = "verified"; break;
+                    case "Cancelled": statusColor = "bg-red-100 text-red-700"; statusIcon = "cancel"; break;
+                }
+
+                <div class="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="font-headline font-bold text-base text-slate-900">Đơn hàng #@order.OrderID</span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @statusColor">
+                                <span class="material-symbols-outlined text-sm">@statusIcon</span>
+                                @order.Status
+                            </span>
+                        </div>
+                        <span class="text-xs text-slate-500">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="text-sm text-slate-600">
+                            <span>@(order.OrderDetails?.Count ?? 0) sản phẩm</span>
+                            <span class="mx-2">•</span>
+                            <span>@order.PaymentMethod</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-headline font-extrabold text-lg text-[#0d47a1]">@string.Format("{0:N0}đ", order.FinalAmount)</span>
+                            <a href="@Url.Action("Detail", "Order", new { id = order.OrderID })" class="px-4 py-2 rounded-lg bg-blue-50 hover:bg-[#0d47a1] text-[#0d47a1] hover:text-white font-bold text-xs border border-blue-200 hover:border-[#0d47a1] transition-all">
+                                Chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

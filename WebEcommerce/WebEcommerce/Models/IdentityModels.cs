@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
@@ -68,6 +68,8 @@ namespace WebEcommerce.Models
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<Wishlist> Wishlists { get; set; }
+        public virtual DbSet<FlashSale> FlashSales { get; set; }
+        public virtual DbSet<FlashSaleItem> FlashSaleItems { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -85,6 +87,7 @@ namespace WebEcommerce.Models
             modelBuilder.Entity<Order>().Property(o => o.FinalAmount).HasPrecision(18, 2);
             modelBuilder.Entity<OrderDetail>().Property(d => d.UnitPrice).HasPrecision(18, 2);
             modelBuilder.Entity<OrderDetail>().Property(d => d.Subtotal).HasPrecision(18, 2);
+            modelBuilder.Entity<FlashSaleItem>().Property(f => f.FlashSalePrice).HasPrecision(18, 2);
 
             // Configure Delete behaviors to match SQL script
             modelBuilder.Entity<Order>()
