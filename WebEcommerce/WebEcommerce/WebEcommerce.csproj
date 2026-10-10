@@ -223,6 +223,9 @@
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\AdminOrderController.cs" />
     <Compile Include="Filters\CustomAuthorizeAttribute.cs" />
+    <Compile Include="Helpers\CookieCartItem.cs" />
+    <Compile Include="Helpers\CookieCartHelper.cs" />
+    <Compile Include="Models\CartViewModels.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
