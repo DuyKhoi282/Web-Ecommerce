@@ -340,7 +340,7 @@
             var btn = $(this);
             if (btn.prop("disabled")) return;
 
-            var cartItemId = btn.data("cart-item-id");
+            var productId = btn.data("product-id");
             var token = getAntiForgeryToken();
             if (!token) {
                 alert("Không tìm thấy mã xác thực. Vui lòng tải lại trang.");
@@ -354,7 +354,7 @@
                 type: "POST",
                 dataType: "json",
                 data: {
-                    cartItemId: cartItemId,
+                    productId: productId,
                     __RequestVerificationToken: token
                 },
                 success: function (response) {
@@ -384,7 +384,7 @@
             var btn = $(this);
             if (btn.prop("disabled")) return;
 
-            var cartItemId = btn.data("cart-item-id");
+            var productId = btn.data("product-id");
             var token = getAntiForgeryToken();
             if (!token) {
                 alert("Không tìm thấy mã xác thực. Vui lòng tải lại trang.");
@@ -398,7 +398,7 @@
                 type: "POST",
                 dataType: "json",
                 data: {
-                    cartItemId: cartItemId,
+                    productId: productId,
                     __RequestVerificationToken: token
                 },
                 success: function (response) {
@@ -408,7 +408,7 @@
                         return;
                     }
                     if (response.removed) {
-                        var row = $(".cart-item[data-cart-item-id='" + cartItemId + "']");
+                        var row = $(".cart-item[data-product-id='" + productId + "']");
                         row.fadeOut(300, function () {
                             row.remove();
                             if ($(".cart-item").length === 0) {
@@ -438,7 +438,7 @@
             var btn = $(this);
             if (btn.prop("disabled")) return;
 
-            var cartItemId = btn.data("cart-item-id");
+            var productId = btn.data("product-id");
             if (!confirm("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?")) {
                 return;
             }
@@ -456,7 +456,7 @@
                 type: "POST",
                 dataType: "json",
                 data: {
-                    cartItemId: cartItemId,
+                    productId: productId,
                     __RequestVerificationToken: token
                 },
                 success: function (response) {
@@ -465,7 +465,7 @@
                         alert(response ? response.message : "Lỗi không xác định.");
                         return;
                     }
-                    var row = $(".cart-item[data-cart-item-id='" + cartItemId + "']");
+                    var row = $(".cart-item[data-product-id='" + productId + "']");
                     row.fadeOut(300, function () {
                         row.remove();
                         if ($(".cart-item").length === 0) {

@@ -1,4 +1,4 @@
-@model WebEcommerce.Models.Cart
+@model WebEcommerce.Models.CartViewModel
 
 @{
     ViewBag.Title = "Giỏ hàng";
@@ -30,7 +30,7 @@
         </div>
     }
 
-    @if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
+    @if (Model == null || Model.Items == null || !Model.Items.Any())
     {
         <!-- Empty Cart -->
         <div class="bg-white border-2 border-slate-200 rounded-2xl p-10 text-center shadow-sm">
@@ -68,21 +68,10 @@
             <!-- Cart Items -->
             <div class="lg:col-span-2 space-y-4">
 
-                @foreach (var item in Model.CartItems)
+                @foreach (var item in Model.Items)
                 {
-                    var product = item.Product;
-
-                    if (product == null)
-                    {
-                        continue;
-                    }
-
-                    var unitPrice = item.UnitPriceAtAddition;
-                    var itemTotal = unitPrice * item.Quantity;
-
                     <div class="cart-item bg-white border-2 border-slate-200
                                 rounded-2xl p-4 sm:p-5 shadow-sm"
-                         data-cart-item-id="@item.CartItemID"
                          data-product-id="@item.ProductID">
 
                         <div class="flex flex-col sm:flex-row gap-5">
@@ -92,16 +81,10 @@
                                         rounded-xl bg-slate-50 border border-slate-200
                                         flex items-center justify-center overflow-hidden">
 
-                                @{
-                                    var image = product.ProductImages?
-                                        .FirstOrDefault(x => x.IsMain)
-                                        ?? product.ProductImages?.FirstOrDefault();
-                                }
-
-                                @if (image != null && !string.IsNullOrEmpty(image.ImageURL))
+                                @if (!string.IsNullOrEmpty(item.ImageURL))
                                 {
-                                    <img src="@image.ImageURL"
-                                         alt="@product.Name"
+                                    <img src="@item.ImageURL"
+                                         alt="@item.ProductName"
                                          class="w-full h-full object-contain p-2"
                                          onerror="this.onerror=null; this.src='https://placehold.co/200x200/f8faff/0d47a1?text=TheChillShop';" />
                                 }
@@ -120,11 +103,11 @@
 
                                     <div>
                                         <h2 class="font-headline font-bold text-base text-slate-900">
-                                            @product.Name
+                                            @item.ProductName
                                         </h2>
 
                                         <p class="text-xs text-slate-500 mt-1">
-                                            Mã sản phẩm: @product.ProductID
+                                            Mã sản phẩm: @item.ProductID
                                         </p>
                                     </div>
 
@@ -139,7 +122,7 @@
                                                    hover:bg-red-50
                                                    flex items-center justify-center
                                                    transition-colors"
-                                            data-cart-item-id="@item.CartItemID"
+                                            data-product-id="@item.ProductID"
                                             title="Xóa sản phẩm">
 
                                         <span class="material-symbols-outlined text-lg">
@@ -152,7 +135,7 @@
                                 <!-- Price -->
                                 <div class="mt-3">
                                     <span class="text-sm font-bold text-[#0d47a1]">
-                                        @string.Format("{0:N0}đ", unitPrice)
+                                        @string.Format("{0:N0}đ", item.UnitPrice)
                                     </span>
                                 </div>
 
@@ -169,7 +152,7 @@
                                                        hover:bg-slate-100
                                                        text-slate-700
                                                        flex items-center justify-center"
-                                                data-cart-item-id="@item.CartItemID">
+                                                data-product-id="@item.ProductID">
 
                                             <span class="material-symbols-outlined text-lg">
                                                 remove
@@ -192,7 +175,7 @@
                                                        hover:bg-slate-100
                                                        text-slate-700
                                                        flex items-center justify-center"
-                                                data-cart-item-id="@item.CartItemID">
+                                                data-product-id="@item.ProductID">
 
                                             <span class="material-symbols-outlined text-lg">
                                                 add
@@ -210,7 +193,7 @@
                                         <p class="cart-item-total
                                                   font-headline font-extrabold
                                                   text-lg text-[#0d47a1]">
-                                            @string.Format("{0:N0}đ", itemTotal)
+                                            @string.Format("{0:N0}đ", item.ItemTotal)
                                         </p>
                                     </div>
 
@@ -241,8 +224,7 @@
 
                             <span id="cart-subtotal"
                                   class="font-bold text-slate-900">
-                                @string.Format("{0:N0}đ",
-                                    Model.CartItems.Sum(x => x.UnitPriceAtAddition * x.Quantity))
+                                @string.Format("{0:N0}đ", Model.CartTotal)
                             </span>
                         </div>
 
@@ -266,8 +248,7 @@
 
                         <span id="cart-total"
                               class="font-headline font-extrabold text-xl text-[#0d47a1]">
-                            @string.Format("{0:N0}đ",
-                                Model.CartItems.Sum(x => x.UnitPriceAtAddition * x.Quantity))
+                            @string.Format("{0:N0}đ", Model.CartTotal)
                         </span>
 
                     </div>
