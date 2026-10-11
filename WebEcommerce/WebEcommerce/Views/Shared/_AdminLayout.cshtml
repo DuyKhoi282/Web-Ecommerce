@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "Quản trị" : ViewBag.Title) - TheChillShop Admin</title>
+    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "Quản trị" : ViewBag.Title) - ShopeChill Admin</title>
 
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,9 +21,9 @@
                 extend: {
                     colors: {
                         chill: {
-                            primary: "#0d47a1",
-                            primaryDark: "#0a3880",
-                            accent: "#00b4d8",
+                            primary: "#d70018",
+                            primaryDark: "#b91c1c",
+                            accent: "#ff4d4d",
                             lightBg: "#f8faff",
                             border: "#e2e8f4",
                             charcoal: "#1a1a2e",
@@ -59,18 +59,18 @@
 <body class="bg-[#e9eff6] text-[#1a1a2e] font-body min-h-screen antialiased">
 
     <!-- ========================================== -->
-    <!-- SIDEBAR NAVIGATION (Deep Blue #0d47a1)    -->
+    <!-- SIDEBAR NAVIGATION (Deep Blue #d70018)    -->
     <!-- ========================================== -->
-    <aside class="fixed top-0 left-0 h-screen w-64 z-30 bg-[#0d47a1] text-white shadow-2xl flex flex-col justify-between py-6 px-0 select-none">
+    <aside class="fixed top-0 left-0 h-screen w-64 z-30 bg-[#d70018] text-white shadow-2xl flex flex-col justify-between py-6 px-0 select-none">
         <div>
             <!-- Logo Section -->
             <div class="px-6 mb-8 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#00b4d8] shadow-inner">
+                <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#ff4d4d] shadow-inner">
                     <span class="material-symbols-outlined text-2xl">shopping_cart</span>
                 </div>
                 <div>
-                    <span class="font-headline font-extrabold text-xl tracking-tight text-white block">TheChill<span class="text-[#00b4d8]">Shop</span></span>
-                    <span class="text-[10px] tracking-wider uppercase font-semibold text-blue-200/80 block">Trang Quản Trị</span>
+                    <span class="font-headline font-extrabold text-xl tracking-tight text-white block">TheChill<span class="text-[#ff4d4d]">Shop</span></span>
+                    <span class="text-[10px] tracking-wider uppercase font-semibold text-red-200/80 block">Trang Quản Trị</span>
                 </div>
             </div>
 
@@ -83,8 +83,8 @@
 
                 <!-- Tổng quan / Dashboard -->
                 <a href="@Url.Action("Index", "AdminDashboard")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminDashboard" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "AdminDashboard" ? "text-[#00b4d8]" : "")">dashboard</span>
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminDashboard" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "AdminDashboard" ? "text-[#ff4d4d]" : "")">dashboard</span>
                     <span>Tổng quan</span>
                 </a>
 
@@ -92,37 +92,37 @@
                 @if (User.IsInRole("Administrator"))
                 {
                     <a href="@Url.Action("Index", "AdminUser")" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                        <span class="material-symbols-outlined text-xl @(currentController == "AdminUser" ? "text-[#00b4d8]" : "")">group</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminUser" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                        <span class="material-symbols-outlined text-xl @(currentController == "AdminUser" ? "text-[#ff4d4d]" : "")">group</span>
                         <span>Quản lý tài khoản</span>
                     </a>
                 }
 
                 <!-- Quản lý danh mục (TV2) -->
                 <a href="@Url.Action("Index", "Category")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Category" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "Category" ? "text-[#00b4d8]" : "")">category</span>
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Category" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Category" ? "text-[#ff4d4d]" : "")">category</span>
                     <span>Danh mục sản phẩm</span>
                 </a>
 
                 <!-- Quản lý sản phẩm (TV2) -->
                 <a href="@Url.Action("Index", "Product")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Product" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "Product" ? "text-[#00b4d8]" : "")">inventory_2</span>
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Product" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Product" ? "text-[#ff4d4d]" : "")">inventory_2</span>
                     <span>Quản lý sản phẩm</span>
                 </a>
 
                 <!-- Quản lý kho & tồn kho (TV2) -->
                 <a href="@Url.Action("Index", "Inventory")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Inventory" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "Inventory" ? "text-[#00b4d8]" : "")">warehouse</span>
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Inventory" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "Inventory" ? "text-[#ff4d4d]" : "")">warehouse</span>
                     <span>Kho & Tồn kho</span>
                 </a>
 
                 <!-- Quản lý đơn hàng (TV3) -->
                 <a href="@Url.Action("Index", "AdminOrder")" 
-                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminOrder" ? "bg-white/20 text-white shadow-md border-l-4 border-[#00b4d8]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
-                    <span class="material-symbols-outlined text-xl @(currentController == "AdminOrder" ? "text-[#00b4d8]" : "")">receipt_long</span>
+                   class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "AdminOrder" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                    <span class="material-symbols-outlined text-xl @(currentController == "AdminOrder" ? "text-[#ff4d4d]" : "")">receipt_long</span>
                     <span>Quản lý đơn hàng</span>
                 </a>
 
@@ -148,19 +148,19 @@
             }
             <div class="flex items-center justify-between p-2 rounded-xl bg-white/10 border border-white/15">
                 <div class="flex items-center gap-2.5 truncate">
-                    <div class="w-9 h-9 rounded-full bg-[#00b4d8] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                    <div class="w-9 h-9 rounded-full bg-[#ff4d4d] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                         @adminInitial
                     </div>
                     <div class="truncate text-left">
                         <span class="block text-xs font-bold text-white truncate" title="@adminUserEmail">@adminUserEmail</span>
-                        <span class="block text-[10px] text-blue-200 font-semibold">@adminRoleTitle</span>
+                        <span class="block text-[10px] text-red-200 font-semibold">@adminRoleTitle</span>
                     </div>
                 </div>
 
                 @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "adminLogoutForm", @class = "inline" }))
                 {
                     @Html.AntiForgeryToken()
-                    <button type="submit" title="Đăng xuất" class="p-1.5 text-blue-200 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors">
+                    <button type="submit" title="Đăng xuất" class="p-1.5 text-red-200 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors">
                         <span class="material-symbols-outlined text-lg">logout</span>
                     </button>
                 }
@@ -177,7 +177,7 @@
         <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b-2 border-slate-300 px-8 py-4 flex items-center justify-between shadow-sm">
             <!-- Breadcrumbs / Section Title -->
             <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#0d47a1] font-bold">Admin</a>
+                <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#d70018] font-bold">Admin</a>
                 <span>/</span>
                 <span class="text-slate-900 font-bold">@(ViewBag.Title ?? "Dashboard")</span>
             </div>
@@ -185,12 +185,12 @@
             <!-- Topbar Search & Notification -->
             <div class="flex items-center gap-4">
                 <div class="relative w-64">
-                    <input type="text" placeholder="Tìm kiếm nhanh..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border-2 border-slate-300 rounded-xl focus:bg-white focus:border-[#0d47a1] outline-none transition-all text-slate-800" />
+                    <input type="text" placeholder="Tìm kiếm nhanh..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border-2 border-slate-300 rounded-xl focus:bg-white focus:border-[#d70018] outline-none transition-all text-slate-800" />
                     <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-base">search</span>
                 </div>
 
                 <div class="flex items-center gap-3 border-l-2 border-slate-300 pl-4">
-                    <button class="relative p-2 text-slate-600 hover:text-[#0d47a1] bg-slate-50 hover:bg-white border-2 border-slate-300 rounded-xl transition-colors shadow-sm" title="Thông báo">
+                    <button class="relative p-2 text-slate-600 hover:text-[#d70018] bg-slate-50 hover:bg-white border-2 border-slate-300 rounded-xl transition-colors shadow-sm" title="Thông báo">
                         <span class="material-symbols-outlined text-xl">notifications</span>
                         <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
@@ -206,8 +206,8 @@
 
         <!-- Admin Footer -->
         <footer class="bg-white border-t-2 border-slate-300 px-8 py-4 text-xs text-slate-600 flex items-center justify-between">
-            <span class="font-medium">&copy; @DateTime.Now.Year TheChillShop Ecommerce • Hệ thống hoạt động ổn định</span>
-            <span class="font-semibold text-[#0d47a1]">Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
+            <span class="font-medium">&copy; @DateTime.Now.Year ShopeChill Ecommerce • Hệ thống hoạt động ổn định</span>
+            <span class="font-semibold text-[#d70018]">Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
         </footer>
     </div>
 
@@ -216,3 +216,4 @@
     @RenderSection("scripts", required: false)
 </body>
 </html>
+

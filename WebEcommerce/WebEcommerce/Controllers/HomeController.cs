@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
+
 using Microsoft.AspNet.Identity;
 using WebEcommerce.Models;
 
@@ -21,6 +19,23 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
         {
             try
             {
+                // Self-healing database fix for dummy or broken images
+                var needsUpdate = await _db.ProductImages.AnyAsync(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org"));
+                if (needsUpdate)
+                {
+                    var imagesToUpdate = await _db.ProductImages.Where(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org")).ToListAsync();
+                    foreach (var img in imagesToUpdate)
+                    {
+                        var p = await _db.Products.FirstOrDefaultAsync(x => x.ProductID == img.ProductID);
+                        if (p != null)
+                        {
+                            string text = Uri.EscapeDataString(p.Name);
+                            img.ImageURL = $"https://placehold.co/600x600/f4f6f8/1e293b?text={text}";
+                        }
+                    }
+                    await _db.SaveChangesAsync();
+                }
+
                 var categories = await _db.Categories
                     .AsNoTracking()
                     .Where(c => c.IsActive)
@@ -67,8 +82,6 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                 return View(new List<Product>());
             }
         }
-        }
-
         public ActionResult About()
         {
             ViewBag.Message = "Giới thiệu hệ thống TheChillShop.";
@@ -125,8 +138,6 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                 _db.Dispose();
             }
 
-            base.Dispose(disposing);
-        }
             base.Dispose(disposing);
         }
     }

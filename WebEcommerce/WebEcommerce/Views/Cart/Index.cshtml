@@ -309,3 +309,87 @@
         </div>
     }
 </div>
+
+@section scripts {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value;
+
+        function updateCartUI(cartItemId, data) {
+            if (data.removed) {
+                const itemEl = document.querySelector(`.cart-item[data-cart-item-id="${cartItemId}"]`);
+                if (itemEl) itemEl.remove();
+                
+                // If cart is empty, reload to show empty state
+                if (data.cartItemCount === 0) {
+                    window.location.reload();
+                    return;
+                }
+            } else {
+                const itemEl = document.querySelector(`.cart-item[data-cart-item-id="${cartItemId}"]`);
+                if (itemEl) {
+                    const qtyEl = itemEl.querySelector('.cart-item-quantity');
+                    const itemTotalEl = itemEl.querySelector('.cart-item-total');
+                    if (qtyEl) qtyEl.innerText = data.quantity;
+                    if (itemTotalEl) itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
+                }
+            }
+
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const totalEl = document.getElementById('cart-total');
+            const badge = document.getElementById('cartBadgeCount');
+            
+            if (subtotalEl) subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            if (totalEl) totalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            if (badge) badge.innerText = data.cartItemCount;
+        }
+
+        function sendCartAction(action, cartItemId) {
+            const formData = new URLSearchParams();
+            formData.append('cartItemId', cartItemId);
+            if (token) formData.append('__RequestVerificationToken', token);
+
+            fetch(`@Url.Action("", "Cart")/${action}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartUI(cartItemId, data);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Đã xảy ra lỗi hệ thống.');
+            });
+        }
+
+        document.querySelectorAll('.btn-increase-cart').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-cart-item-id');
+                sendCartAction('IncreaseQuantity', id);
+            });
+        });
+
+        document.querySelectorAll('.btn-decrease-cart').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-cart-item-id');
+                sendCartAction('DecreaseQuantity', id);
+            });
+        });
+
+        document.querySelectorAll('.btn-remove-cart-item').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                    const id = this.getAttribute('data-cart-item-id');
+                    sendCartAction('RemoveItem', id);
+                }
+            });
+        });
+    });
+</script>
+}

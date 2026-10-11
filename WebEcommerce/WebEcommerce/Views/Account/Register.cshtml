@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Đăng ký tài khoản - TheChillShop | Mua sắm thông minh - Sống chất lượng</title>
+    <title>Đăng ký tài khoản - ShopeChill | Mua sắm thông minh - Sống chất lượng</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
@@ -24,14 +24,14 @@
                 extend: {
                     colors: {
                         brand: {
-                            primary: '#0d47a1',
-                            primaryDark: '#0a3880',
-                            accent: '#00b4d8',
-                            accentHover: '#0096c7',
+                            primary: '#d70018',
+                            primaryDark: '#b91c1c',
+                            accent: '#ff4d4d',
+                            accentHover: '#f87171',
                             dark: '#1a1a2e',
                             muted: '#5c6370',
                             border: '#e2e8f4',
-                            surface: '#f8faff',
+                            surface: '#fff1f2',
                         }
                     },
                     fontFamily: {
@@ -53,7 +53,7 @@
             vertical-align: middle;
         }
         .bg-gradient-chill {
-            background: linear-gradient(135deg, #0d47a1 0%, #0077b6 50%, #00b4d8 100%);
+            background: linear-gradient(135deg, #d70018 0%, #e63946 50%, #ff4d4d 100%);
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.14);
@@ -62,23 +62,23 @@
         }
     </style>
 </head>
-<body class="h-full bg-white font-body text-[#1a1a2e] antialiased selection:bg-[#00b4d8]/20 selection:text-[#0d47a1]">
+<body class="h-full bg-white font-body text-[#1a1a2e] antialiased selection:bg-[#ff4d4d]/20 selection:text-[#d70018]">
     <main class="min-h-full flex flex-col lg:flex-row">
         <!-- LEFT PANEL: Brand Visuals & Member Perks -->
         <section class="lg:w-[50%] bg-gradient-chill text-white flex flex-col justify-between p-8 sm:p-12 lg:p-14 relative overflow-hidden">
             <!-- Ambient glow elements -->
             <div class="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-rose-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
             <!-- Top Header / Brand Row -->
             <div class="relative z-10 flex items-center justify-between">
                 <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-white text-[#0d47a1] flex items-center justify-center shadow-lg">
-                        <span class="material-symbols-outlined text-2xl text-[#0d47a1]">shopping_bag</span>
+                    <div class="w-11 h-11 rounded-xl bg-white text-[#d70018] flex items-center justify-center shadow-lg">
+                        <span class="material-symbols-outlined text-2xl text-[#d70018]">shopping_bag</span>
                     </div>
                     <div>
-                        <span class="text-2xl font-bold font-headline tracking-tight leading-none block">TheChill<span class="text-cyan-300">Shop</span></span>
-                        <span class="text-xs text-blue-100 font-normal tracking-wide block mt-1">Mua sắm thông minh - Sống chất lượng</span>
+                        <span class="text-2xl font-bold font-headline tracking-tight leading-none block">Shope<span class="text-rose-200">Chill</span></span>
+                        <span class="text-xs text-red-100 font-normal tracking-wide block mt-1">Mua sắm thông minh - Sống chất lượng</span>
                     </div>
                 </a>
                 <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full transition-all border border-white/15">
@@ -94,9 +94,9 @@
                     <span>Đăng ký miễn phí - Nhận ngay ưu đãi 50K cho đơn đầu tiên!</span>
                 </div>
                 <h2 class="text-3xl sm:text-4xl lg:text-4xl font-extrabold font-headline tracking-tight leading-tight text-white mb-4">
-                    Gia nhập cộng đồng khách hàng TheChillShop
+                    Gia nhập cộng đồng khách hàng ShopeChill
                 </h2>
-                <p class="text-blue-100/90 text-sm sm:text-base mb-6 font-light leading-relaxed">
+                <p class="text-red-100/90 text-sm sm:text-base mb-6 font-light leading-relaxed">
                     Khám phá hàng ngàn sản phẩm chính hãng với mức giá tốt nhất, tích lũy điểm thưởng thành viên và nhận bảo trợ mua sắm tuyệt đối.
                 </p>
 
@@ -108,7 +108,7 @@
                         </div>
                         <div>
                             <div class="font-semibold text-sm text-white">Voucher chào mừng 50K</div>
-                            <div class="text-xs text-blue-100/80">Áp dụng ngay cho đơn hàng mua sắm đầu tiên</div>
+                            <div class="text-xs text-red-100/80">Áp dụng ngay cho đơn hàng mua sắm đầu tiên</div>
                         </div>
                         <span class="ml-auto px-2 py-0.5 rounded bg-amber-400/20 text-amber-200 border border-amber-300/30 text-xs font-bold uppercase">50K</span>
                     </div>
@@ -120,7 +120,7 @@
                         </div>
                         <div>
                             <div class="font-semibold text-sm text-white">Miễn phí vận chuyển toàn quốc</div>
-                            <div class="text-xs text-blue-100/80">Áp dụng cho mọi đơn hàng từ 500.000đ</div>
+                            <div class="text-xs text-red-100/80">Áp dụng cho mọi đơn hàng từ 500.000đ</div>
                         </div>
                         <span class="ml-auto px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 text-xs font-bold uppercase">FREE</span>
                     </div>
@@ -128,8 +128,8 @@
             </div>
 
             <!-- Bottom: Footer Note -->
-            <div class="relative z-10 pt-4 flex items-center justify-between border-t border-white/15 text-xs text-blue-100">
-                <span>© @DateTime.Now.Year TheChillShop. Bản quyền thuộc về Nhóm TheChill.</span>
+            <div class="relative z-10 pt-4 flex items-center justify-between border-t border-white/15 text-xs text-red-100">
+                <span>© @DateTime.Now.Year ShopeChill. Bản quyền thuộc về Nhóm TheChill.</span>
                 <span class="flex items-center gap-1">
                     <span class="material-symbols-outlined text-emerald-300 text-sm">lock</span>
                     <span>Bảo mật 100%</span>
@@ -143,7 +143,7 @@
             <div class="w-full flex items-center justify-end mb-4">
                 <p class="text-sm text-slate-500">
                     Đã có tài khoản?
-                    <a href="@Url.Action("Login", "Account")" class="text-[#0d47a1] hover:text-[#00b4d8] font-bold ml-1 transition-colors">
+                    <a href="@Url.Action("Login", "Account")" class="text-[#d70018] hover:text-[#ff4d4d] font-bold ml-1 transition-colors">
                         Đăng nhập
                     </a>
                 </p>
@@ -179,7 +179,7 @@
                                 <span class="material-symbols-outlined text-lg">person</span>
                             </div>
                             @Html.TextBoxFor(m => m.FullName, new {
-                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "Nguyễn Văn A",
                                 autocomplete = "name",
                                 required = "required"
@@ -198,7 +198,7 @@
                                 <span class="material-symbols-outlined text-lg">mail</span>
                             </div>
                             @Html.TextBoxFor(m => m.Email, new {
-                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "example@email.com",
                                 autocomplete = "email",
                                 type = "email",
@@ -218,7 +218,7 @@
                                 <span class="material-symbols-outlined text-lg">lock</span>
                             </div>
                             @Html.PasswordFor(m => m.Password, new {
-                                @class = "block w-full pl-10 pr-11 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-11 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "Tối thiểu 6 ký tự",
                                 autocomplete = "new-password",
                                 required = "required",
@@ -241,7 +241,7 @@
                                 <span class="material-symbols-outlined text-lg">lock_reset</span>
                             </div>
                             @Html.PasswordFor(m => m.ConfirmPassword, new {
-                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "Nhập lại mật khẩu",
                                 autocomplete = "new-password",
                                 required = "required"
@@ -251,20 +251,20 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button class="w-full mt-3 bg-[#0d47a1] hover:bg-[#0a3880] text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm" type="submit">
+                    <button class="w-full mt-3 bg-[#d70018] hover:bg-[#b91c1c] text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm" type="submit">
                         <span>Đăng ký ngay</span>
                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
                     </button>
                 }
 
                 <div class="mt-4 text-center text-xs text-slate-500">
-                    Bằng việc đăng ký, bạn đồng ý với <a href="#" class="text-[#0d47a1] underline">Điều khoản dịch vụ</a> và <a href="#" class="text-[#0d47a1] underline">Chính sách bảo mật</a> của TheChillShop.
+                    Bằng việc đăng ký, bạn đồng ý với <a href="#" class="text-[#d70018] underline">Điều khoản dịch vụ</a> và <a href="#" class="text-[#d70018] underline">Chính sách bảo mật</a> của ShopeChill.
                 </div>
             </div>
 
             <!-- Footer -->
             <div class="pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
-                TheChillShop &copy; @DateTime.Now.Year. Bảo mật thông tin khách hàng tuyệt đối.
+                ShopeChill &copy; @DateTime.Now.Year. Bảo mật thông tin khách hàng tuyệt đối.
             </div>
         </section>
     </main>
@@ -289,3 +289,4 @@
     </script>
 </body>
 </html>
+
