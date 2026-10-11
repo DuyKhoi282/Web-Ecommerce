@@ -103,10 +103,10 @@ Hệ thống được thiết kế theo chuỗi giá trị và trật tự phụ
 | Thực hiện Checkout đặt hàng, xem lịch sử mua cá nhân | ✅ | ❌ | ❌ |
 | Tự hủy đơn hàng cá nhân (chỉ khi trạng thái `Pending`) | ✅ | ❌ | ❌ |
 | Đánh giá 1-5 sao (bắt buộc đơn hàng trạng thái `Delivered`) | ✅ | ❌ | ❌ |
-| Quản lý CRUD Danh mục, Sản phẩm, Upload ảnh, Kho hàng | ❌ | ✅ *(Độc quyền)* | ❌ |
-| Quản lý và cập nhật tiến trình đơn hàng | ❌ | ✅ *(Độc quyền)* | ❌ |
-| Thiết lập Voucher khuyến mãi và khung giờ Flash Sale | ❌ | ✅ | ❌ |
-| Xem Dashboard thống kê (doanh thu, đơn hàng, biểu đồ Chart.js) | ❌ | ✅ *(Giới hạn)* | ✅ *(Toàn quyền)* |
+| Quản lý CRUD Danh mục, Sản phẩm, Upload ảnh, Kho hàng | ❌ | ✅ | ✅ |
+| Quản lý và cập nhật tiến trình đơn hàng | ❌ | ✅ | ✅ |
+| Thiết lập Voucher khuyến mãi và khung giờ Flash Sale | ❌ | ✅ | ✅ |
+| Xem Dashboard thống kê (doanh thu, đơn hàng, biểu đồ Chart.js) | ❌ | ✅ *(Kinh doanh)* | ✅ *(Toàn quyền)* |
 | Quản trị User (Xem danh sách, tìm kiếm User, xem chi tiết Profile) | ❌ | ❌ | ✅ *(Độc quyền)* |
 | Quản lý tài khoản (Khóa/Mở tài khoản Lock/Unlock, Activate/Deactivate) | ❌ | ❌ | ✅ *(Độc quyền)* |
 | Phân quyền vai trò (Gán và Chuyển đổi Role: Customer/Manager/Admin) | ❌ | ❌ | ✅ *(Độc quyền)* |

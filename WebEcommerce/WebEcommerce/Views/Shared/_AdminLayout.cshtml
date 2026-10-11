@@ -98,8 +98,8 @@
                     </a>
                 }
 
-                <!-- Nghiệp vụ Người bán (Độc quyền StoreManager) -->
-                @if (User.IsInRole("StoreManager"))
+                <!-- Nghiệp vụ Bán hàng & Hàng hóa (StoreManager & Administrator) -->
+                @if (User.IsInRole("StoreManager") || User.IsInRole("Administrator"))
                 {
                     <!-- Quản lý danh mục -->
                     <a href="@Url.Action("Index", "Category")" 

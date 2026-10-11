@@ -127,12 +127,7 @@ namespace WebEcommerce.Controllers
                 if (DateTime.UtcNow > otpExpiresAt.Value)
                 {
                     // Xóa thông tin đăng ký tạm thời
-                    Session.Remove("PendingRegistration.FullName");
-                    Session.Remove("PendingRegistration.Email");
-                    Session.Remove("PendingRegistration.PasswordHash");
-                    Session.Remove("PendingRegistration.Otp");
-                    Session.Remove("PendingRegistration.OtpExpiresAt");
-                    Session.Remove("PendingRegistration.OtpAttempts");
+                    ClearPendingRegistrationSession();
 
                     ModelState.AddModelError(
                         "Code",
@@ -162,12 +157,7 @@ namespace WebEcommerce.Controllers
                     if (otpAttempts >= 5)
                     {
                         // Xóa toàn bộ thông tin đăng ký tạm thời
-                        Session.Remove("PendingRegistration.FullName");
-                        Session.Remove("PendingRegistration.Email");
-                        Session.Remove("PendingRegistration.PasswordHash");
-                        Session.Remove("PendingRegistration.Otp");
-                        Session.Remove("PendingRegistration.OtpExpiresAt");
-                        Session.Remove("PendingRegistration.OtpAttempts");
+                        ClearPendingRegistrationSession();
 
                         ModelState.AddModelError(
                             "Code",
@@ -472,12 +462,7 @@ try
                 // 9. Xóa dữ liệu đăng ký tạm thời
                 // ==========================================
 
-                Session.Remove("PendingRegistration.FullName");
-                Session.Remove("PendingRegistration.Email");
-                Session.Remove("PendingRegistration.PasswordHash");
-                Session.Remove("PendingRegistration.Otp");
-                Session.Remove("PendingRegistration.OtpExpiresAt");
-                Session.Remove("PendingRegistration.OtpAttempts");
+                ClearPendingRegistrationSession();
 
                 // ==========================================
                 // 10. Chuyển về Login
@@ -493,18 +478,8 @@ try
             }
             catch (Exception ex)
             {
-                var msg = ex.InnerException != null
-                    ? $"{ex.Message} -> {ex.InnerException.Message}"
-                    : ex.Message;
-
-                System.Diagnostics.Debug.WriteLine(
-                    $"[VerifyOtp Error] {msg}"
-                );
-
-                ModelState.AddModelError(
-                    "",
-                    $"Đã xảy ra lỗi trong quá trình xác thực: {msg}"
-                );
+                System.Diagnostics.Debug.WriteLine($"[VerifyOtp Error] {ex.Message}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình xác thực. Vui lòng thử lại.");
             }
 
             return View(model);
@@ -1171,11 +1146,7 @@ try
                 catch (Exception emailEx)
                 {
                     // Nếu gửi mail thất bại thì xóa dữ liệu đăng ký tạm
-                    Session.Remove("PendingRegistration.FullName");
-                    Session.Remove("PendingRegistration.Email");
-                    Session.Remove("PendingRegistration.PasswordHash");
-                    Session.Remove("PendingRegistration.Otp");
-                    Session.Remove("PendingRegistration.OtpExpiresAt");
+                    ClearPendingRegistrationSession();
 
                     System.Diagnostics.Debug.WriteLine(
                         $"[Register OTP Email Error] {emailEx.Message}"
@@ -1194,18 +1165,8 @@ try
             }
             catch (Exception ex)
             {
-                var msg = ex.InnerException != null
-                    ? $"{ex.Message} -> {ex.InnerException.Message}"
-                    : ex.Message;
-
-                System.Diagnostics.Debug.WriteLine(
-                    $"[Register OTP Error] {msg}"
-                );
-
-                ModelState.AddModelError(
-                    "",
-                    $"Đã xảy ra lỗi trong quá trình đăng ký: {msg}"
-                );
+                System.Diagnostics.Debug.WriteLine($"[Register OTP Error] {ex.Message}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.");
             }
 
             return View(model);
@@ -1344,9 +1305,8 @@ try
             }
             catch (Exception ex)
             {
-                var msg = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
-                System.Diagnostics.Debug.WriteLine($"[Login Error] {msg}");
-                ModelState.AddModelError("", $"Đã xảy ra lỗi trong quá trình đăng nhập: {msg}");
+                System.Diagnostics.Debug.WriteLine($"[Login Error] {ex.Message}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại.");
             }
 
             return View(model);
@@ -1847,6 +1807,17 @@ $@"
         // ═══════════════════════════════════════════════════
         //  HELPERS
         // ═══════════════════════════════════════════════════
+
+        private void ClearPendingRegistrationSession()
+        {
+            Session.Remove("PendingRegistration.FullName");
+            Session.Remove("PendingRegistration.Email");
+            Session.Remove("PendingRegistration.PasswordHash");
+            Session.Remove("PendingRegistration.Otp");
+            Session.Remove("PendingRegistration.OtpExpiresAt");
+            Session.Remove("PendingRegistration.OtpAttempts");
+            Session.Remove("PendingRegistration.OtpLastSentAt");
+        }
 
         private void AddErrors(IdentityResult result)
         {
