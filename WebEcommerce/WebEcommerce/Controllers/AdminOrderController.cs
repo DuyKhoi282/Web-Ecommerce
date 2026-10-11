@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using WebEcommerce.Filters;
 using WebEcommerce.Models;
+using static System.Web.Razor.Parser.SyntaxConstants;
 
 namespace WebEcommerce.Controllers
 {
@@ -445,6 +446,158 @@ namespace WebEcommerce.Controllers
                         // Email thất bại không làm hoàn tác đơn hàng đã hủy.
                         System.Diagnostics.Debug.WriteLine(
                             $"[Order Cancellation Email Error] Order #{orderId}: {emailEx}");
+                    }
+                }
+
+               
+                    // ==============================================
+                    // EMAIL CẢM ƠN KHI ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG
+                    // ==============================================
+                if (updateSucceeded && newStatus == "Delivered")
+                {
+                    try
+                    {
+                        if (order.User != null &&
+                            !string.IsNullOrWhiteSpace(order.User.Email))
+                        {
+                            var emailService = new EmailService();
+
+                            string customerName =
+                                System.Web.HttpUtility.HtmlEncode(
+                                    order.User.FullName ?? "Quý khách");
+
+                            string orderDate =
+                                order.OrderDate.ToLocalTime()
+                                    .ToString("dd/MM/yyyy HH:mm");
+
+                            string htmlBody = $@"
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport'
+          content='width=device-width, initial-scale=1.0'>
+</head>
+<body style='margin:0;padding:0;background:#f4f5f7;
+             font-family:Arial,Helvetica,sans-serif;color:#333;'>
+    <table role='presentation' width='100%'
+           cellpadding='0' cellspacing='0'
+           style='background:#f4f5f7;padding:24px 10px;'>
+        <tr>
+            <td align='center'>
+                <table role='presentation' width='600'
+                       cellpadding='0' cellspacing='0'
+                       style='width:100%;max-width:600px;
+                              background:#fff;border-radius:12px;
+                              overflow:hidden;'>
+                    <tr>
+                        <td style='background:#d70018;
+                                   padding:26px 24px;
+                                   text-align:center;color:#fff;'>
+                            <h1 style='margin:0;font-size:25px;'>
+                                The Chill Shop
+                            </h1>
+                            <p style='margin:8px 0 0;font-size:14px;'>
+                                Công nghệ trong tầm tay
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style='padding:28px 24px;'>
+                            <h2 style='margin:0 0 16px;
+                                       color:#16803d;font-size:22px;'>
+                                Đơn hàng đã được giao thành công!
+                            </h2>
+
+                            <p>
+                                Xin chào <strong>{customerName}</strong>,
+                            </p>
+
+                            <p>
+                                The Chill Shop xin thông báo rằng đơn hàng
+                                của bạn đã được cập nhật sang trạng thái
+                                giao hàng thành công.
+                            </p>
+
+                            <div style='background:#f0fdf4;
+                                        border:1px solid #bbf7d0;
+                                        border-radius:8px;
+                                        padding:18px;margin:20px 0;'>
+                                <p style='margin:0 0 10px;'>
+                                    <strong>Mã đơn hàng:</strong>
+                                    #{order.OrderID}
+                                </p>
+
+                                <p style='margin:0 0 10px;'>
+                                    <strong>Ngày đặt:</strong>
+                                    {orderDate}
+                                </p>
+
+                                <p style='margin:0 0 10px;'>
+                                    <strong>Trạng thái:</strong>
+                                    Đã giao thành công
+                                </p>
+
+                                <p style='margin:0;'>
+                                    <strong>Tổng thanh toán:</strong>
+                                    <span style='color:#d70018;
+                                                 font-size:18px;
+                                                 font-weight:bold;'>
+                                        {order.FinalAmount:N0}đ
+                                    </span>
+                                </p>
+                            </div>
+
+                            <p>
+                                Cảm ơn bạn đã tin tưởng và lựa chọn
+                                The Chill Shop. Sự hài lòng của bạn
+                                là động lực để chúng tôi không ngừng
+                                cải thiện chất lượng sản phẩm và dịch vụ.
+                            </p>
+
+                            <p>
+                                Hy vọng bạn hài lòng với sản phẩm đã nhận.
+                                Chúng tôi rất mong được phục vụ bạn
+                                trong những lần mua sắm tiếp theo.
+                            </p>
+
+                            <p style='margin-top:24px;'>
+                                Trân trọng,<br>
+                                <strong>Đội ngũ The Chill Shop</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style='padding:18px 24px;
+                                   background:#f8f8f8;
+                                   text-align:center;
+                                   font-size:12px;color:#777;'>
+                            The Chill Shop · Công nghệ trong tầm tay
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>";
+
+                            await emailService.SendAsync(new IdentityMessage
+                            {
+                                Destination = order.User.Email,
+                                Subject =
+                                    $"Cảm ơn bạn đã mua hàng - Đơn #{order.OrderID} | The Chill Shop",
+                                Body = htmlBody
+                            });
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        // Email lỗi không làm hoàn tác trạng thái Delivered.
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Order Delivered Email Error] Order #{orderId}: {emailEx}");
                     }
                 }
 
