@@ -1,0 +1,147 @@
+@using WebEcommerce.Models
+@model List<WebEcommerce.Models.Product>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var keyword = ViewBag.Keyword as string;
+    var categories = ViewBag.Categories as List<WebEcommerce.Models.CategoryItemViewModel>;
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Tiêu đề trang -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-headline font-extrabold text-[#1a1a2e]">
+            @(string.IsNullOrWhiteSpace(keyword) ? "Tất cả Sản phẩm" : $"Kết quả tìm kiếm: \"{keyword}\"")
+        </h1>
+        <p class="text-sm text-slate-500 mt-2">Tìm thấy <span class="font-bold text-[#0d47a1]">@ViewBag.TotalCount</span> sản phẩm phù hợp</p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Cột trái: Bộ lọc (Sidebar) -->
+        <div class="w-full lg:w-1/4 flex-shrink-0">
+            <div class="bg-white rounded-2xl border-2 border-slate-200 p-5 sticky top-24">
+                <h2 class="font-headline font-bold text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#0d47a1]">filter_alt</span>
+                    Bộ lọc sản phẩm
+                </h2>
+                
+                @using (Html.BeginForm("Index", "Shop", FormMethod.Get, new { id = "filterForm" }))
+                {
+                    <input type="hidden" name="keyword" value="@keyword" />
+                    
+                    <!-- Lọc Danh mục -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-sm text-slate-700 mb-3">Danh mục</h3>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="categoryId" value="" @(ViewBag.SelectedCategoryID == null ? "checked" : "") class="w-4 h-4 text-[#0d47a1] focus:ring-[#0d47a1] border-slate-300" onchange="document.getElementById('filterForm').submit();" />
+                                <span class="text-sm text-slate-600 group-hover:text-[#0d47a1] transition-colors">Tất cả danh mục</span>
+                            </label>
+                            @if (categories != null)
+                            {
+                                foreach (var cat in categories.Where(c => c.ParentCategoryID == null))
+                                {
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="categoryId" value="@cat.CategoryID" @(ViewBag.SelectedCategoryID == cat.CategoryID ? "checked" : "") class="w-4 h-4 text-[#0d47a1] focus:ring-[#0d47a1] border-slate-300" onchange="document.getElementById('filterForm').submit();" />
+                                        <span class="text-sm text-slate-600 group-hover:text-[#0d47a1] transition-colors">@cat.Name (@cat.ProductCount)</span>
+                                    </label>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Lọc Giá -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-sm text-slate-700 mb-3">Khoảng giá</h3>
+                        <div class="flex items-center gap-2">
+                            <input type="number" name="minPrice" value="@ViewBag.MinPrice" placeholder="Từ" class="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:border-[#0d47a1] outline-none" />
+                            <span class="text-slate-400">-</span>
+                            <input type="number" name="maxPrice" value="@ViewBag.MaxPrice" placeholder="Đến" class="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:border-[#0d47a1] outline-none" />
+                        </div>
+                        <button type="submit" class="w-full mt-3 bg-[#0d47a1] hover:bg-[#0a3880] text-white py-2 rounded-lg text-sm font-bold transition-colors">Áp dụng giá</button>
+                    </div>
+
+                    <!-- Lọc Đánh giá -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-sm text-slate-700 mb-3">Đánh giá tối thiểu</h3>
+                        <select name="minRating" class="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:border-[#0d47a1] outline-none" onchange="document.getElementById('filterForm').submit();">
+                            <option value="">Tất cả đánh giá</option>
+                            <option value="5" @(ViewBag.MinRating == 5 ? "selected" : "")>5 Sao</option>
+                            <option value="4" @(ViewBag.MinRating == 4 ? "selected" : "")>Từ 4 Sao</option>
+                            <option value="3" @(ViewBag.MinRating == 3 ? "selected" : "")>Từ 3 Sao</option>
+                        </select>
+                    </div>
+
+                    if (!string.IsNullOrEmpty(keyword) || ViewBag.SelectedCategoryID != null || ViewBag.MinPrice != null || ViewBag.MaxPrice != null || ViewBag.MinRating != null)
+                    {
+                        <a href="@Url.Action("Index", "Shop")" class="w-full flex items-center justify-center gap-1 text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 py-2 rounded-lg text-sm font-bold transition-colors">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                            Xóa bộ lọc
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Cột phải: Danh sách sản phẩm -->
+        <div class="flex-1">
+            <!-- Toolbar: Sắp xếp -->
+            <div class="bg-white rounded-xl border-2 border-slate-200 p-3 mb-6 flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 hidden sm:block">Hiển thị @Model.Count trên @ViewBag.TotalCount sản phẩm</span>
+                <div class="flex items-center gap-2 ml-auto">
+                    <label class="text-sm font-bold text-slate-700 whitespace-nowrap">Sắp xếp:</label>
+                    <select form="filterForm" name="sortBy" class="px-3 py-1.5 text-sm border-2 border-slate-200 rounded-lg focus:border-[#0d47a1] outline-none" onchange="document.getElementById('filterForm').submit();">
+                        <option value="newest" @(ViewBag.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
+                        <option value="popular" @(ViewBag.SortBy == "popular" ? "selected" : "")>Xem nhiều nhất</option>
+                        <option value="price_asc" @(ViewBag.SortBy == "price_asc" ? "selected" : "")>Giá thấp đến cao</option>
+                        <option value="price_desc" @(ViewBag.SortBy == "price_desc" ? "selected" : "")>Giá cao đến thấp</option>
+                        <option value="name_asc" @(ViewBag.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid Sản phẩm -->
+            @if (Model.Any())
+            {
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                    @foreach (var p in Model)
+                    {
+                        @Html.Partial("_ProductCard", p)
+                    }
+                </div>
+
+                <!-- Phân trang -->
+                if (ViewBag.TotalPages > 1)
+                {
+                    <div class="flex justify-center items-center gap-2 mt-10">
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            var activeClass = i == ViewBag.CurrentPage ? "bg-[#0d47a1] text-white shadow-md border-[#0d47a1]" : "bg-white text-slate-700 border-slate-200 hover:border-[#0d47a1] hover:text-[#0d47a1]";
+                            <a href="@Url.Action("Index", "Shop", new { keyword = ViewBag.Keyword, categoryId = ViewBag.SelectedCategoryID, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, minRating = ViewBag.MinRating, sortBy = ViewBag.SortBy, page = i })"
+                               class="@activeClass border-2 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all">@i</a>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="bg-white rounded-2xl border-2 border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-5xl text-slate-300">search_off</span>
+                    </div>
+                    <h3 class="font-headline font-bold text-xl text-slate-800 mb-2">Không tìm thấy sản phẩm nào</h3>
+                    <p class="text-slate-500 mb-6 max-w-sm">Rất tiếc, chúng tôi không tìm thấy sản phẩm nào phù hợp với tiêu chí lọc của bạn. Vui lòng thử lại với từ khóa khác.</p>
+                    <a href="@Url.Action("Index", "Shop")" class="px-6 py-2.5 bg-[#0d47a1] hover:bg-[#0a3880] text-white rounded-xl font-bold transition-colors shadow-lg shadow-[#0d47a1]/20">Xem tất cả sản phẩm</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>

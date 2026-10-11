@@ -1,0 +1,167 @@
+@model WebEcommerce.Models.ProductDetailViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-3 mb-6">
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("Index", "Product")" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                <span class="material-symbols-outlined text-slate-600">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="text-2xl font-headline font-extrabold text-slate-900">@Model.Name</h1>
+                <p class="text-sm text-slate-500 mt-0.5">Mã SP: #@Model.ProductID • Danh mục: @Model.CategoryName</p>
+            </div>
+        </div>
+        <a href="@Url.Action("Edit", "Product", new { id = Model.ProductID })" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg">
+            <span class="material-symbols-outlined text-lg">edit</span>
+            Chỉnh sửa
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Cột trái: Hình ảnh -->
+        <div class="lg:col-span-1">
+            <div class="admin-card rounded-2xl p-4">
+                <h3 class="text-sm font-bold text-slate-700 mb-3">Hình ảnh sản phẩm (@Model.Images.Count)</h3>
+                @if (Model.Images.Any())
+                {
+                    var mainImage = Model.Images.FirstOrDefault(i => i.IsMain) ?? Model.Images.First();
+                    <img src="@mainImage.ImageURL" alt="@Model.Name" class="w-full rounded-xl object-cover border-2 border-slate-200 mb-3" id="mainImageDisplay" />
+                    <div class="grid grid-cols-4 gap-2">
+                        @foreach (var img in Model.Images)
+                        {
+                            <img src="@img.ImageURL" alt="Ảnh" onclick="document.getElementById('mainImageDisplay').src='@img.ImageURL'"
+                                 class="w-full aspect-square rounded-lg object-cover border-2 cursor-pointer hover:border-chill-primary transition-colors @(img.IsMain ? "border-chill-primary ring-1 ring-chill-accent" : "border-slate-200")" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-5xl text-slate-300">image</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Thông tin chính -->
+            <div class="admin-card rounded-2xl p-5">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-chill-primary text-lg">info</span>
+                    Thông tin sản phẩm
+                </h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Giá gốc</span>
+                        <span class="text-xl font-extrabold text-slate-900">@Model.Price.ToString("N0")₫</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Giá khuyến mãi</span>
+                        @if (Model.DiscountPrice.HasValue)
+                        {
+                            <span class="text-xl font-extrabold text-red-600">@Model.DiscountPrice.Value.ToString("N0")₫</span>
+                            var discount = Math.Round((1 - (double)Model.DiscountPrice.Value / (double)Model.Price) * 100);
+                            <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-lg ml-1">-@discount%</span>
+                        }
+                        else
+                        {
+                            <span class="text-slate-400">—</span>
+                        }
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Tồn kho</span>
+                        @{
+                            var stockClass = Model.StockQuantity == 0 ? "text-red-600" : (Model.StockQuantity < 5 ? "text-amber-600" : "text-emerald-600");
+                        }
+                        <span class="text-lg font-extrabold @stockClass">@Model.StockQuantity</span>
+                        @if (Model.StockQuantity < 5 && Model.StockQuantity > 0)
+                        {
+                            <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-lg ml-1">⚠ Sắp hết</span>
+                        }
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Trạng thái</span>
+                        @{
+                            var statusClass = Model.Status == 1 ? "bg-emerald-100 text-emerald-700" : (Model.Status == 2 ? "bg-red-100 text-red-600" : "bg-slate-200 text-slate-600");
+                        }
+                        <span class="@statusClass px-3 py-1 rounded-full text-xs font-bold inline-block mt-1">@Model.StatusText</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Lượt xem</span>
+                        <span class="text-lg font-bold text-slate-800">@Model.ViewCount.ToString("N0")</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Ngày tạo</span>
+                        <span class="font-bold text-slate-800">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-xs font-medium">Đánh giá trung bình</span>
+                        @if (Model.ReviewCount > 0)
+                        {
+                            <div class="flex items-center gap-1 mt-1">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="material-symbols-outlined text-lg @(i <= Math.Round(Model.AverageRating) ? "text-amber-400" : "text-slate-300")" style="font-variation-settings: 'FILL' 1;">star</span>
+                                }
+                                <span class="text-sm font-bold text-slate-700 ml-1">@Model.AverageRating.ToString("F1") (@Model.ReviewCount đánh giá)</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-slate-400">Chưa có đánh giá</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mô tả -->
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="admin-card rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-chill-primary text-lg">description</span>
+                        Mô tả
+                    </h3>
+                    <div class="text-sm text-slate-600 leading-relaxed">@Html.Raw(Model.Description)</div>
+                </div>
+            }
+
+            <!-- Đánh giá gần đây -->
+            @if (Model.Reviews.Any())
+            {
+                <div class="admin-card rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-chill-primary text-lg">reviews</span>
+                        Đánh giá gần đây (@Model.ReviewCount)
+                    </h3>
+                    <div class="space-y-3">
+                        @foreach (var rev in Model.Reviews)
+                        {
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-semibold text-sm text-slate-800">@rev.UserName</span>
+                                    <span class="text-xs text-slate-400">@rev.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="flex items-center gap-0.5 mb-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="material-symbols-outlined text-sm @(i <= rev.Rating ? "text-amber-400" : "text-slate-300")" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(rev.Comment))
+                                {
+                                    <p class="text-sm text-slate-600">@rev.Comment</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

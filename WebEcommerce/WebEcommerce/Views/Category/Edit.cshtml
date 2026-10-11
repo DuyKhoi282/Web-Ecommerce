@@ -1,0 +1,78 @@
+@model WebEcommerce.Models.CategoryFormViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    bool isEdit = Model.CategoryID > 0;
+    ViewBag.Title = isEdit ? "Chỉnh sửa Danh mục" : "Thêm Danh mục mới";
+}
+
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+        <a href="@Url.Action("Index", "Category")" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-slate-600">arrow_back</span>
+        </a>
+        <div>
+            <h1 class="text-2xl font-headline font-extrabold text-slate-900">@ViewBag.Title</h1>
+            <p class="text-sm text-slate-500 mt-0.5">@(isEdit ? "Cập nhật thông tin danh mục" : "Điền thông tin để tạo danh mục mới")</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="admin-card rounded-2xl p-6">
+        @using (Html.BeginForm(isEdit ? "Edit" : "Create", "Category", FormMethod.Post, new { @class = "space-y-5" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.CategoryID)
+
+            @Html.ValidationSummary(true, "", new { @class = "bg-red-50 text-red-600 text-sm p-4 rounded-xl border border-red-200 mb-4" })
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">Tên danh mục <span class="text-red-500">*</span></label>
+                @Html.TextBoxFor(m => m.Name, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", placeholder = "VD: Điện thoại, Laptop..." })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-red-500 text-xs mt-1" })
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">Mô tả</label>
+                @Html.TextAreaFor(m => m.Description, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", rows = "3", placeholder = "Mô tả ngắn về danh mục..." })
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">Danh mục cha</label>
+                @Html.DropDownListFor(m => m.ParentCategoryID, Model.ParentCategoryList, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all" })
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">URL hình ảnh</label>
+                @Html.TextBoxFor(m => m.ImageURL, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", placeholder = "https://example.com/image.jpg" })
+                @Html.ValidationMessageFor(m => m.ImageURL, "", new { @class = "text-red-500 text-xs mt-1" })
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">Thứ tự hiển thị</label>
+                    @Html.TextBoxFor(m => m.DisplayOrder, new { @class = "w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all", type = "number", min = "0" })
+                    @Html.ValidationMessageFor(m => m.DisplayOrder, "", new { @class = "text-red-500 text-xs mt-1" })
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">Trạng thái</label>
+                    <div class="flex items-center gap-3 pt-2">
+                        @Html.CheckBoxFor(m => m.IsActive, new { @class = "w-5 h-5 text-chill-primary rounded border-slate-300 focus:ring-chill-primary" })
+                        <span class="text-sm text-slate-600 font-medium">Hiển thị danh mục</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 pt-4 border-t border-slate-200">
+                <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg">
+                    <span class="material-symbols-outlined text-lg">save</span>
+                    @(isEdit ? "Cập nhật" : "Tạo danh mục")
+                </button>
+                <a href="@Url.Action("Index", "Category")" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition-all">
+                    Hủy
+                </a>
+            </div>
+        }
+    </div>
+</div>

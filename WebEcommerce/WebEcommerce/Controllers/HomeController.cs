@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+
 using Microsoft.AspNet.Identity;
 using WebEcommerce.Models;
 
@@ -12,19 +13,53 @@ namespace WebEcommerce.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public HomeController()
-        {
-            _context = new ApplicationDbContext();
-        }
+private readonly ApplicationDbContext _db = new ApplicationDbContext();
 
         public async Task<ActionResult> Index()
         {
             try
             {
-                // Lấy sản phẩm còn kinh doanh (Status=1), sắp xếp theo ViewCount giảm dần
-                var products = await _context.Products
+                // Self-healing database fix for dummy or broken images
+                var needsUpdate = await _db.ProductImages.AnyAsync(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org"));
+                if (needsUpdate)
+                {
+                    var imagesToUpdate = await _db.ProductImages.Where(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org")).ToListAsync();
+                    foreach (var img in imagesToUpdate)
+                    {
+                        var p = await _db.Products.FirstOrDefaultAsync(x => x.ProductID == img.ProductID);
+                        if (p != null)
+                        {
+                            string text = Uri.EscapeDataString(p.Name);
+                            img.ImageURL = $"https://placehold.co/600x600/f4f6f8/1e293b?text={text}";
+                        }
+                    }
+                    await _db.SaveChangesAsync();
+                }
+
+                var categories = await _db.Categories
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.DisplayOrder)
+                    .ToListAsync();
+
+                var featuredProducts = await _db.Products
+                    .AsNoTracking()
+                    .Include(p => p.Category)
+                    .Include(p => p.ProductImages)
+                    .Where(p => p.Status != 3)
+                    .OrderByDescending(p => p.ProductID)
+                    .Take(10)
+                    .ToListAsync();
+
+                var allProducts = await _db.Products
+                    .AsNoTracking()
+                    .Include(p => p.Category)
+                    .Include(p => p.ProductImages)
+                    .Where(p => p.Status != 3)
+                    .OrderByDescending(p => p.ProductID)
+                    .ToListAsync();
+
+                var products = await _db.Products
                     .Include(p => p.Category)
                     .Include(p => p.ProductImages)
                     .Where(p => p.Status == 1)
@@ -32,26 +67,30 @@ namespace WebEcommerce.Controllers
                     .Take(8)
                     .ToListAsync();
 
+                ViewBag.Categories = categories;
+                ViewBag.FeaturedProducts = featuredProducts;
+                ViewBag.AllProducts = allProducts;
+
                 return View(products);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[Home/Index] {ex}");
+                ViewBag.Categories = new List<Category>();
+                ViewBag.FeaturedProducts = new List<Product>();
+                ViewBag.AllProducts = new List<Product>();
                 return View(new List<Product>());
             }
         }
-
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
+            ViewBag.Message = "Giới thiệu hệ thống TheChillShop.";
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
-
+            ViewBag.Message = "Liên hệ với chúng tôi.";
             return View();
         }
 
@@ -73,7 +112,7 @@ namespace WebEcommerce.Controllers
                     return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
-                var cart = await _context.Carts
+                var cart = await _db.Carts
                     .Include(c => c.CartItems)
                     .FirstOrDefaultAsync(c => c.UserID == userId);
 
@@ -92,12 +131,11 @@ namespace WebEcommerce.Controllers
                 return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
             }
         }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _context.Dispose();
+                _db.Dispose();
             }
 
             base.Dispose(disposing);

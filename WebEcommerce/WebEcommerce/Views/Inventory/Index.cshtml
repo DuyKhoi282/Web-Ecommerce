@@ -1,0 +1,192 @@
+@model WebEcommerce.Models.InventoryListViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Toast -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span class="font-semibold text-sm">@TempData["SuccessMessage"]</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 hover:text-emerald-200"><span class="material-symbols-outlined text-lg">close</span></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="toast-error" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in">
+        <span class="material-symbols-outlined">error</span>
+        <span class="font-semibold text-sm">@TempData["ErrorMessage"]</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 hover:text-red-200"><span class="material-symbols-outlined text-lg">close</span></button>
+    </div>
+}
+
+<!-- Header -->
+<div class="mb-6">
+    <h1 class="text-2xl font-headline font-extrabold text-slate-900">Quản lý Kho & Tồn kho</h1>
+    <p class="text-sm text-slate-500 mt-1">Theo dõi, nhập/xuất số lượng tồn kho và cảnh báo sắp hết hàng</p>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="admin-card rounded-2xl p-4 text-center">
+        <span class="material-symbols-outlined text-3xl text-blue-500 mb-1 block">inventory_2</span>
+        <p class="text-2xl font-extrabold text-slate-900">@Model.TotalProducts</p>
+        <p class="text-xs text-slate-500 font-medium">Tổng sản phẩm</p>
+    </div>
+    <div class="admin-card rounded-2xl p-4 text-center">
+        <span class="material-symbols-outlined text-3xl text-emerald-500 mb-1 block">check_circle</span>
+        <p class="text-2xl font-extrabold text-emerald-600">@Model.NormalStockCount</p>
+        <p class="text-xs text-slate-500 font-medium">Tồn kho ổn (≥5)</p>
+    </div>
+    <div class="admin-card rounded-2xl p-4 text-center border-2 border-amber-200">
+        <span class="material-symbols-outlined text-3xl text-amber-500 mb-1 block">warning</span>
+        <p class="text-2xl font-extrabold text-amber-600">@Model.LowStockCount</p>
+        <p class="text-xs text-slate-500 font-medium">Sắp hết (&lt;5)</p>
+    </div>
+    <div class="admin-card rounded-2xl p-4 text-center border-2 border-red-200">
+        <span class="material-symbols-outlined text-3xl text-red-500 mb-1 block">remove_shopping_cart</span>
+        <p class="text-2xl font-extrabold text-red-600">@Model.OutOfStockCount</p>
+        <p class="text-xs text-slate-500 font-medium">Hết hàng (0)</p>
+    </div>
+</div>
+
+<!-- Bộ lọc -->
+<div class="admin-card rounded-2xl p-4 mb-6">
+    @using (Html.BeginForm("Index", "Inventory", FormMethod.Get, new { @class = "flex flex-wrap items-end gap-3" }))
+    {
+        <div class="flex-1 min-w-[200px]">
+            <label class="text-xs font-bold text-slate-600 mb-1 block">Tìm kiếm</label>
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tên sản phẩm..."
+                   class="w-full px-4 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all" />
+        </div>
+        <div class="w-48">
+            <label class="text-xs font-bold text-slate-600 mb-1 block">Danh mục</label>
+            @Html.DropDownList("categoryId", Model.CategoryList, new { @class = "w-full px-3 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary outline-none transition-all" })
+        </div>
+        <div class="w-44">
+            <label class="text-xs font-bold text-slate-600 mb-1 block">Mức tồn kho</label>
+            <select name="stockFilter" class="w-full px-3 py-2.5 text-sm bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-chill-primary outline-none transition-all">
+                <option value="all" @(Model.StockFilter == "all" ? "selected" : "")>Tất cả</option>
+                <option value="low" @(Model.StockFilter == "low" ? "selected" : "")>⚠ Sắp hết (&lt;5)</option>
+                <option value="out" @(Model.StockFilter == "out" ? "selected" : "")>🔴 Hết hàng (0)</option>
+                <option value="ok" @(Model.StockFilter == "ok" ? "selected" : "")>✅ Đủ hàng (≥5)</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all">Lọc</button>
+    }
+</div>
+
+<!-- Bảng tồn kho -->
+<div class="admin-card rounded-2xl overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="bg-slate-50 border-b-2 border-slate-200">
+                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Sản phẩm</th>
+                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục</th>
+                <th class="text-right px-5 py-3.5 font-bold text-slate-700">Giá</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Tồn kho</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Mức cảnh báo</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Trạng thái</th>
+                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items.Any())
+            {
+                foreach (var item in Model.Items)
+                {
+                    var rowBg = item.StockLevel == "danger" ? "bg-red-50/60" : (item.StockLevel == "warning" ? "bg-amber-50/60" : "");
+                    <tr class="border-b border-slate-100 hover:bg-blue-50/50 transition-colors @rowBg">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrEmpty(item.MainImageUrl))
+                                {
+                                    <img src="@item.MainImageUrl" alt="@item.ProductName" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                                }
+                                else
+                                {
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-slate-400 text-sm">image</span>
+                                    </div>
+                                }
+                                <span class="font-semibold text-slate-800">@item.ProductName</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-slate-600">@item.CategoryName</td>
+                        <td class="px-5 py-3 text-right font-bold text-slate-800">@item.Price.ToString("N0")₫</td>
+                        <td class="px-5 py-3 text-center">
+                            @{
+                                var stockColor = item.StockLevel == "danger" ? "bg-red-100 text-red-700" : (item.StockLevel == "warning" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700");
+                            }
+                            <span class="@stockColor px-3 py-1 rounded-lg text-sm font-extrabold">@item.StockQuantity</span>
+                        </td>
+                        <td class="px-5 py-3 text-center">
+                            @if (item.StockLevel == "danger")
+                            {
+                                <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">🔴 HẾT HÀNG</span>
+                            }
+                            else if (item.StockLevel == "warning")
+                            {
+                                <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">⚠ SẮP HẾT</span>
+                            }
+                            else
+                            {
+                                <span class="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">✅ ĐỦ HÀNG</span>
+                            }
+                        </td>
+                        <td class="px-5 py-3 text-center">
+                            @{
+                                var statusClass = item.Status == 1 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600";
+                            }
+                            <span class="@statusClass px-3 py-1 rounded-full text-xs font-bold">@item.StatusText</span>
+                        </td>
+                        <td class="px-5 py-3 text-center">
+                            <a href="@Url.Action("UpdateStock", "Inventory", new { id = item.ProductID })"
+                               class="inline-flex items-center gap-1 bg-chill-primary hover:bg-chill-primaryDark text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                                <span class="material-symbols-outlined text-sm">sync_alt</span>
+                                Nhập/Xuất
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span>
+                        <span class="text-base font-medium">Không có sản phẩm nào</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Phân trang -->
+@if (Model.TotalPages > 1)
+{
+    <div class="flex justify-center items-center gap-2 mt-6">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            var activeClass = i == Model.CurrentPage ? "bg-chill-primary text-white shadow-lg" : "bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50";
+            <a href="@Url.Action("Index", "Inventory", new { search = Model.SearchTerm, stockFilter = Model.StockFilter, categoryId = Model.SelectedCategoryID, page = i })"
+               class="@activeClass w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold transition-all">@i</a>
+        }
+    </div>
+}
+
+<style>
+    @@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .animate-slide-in { animation: slideIn 0.3s ease-out; }
+</style>
+
+@section scripts {
+    <script>
+        setTimeout(function () {
+            var t = document.getElementById('toast-success'); if (t) t.remove();
+            var e = document.getElementById('toast-error'); if (e) e.remove();
+        }, 5000);
+    </script>
+}

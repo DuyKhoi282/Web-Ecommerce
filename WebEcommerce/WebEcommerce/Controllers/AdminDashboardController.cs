@@ -104,6 +104,39 @@ namespace WebEcommerce.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<JsonResult> GetRevenueData()
+        {
+            var labels = new List<string>();
+            var revenues = new List<decimal>();
+
+            var currentMonth = DateTime.UtcNow;
+            for (int i = 5; i >= 0; i--)
+            {
+                var m = currentMonth.AddMonths(-i);
+                labels.Add($"T{m.Month}/{m.Year}");
+
+                var monthStart = new DateTime(m.Year, m.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                var monthEnd = monthStart.AddMonths(1);
+
+                var rev = await _context.Orders
+                    .Where(o => o.OrderDate >= monthStart && o.OrderDate < monthEnd && o.Status != "Cancelled")
+                    .SumAsync(o => (decimal?)o.FinalAmount) ?? 0;
+
+                revenues.Add(rev);
+            }
+
+            var statusCounts = await _context.Orders
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var statusLabels = statusCounts.Select(s => s.Status ?? "Pending").ToList();
+            var statusData = statusCounts.Select(s => s.Count).ToList();
+
+            return Json(new { months = labels, revenues = revenues, statusLabels = statusLabels, statusData = statusData }, JsonRequestBehavior.AllowGet);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

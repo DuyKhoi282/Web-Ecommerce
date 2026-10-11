@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Đăng nhập - TheChillShop | Mua sắm thông minh - Sống chất lượng</title>
+    <title>Đăng nhập - ShopeChill | Mua sắm thông minh - Sống chất lượng</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
@@ -24,14 +24,14 @@
                 extend: {
                     colors: {
                         brand: {
-                            primary: '#0d47a1',
-                            primaryDark: '#0a3880',
-                            accent: '#00b4d8',
-                            accentHover: '#0096c7',
+                            primary: '#d70018',
+                            primaryDark: '#b91c1c',
+                            accent: '#ff4d4d',
+                            accentHover: '#f87171',
                             dark: '#1a1a2e',
                             muted: '#5c6370',
                             border: '#e2e8f4',
-                            surface: '#f8faff',
+                            surface: '#fff1f2',
                         }
                     },
                     fontFamily: {
@@ -53,7 +53,7 @@
             vertical-align: middle;
         }
         .bg-gradient-chill {
-            background: linear-gradient(135deg, #0d47a1 0%, #0077b6 50%, #00b4d8 100%);
+            background: linear-gradient(135deg, #d70018 0%, #e63946 50%, #ff4d4d 100%);
         }
         .glass-pill {
             background: rgba(255, 255, 255, 0.12);
@@ -62,13 +62,13 @@
         }
     </style>
 </head>
-<body class="h-full bg-white font-body text-[#1a1a2e] antialiased selection:bg-[#00b4d8]/20 selection:text-[#0d47a1]">
+<body class="h-full bg-white font-body text-[#1a1a2e] antialiased selection:bg-[#ff4d4d]/20 selection:text-[#d70018]">
     <main class="min-h-screen w-full flex flex-col lg:flex-row">
         <!-- LEFT PANEL: 55% Hero & Value Props -->
         <section class="relative w-full lg:w-[55%] bg-gradient-chill text-white flex flex-col justify-between p-8 sm:p-12 lg:p-16 overflow-hidden">
             <!-- Ambient decorative patterns -->
             <div class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-32 -right-20 w-[500px] h-[500px] rounded-full bg-[#00b4d8]/25 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-32 -right-20 w-[500px] h-[500px] rounded-full bg-[#ff4d4d]/25 blur-3xl"></div>
 
             <!-- Top Header Brand Anchor -->
             <div class="relative z-10 flex items-center justify-between">
@@ -77,8 +77,8 @@
                         <span class="material-symbols-outlined text-2xl text-white">shopping_bag</span>
                     </div>
                     <div>
-                        <span class="font-headline font-bold text-2xl sm:text-3xl tracking-tight text-white block">TheChill<span class="text-cyan-300">Shop</span></span>
-                        <p class="text-xs sm:text-sm text-blue-100 font-medium tracking-wide">Mua sắm thông minh - Sống chất lượng</p>
+                        <span class="font-headline font-bold text-2xl sm:text-3xl tracking-tight text-white block">Shope<span class="text-rose-200">Chill</span></span>
+                        <p class="text-xs sm:text-sm text-red-100 font-medium tracking-wide">Mua sắm thông minh - Sống chất lượng</p>
                     </div>
                 </a>
                 <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full transition-all border border-white/20">
@@ -95,33 +95,33 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="inline-block w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="text-xs font-semibold tracking-wider uppercase text-blue-100">Flash Sale 50%</span>
+                                <span class="text-xs font-semibold tracking-wider uppercase text-red-100">Flash Sale 50%</span>
                             </div>
                             <span class="glass-pill px-3 py-1 rounded-full text-xs font-semibold text-white">Chính hãng 100%</span>
                         </div>
 
                         <div class="grid grid-cols-3 gap-3 my-auto pt-2">
                             <div class="p-3 rounded-lg bg-white/10 border border-white/15 flex flex-col items-center text-center">
-                                <span class="material-symbols-outlined text-2xl mb-1 text-cyan-200">local_shipping</span>
-                                <span class="text-[11px] font-medium text-blue-100">Giao 2H</span>
+                                <span class="material-symbols-outlined text-2xl mb-1 text-rose-100">local_shipping</span>
+                                <span class="text-[11px] font-medium text-red-100">Giao 2H</span>
                             </div>
                             <div class="p-3 rounded-lg bg-white/20 border border-white/30 flex flex-col items-center text-center shadow-lg transform -translate-y-2">
                                 <span class="material-symbols-outlined text-3xl mb-1 text-white">verified</span>
                                 <span class="text-[11px] font-semibold text-white">Uy tín</span>
                             </div>
                             <div class="p-3 rounded-lg bg-white/10 border border-white/15 flex flex-col items-center text-center">
-                                <span class="material-symbols-outlined text-2xl mb-1 text-cyan-200">published_with_changes</span>
-                                <span class="text-[11px] font-medium text-blue-100">Đổi trả 15D</span>
+                                <span class="material-symbols-outlined text-2xl mb-1 text-rose-100">published_with_changes</span>
+                                <span class="text-[11px] font-medium text-red-100">Đổi trả 15D</span>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2 border-t border-white/15 text-xs text-blue-100">
+                        <div class="flex items-center justify-between pt-2 border-t border-white/15 text-xs text-red-100">
                             <div class="flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-sm text-amber-300">star</span>
                                 <span class="font-medium text-white">4.9/5</span>
                                 <span>(380k đánh giá)</span>
                             </div>
-                            <span class="text-cyan-200 font-medium">Bảo vệ đơn hàng 100%</span>
+                            <span class="text-rose-100 font-medium">Bảo vệ đơn hàng 100%</span>
                         </div>
                     </div>
                 </div>
@@ -129,33 +129,33 @@
                 <!-- 3 Value Proposition Bullets -->
                 <div class="w-full space-y-3 mt-6 max-w-md">
                     <div class="flex items-start gap-3 p-3 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm">
-                        <div class="shrink-0 w-7 h-7 rounded-full bg-cyan-400/20 border border-cyan-300/40 flex items-center justify-center text-cyan-200 text-sm">
+                        <div class="shrink-0 w-7 h-7 rounded-full bg-rose-400/20 border border-rose-200/40 flex items-center justify-center text-rose-100 text-sm">
                             <span class="material-symbols-outlined text-base">check</span>
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-white leading-snug">Hàng chính hãng 100% - Bảo hành tận tâm</p>
-                            <p class="text-xs text-blue-100/90 mt-0.5">Cam kết đền bù 200% nếu phát hiện hàng giả, hàng nhái.</p>
+                            <p class="text-xs text-red-100/90 mt-0.5">Cam kết đền bù 200% nếu phát hiện hàng giả, hàng nhái.</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-3 p-3 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm">
-                        <div class="shrink-0 w-7 h-7 rounded-full bg-cyan-400/20 border border-cyan-300/40 flex items-center justify-center text-cyan-200 text-sm">
+                        <div class="shrink-0 w-7 h-7 rounded-full bg-rose-400/20 border border-rose-200/40 flex items-center justify-center text-rose-100 text-sm">
                             <span class="material-symbols-outlined text-base">check</span>
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-white leading-snug">Giao hàng siêu tốc trong 2h</p>
-                            <p class="text-xs text-blue-100/90 mt-0.5">Mạng lưới vận chuyển đa kênh thông minh, nhanh chóng.</p>
+                            <p class="text-xs text-red-100/90 mt-0.5">Mạng lưới vận chuyển đa kênh thông minh, nhanh chóng.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Bottom: Social Proof & Security Badge -->
-            <div class="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-white/15 text-xs text-blue-100">
+            <div class="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-white/15 text-xs text-red-100">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-white">5M+</span> Khách hàng tin dùng khắp toàn quốc
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-cyan-200 text-sm">verified_user</span>
+                    <span class="material-symbols-outlined text-rose-100 text-sm">verified_user</span>
                     <span>Bảo mật chuẩn SSL 256-bit</span>
                 </div>
             </div>
@@ -165,11 +165,11 @@
         <section class="w-full lg:w-[45%] bg-white flex flex-col justify-between p-6 sm:p-10 lg:p-14 min-h-screen overflow-y-auto">
             <!-- Top Helper Bar -->
             <div class="w-full flex items-center justify-between mb-4">
-                <a class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-[#0d47a1] transition-colors" href="@Url.Action("Index", "Home")">
+                <a class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-[#d70018] transition-colors" href="@Url.Action("Index", "Home")">
                     <span class="material-symbols-outlined text-base">arrow_back</span>
                     <span>Về trang chủ</span>
                 </a>
-                <a class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-[#0d47a1] transition-colors" href="@Url.Action("Contact", "Home")">
+                <a class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-[#d70018] transition-colors" href="@Url.Action("Contact", "Home")">
                     <span class="material-symbols-outlined text-base">help_outline</span>
                     <span>Trợ giúp</span>
                 </a>
@@ -179,10 +179,10 @@
             <div class="w-full max-w-md mx-auto my-auto py-4">
                 <!-- Brand Mark -->
                 <div class="mb-5 flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-xl bg-[#0d47a1] flex items-center justify-center text-white shadow-md shadow-[#0d47a1]/20">
+                    <div class="w-10 h-10 rounded-xl bg-[#d70018] flex items-center justify-center text-white shadow-md shadow-[#d70018]/20">
                         <span class="material-symbols-outlined text-2xl">shopping_bag</span>
                     </div>
-                    <span class="font-headline font-bold text-xl text-[#0d47a1] tracking-tight">TheChill<span class="text-[#00b4d8]">Shop</span></span>
+                    <span class="font-headline font-bold text-xl text-[#d70018] tracking-tight">Shope<span class="text-\[\#ff4d4d\]">Chill</span></span>
                 </div>
 
                 <!-- Heading & Subtitle -->
@@ -223,7 +223,7 @@
                                 <span class="material-symbols-outlined text-lg">mail</span>
                             </div>
                             @Html.TextBoxFor(m => m.Email, new {
-                                @class = "block w-full pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "example@email.com",
                                 autocomplete = "email",
                                 type = "email",
@@ -243,7 +243,7 @@
                                 <span class="material-symbols-outlined text-lg">lock</span>
                             </div>
                             @Html.PasswordFor(m => m.Password, new {
-                                @class = "block w-full pl-10 pr-11 py-3 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 transition-all outline-none",
+                                @class = "block w-full pl-10 pr-11 py-3 text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-300 focus:border-[#d70018] focus:ring-2 focus:ring-[#d70018]/20 transition-all outline-none",
                                 placeholder = "••••••••",
                                 autocomplete = "current-password",
                                 required = "required",
@@ -259,16 +259,16 @@
                     <!-- Options Row: Remember Me & Forgot Password -->
                     <div class="flex items-center justify-between pt-1">
                         <label class="flex items-center gap-2 cursor-pointer select-none">
-                            @Html.CheckBoxFor(m => m.RememberMe, new { @class = "w-4 h-4 rounded border-slate-300 text-[#0d47a1] focus:ring-[#0d47a1]/30 cursor-pointer" })
+                            @Html.CheckBoxFor(m => m.RememberMe, new { @class = "w-4 h-4 rounded border-slate-300 text-[#d70018] focus:ring-[#d70018]/30 cursor-pointer" })
                             <span class="text-xs sm:text-sm text-slate-600 hover:text-slate-900">Ghi nhớ đăng nhập</span>
                         </label>
-                        <a class="text-xs sm:text-sm font-semibold text-[#00b4d8] hover:text-[#0096c7] transition-colors" href="@Url.Action("ForgotPassword", "Account")">
+                        <a class="text-xs sm:text-sm font-semibold text-[#ff4d4d] hover:text-[#f87171] transition-colors" href="@Url.Action("ForgotPassword", "Account")">
                             Quên mật khẩu?
                         </a>
                     </div>
 
                     <!-- Submit Button -->
-                    <button class="w-full mt-2 bg-[#0d47a1] hover:bg-[#0a3880] text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center gap-2 text-sm" type="submit">
+                    <button class="w-full mt-2 bg-[#d70018] hover:bg-[#b91c1c] text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center gap-2 text-sm" type="submit">
                         <span>Đăng nhập</span>
                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
                     </button>
@@ -277,7 +277,7 @@
                 <!-- Registration Link prompt -->
                 <p class="text-center text-sm text-slate-600 mt-6">
                     Chưa có tài khoản?
-                    <a class="text-[#00b4d8] hover:text-[#0096c7] font-semibold hover:underline transition-colors ml-1" href="@Url.Action("Register", "Account")">
+                    <a class="text-[#ff4d4d] hover:text-[#f87171] font-semibold hover:underline transition-colors ml-1" href="@Url.Action("Register", "Account")">
                         Đăng ký ngay
                     </a>
                 </p>
