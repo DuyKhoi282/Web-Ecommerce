@@ -152,13 +152,27 @@
 </div>
 <!-- RIGHT PROMO BANNERS + QUICK ACTIONS (3 COLS) -->
 <div class="lg:col-span-3 flex flex-col gap-3">
-<!-- Stacked Card 1 -->
-<a class="rounded-xl overflow-hidden shadow-sm relative group bg-surface-card aspect-[690/300] block" href="#">
-<img alt="Samsung Galaxy A37 A57 5G" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1580910051074-3eb694886505?w=700&h=300&auto=format&fit=crop&q=80"/>
+<!-- Stacked Card 1: Samsung Galaxy AI -->
+<a class="rounded-xl overflow-hidden shadow-sm relative group bg-slate-900 aspect-[690/300] block" href="@Url.Action("Index", "Search", new { q = "Samsung" })">
+    <img alt="Samsung Galaxy S24 Ultra &amp; Z Series" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=700&h=300&auto=format&fit=crop&q=80"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-3">
+        <span class="inline-block px-2 py-0.5 rounded bg-primary-container text-white text-[9px] font-black uppercase tracking-wider w-fit">
+            GALAXY AI
+        </span>
+        <h4 class="text-white font-extrabold text-sm mt-1 leading-tight">Galaxy Z Fold &amp; S24 Series</h4>
+        <p class="text-slate-300 text-[11px]">Trợ giá thu cũ tới 4 Triệu • Quà tặng 1.5TR</p>
+    </div>
 </a>
-<!-- Stacked Card 2 -->
-<a class="rounded-xl overflow-hidden shadow-sm relative group bg-surface-card aspect-[690/300] block" href="#">
-<img alt="Mac Studio M5 Max and Ultra" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=700&h=300&auto=format&fit=crop&q=80"/>
+<!-- Stacked Card 2: MacBook M3 -->
+<a class="rounded-xl overflow-hidden shadow-sm relative group bg-slate-900 aspect-[690/300] block" href="@Url.Action("Index", "Search", new { q = "MacBook" })">
+    <img alt="MacBook Air M3 Series" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=700&h=300&auto=format&fit=crop&q=80"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-3">
+        <span class="inline-block px-2 py-0.5 rounded bg-[#d70018] text-white text-[9px] font-black uppercase tracking-wider w-fit">
+            APPLE CHÍNH HÃNG
+        </span>
+        <h4 class="text-white font-extrabold text-sm mt-1 leading-tight">MacBook Air M3 Series</h4>
+        <p class="text-slate-300 text-[11px]">Chỉ từ 24.990.000₫ • Trả góp 0% duyệt 3 phút</p>
+    </div>
 </a>
 <!-- Quick Utility Card: Smember & Trade-in -->
 <div class="bg-gradient-to-br from-primary-container via-brand-red-vibrant to-primary rounded-xl p-3 text-on-primary shadow-sm space-y-2">
@@ -262,11 +276,31 @@
 </div>
 </div>
 </section>
-<!-- B2B CORPORATE PARTNERSHIP BANNER -->
-<section class="max-w-[1280px] mx-auto px-4 py-4 w-full">
-    <a class="block w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" href="#">
-        <img alt="Trở thành Khách hàng Doanh nghiệp cùng ShopeChill S-Business" class="w-full h-auto object-cover max-h-48 rounded-2xl" src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1280&h=260&auto=format&fit=crop&q=80" />
-    </a>
+<!-- B2B CORPORATE & TRADE-IN CAMPAIGN BANNER -->
+<section class="max-w-[1280px] mx-auto px-4 py-2 w-full">
+    <div class="relative w-full rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#0d47a1] via-[#1565c0] to-[#0284c7] text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-blue-400/30">
+        <div class="space-y-1.5 max-w-xl text-center md:text-left">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-amber-300">
+                <span class="material-symbols-outlined text-sm">business_center</span> KHÁCH HÀNG DOANH NGHIỆP S-BUSINESS
+            </span>
+            <h3 class="font-headline font-black text-xl sm:text-2xl tracking-tight text-white">
+                Giải Pháp Thiết Bị Công Nghệ Cho Doanh Nghiệp &amp; Giáo Dục
+            </h3>
+            <p class="text-blue-100 text-xs sm:text-sm font-medium">
+                Chiết khấu đến 15% cho đơn hàng số lượng lớn • Xuất hóa đơn VAT điện tử nhanh chóng • Bảo hành tận nơi.
+            </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+            <a href="@Url.Action("Index", "Search")" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5">
+                <span>Khám phá ngay</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
+            <a href="tel:18002097" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">call</span>
+                <span>Hotline 1800.2097</span>
+            </a>
+        </div>
+    </div>
 </section>
 
 <!-- ==========================================================================
@@ -817,7 +851,7 @@
       desc: "Gập mở chuẩn AI đỉnh cao - Ưu đãi độc quyền tặng bảo hành Care+ 1 năm"
     },
     {
-      image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=1200&h=520&auto=format&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=520&auto=format&fit=crop&q=80",
       badge: "Back To School",
       title: "Tuần Lễ Laptop ASUS ZenBook & ROG",
       desc: "Giảm thêm 1 Triệu Sinh Viên - Tặng kèm Balo cao cấp & Chuột không dây"
