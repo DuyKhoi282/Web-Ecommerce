@@ -10,8 +10,7 @@ using System.Configuration;
 using System.Threading.Tasks;
 using WebEcommerce.Models;
 using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+
 
 namespace WebEcommerce
 {
