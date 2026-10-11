@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -206,8 +206,7 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Profile");
                 }
 
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError("", error);
+                AddErrors(result);
             }
             catch (Exception ex)
             {
@@ -223,38 +222,8 @@ namespace WebEcommerce.Controllers
         }
 
         // ═══════════════════════════════════════════════════════
-        //  Giữ lại các actions mặc định của Identity (LinkLogin...)
-        // ═══════════════════════════════════════════════════════
-
-        // POST: /Manage/LinkLogin (dùng bởi external login)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult LinkLogin(string provider)
-        {
-            return new AccountController.ChallengeResult(
-                provider,
-                Url.Action("LinkLoginCallback", "Manage"),
-                User.Identity.GetUserId());
-        }
-
-        // GET: /Manage/LinkLoginCallback
-        public async Task<ActionResult> LinkLoginCallback()
-        {
-            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
-            if (loginInfo == null)
-                return RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
-
-            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId(), loginInfo.Login);
-            return result.Succeeded
-                ? RedirectToAction("ManageLogins")
-                : RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
-        }
-
-        // ═══════════════════════════════════════════════════════
         //  HELPERS
-        // ═══════════════════════════════════════════════════════
-
-        private const string XsrfKey = "XsrfId";
+        // ═══════════════════════════════════════════════════
 
         private void AddErrors(IdentityResult result)
         {
@@ -274,22 +243,6 @@ namespace WebEcommerce.Controllers
             if (error.Contains("UserName") && error.Contains("already"))
                 return "Tên tài khoản này đã tồn tại.";
             return error; // Giữ nguyên nếu không match
-        }
-
-        private bool HasPassword()
-        {
-            var user = UserManager.FindById(User.Identity.GetUserId());
-            return user?.PasswordHash != null;
-        }
-
-        public enum ManageMessageId
-        {
-            AddPhoneSuccess,
-            ChangePasswordSuccess,
-            SetPasswordSuccess,
-            RemoveLoginSuccess,
-            RemovePhoneSuccess,
-            Error
         }
 
         protected override void Dispose(bool disposing)

@@ -97,14 +97,14 @@ namespace WebEcommerce
             };
 
             // ── Quy tắc mật khẩu ─────────────────────────────
-            // Nghiệp vụ: Tối thiểu 6 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt
+            // Nghiệp vụ: Tối thiểu 6 ký tự, gồm chữ thường và số (tối ưu UX cho người dùng & kiểm thử đồ án)
             manager.PasswordValidator = new PasswordValidator
             {
                 RequiredLength = 6,
-                RequireNonLetterOrDigit = false,   // Giảm bớt để UX không khó quá
+                RequireNonLetterOrDigit = false,   // Tắt ký tự đặc biệt để người dùng dễ đăng ký
                 RequireDigit = true,
                 RequireLowercase = true,
-                RequireUppercase = false,
+                RequireUppercase = false,          // Tắt chữ hoa để tối ưu trải nghiệm người dùng
             };
 
             // ── Chống Brute-Force: Lockout ────────────────────

@@ -63,11 +63,8 @@ namespace WebEcommerce.Controllers
                 ? await allUsersQuery.CountAsync(u => u.Roles.Any(r => r.RoleId == customerRoleId))
                 : 0;
 
-            int totalStaff = 0;
-            if (adminRoleId != null)
-                totalStaff += await allUsersQuery.CountAsync(u => u.Roles.Any(r => r.RoleId == adminRoleId));
-            if (managerRoleId != null)
-                totalStaff += await allUsersQuery.CountAsync(u => u.Roles.Any(r => r.RoleId == managerRoleId));
+            var staffRoleIds = new[] { adminRoleId, managerRoleId }.Where(id => id != null).ToList();
+            int totalStaff = await allUsersQuery.CountAsync(u => u.Roles.Any(r => staffRoleIds.Contains(r.RoleId)));
 
             // Query with filter
             var query = _context.Users.AsQueryable();
@@ -233,7 +230,6 @@ namespace WebEcommerce.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [CustomAuthorize(Roles = "Administrator")]
         public async Task<ActionResult> ToggleLock(string userId)
         {
             try
@@ -267,26 +263,28 @@ namespace WebEcommerce.Controllers
                     // Mở khóa
                     user.IsActive = true;
                     user.LockoutEndDateUtc = null;
-                    await UserManager.UpdateAsync(user); // Lưu IsActive + LockoutEndDateUtc về DB
+                    await UserManager.UpdateAsync(user);
                     await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.MinValue);
                     await UserManager.ResetAccessFailedCountAsync(userId);
+                    await UserManager.UpdateSecurityStampAsync(userId);
                     TempData["SuccessMessage"] = $"Đã mở khóa tài khoản cho người dùng {user.FullName ?? user.Email}.";
                 }
                 else
                 {
                     // Khóa tài khoản
                     user.IsActive = false;
-                    await UserManager.UpdateAsync(user); // Lưu IsActive về DB
+                    await UserManager.UpdateAsync(user);
                     await UserManager.SetLockoutEnabledAsync(userId, true);
                     await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.UtcNow.AddYears(100));
+                    // Invalidate ngay lập tức cookie/session của tài khoản bị khóa
+                    await UserManager.UpdateSecurityStampAsync(userId);
                     TempData["SuccessMessage"] = $"Đã khóa tài khoản người dùng {user.FullName ?? user.Email}.";
                 }
-
-                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi thay đổi trạng thái tài khoản: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine($"[ToggleLock Error] {ex.Message}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi thay đổi trạng thái tài khoản. Vui lòng thử lại.";
             }
 
             return RedirectToAction("Index");
@@ -295,7 +293,6 @@ namespace WebEcommerce.Controllers
         // POST: AdminUser/ChangeRole
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [CustomAuthorize(Roles = "Administrator")]
         public async Task<ActionResult> ChangeRole(string userId, string newRole)
         {
             try
@@ -331,15 +328,29 @@ namespace WebEcommerce.Controllers
                 var currentRoles = await UserManager.GetRolesAsync(userId);
                 if (currentRoles.Any())
                 {
-                    await UserManager.RemoveFromRolesAsync(userId, currentRoles.ToArray());
+                    var removeResult = await UserManager.RemoveFromRolesAsync(userId, currentRoles.ToArray());
+                    if (!removeResult.Succeeded)
+                    {
+                        TempData["ErrorMessage"] = "Không thể gỡ bỏ vai trò hiện tại: " + string.Join("; ", removeResult.Errors);
+                        return RedirectToAction("Index");
+                    }
                 }
 
-                await UserManager.AddToRoleAsync(userId, newRole);
+                var addResult = await UserManager.AddToRoleAsync(userId, newRole);
+                if (!addResult.Succeeded)
+                {
+                    TempData["ErrorMessage"] = "Không thể gán vai trò mới: " + string.Join("; ", addResult.Errors);
+                    return RedirectToAction("Index");
+                }
+
+                // Cập nhật Security Stamp để vô hiệu hóa cookie/claim cũ và yêu cầu làm mới quyền
+                await UserManager.UpdateSecurityStampAsync(userId);
                 TempData["SuccessMessage"] = $"Đã cập nhật vai trò của {user.FullName ?? user.Email} thành '{newRole}'.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Lỗi khi phân quyền người dùng: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine($"[ChangeRole Error] {ex.Message}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi phân quyền người dùng. Vui lòng thử lại.";
             }
 
             return RedirectToAction("Index");
