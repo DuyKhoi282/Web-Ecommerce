@@ -138,6 +138,9 @@ CREATE TABLE IF NOT EXISTS "Orders" (
     "PaymentStatus" VARCHAR(50) NOT NULL DEFAULT 'Unpaid', -- Unpaid, PendingConfirmation, Paid
     "PaymentDate" TIMESTAMP,
     "Notes" TEXT
+    "CancellationReason" VARCHAR(1000),
+    "CancelledBy" VARCHAR(50),
+    "CancelledAt" TIMESTAMP
 );
 
 -- 11. BẢNG CHI TIẾT ĐƠN HÀNG (OrderDetails)

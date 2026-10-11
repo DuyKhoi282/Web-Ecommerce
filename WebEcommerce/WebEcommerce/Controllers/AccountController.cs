@@ -1,13 +1,14 @@
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
 using WebEcommerce.Models;
+using static System.Web.Razor.Parser.SyntaxConstants;
 
 namespace WebEcommerce.Controllers
 {
@@ -97,7 +98,7 @@ namespace WebEcommerce.Controllers
                     Session["PendingRegistration.OtpExpiresAt"] as DateTime?;
                 var otpAttempts =
                     Session["PendingRegistration.OtpAttempts"] != null
-                     ? (int)Session["PendingRegistration.OtpAttempts"]: 0;
+                     ? (int)Session["PendingRegistration.OtpAttempts"] : 0;
 
 
                 // ==========================================
@@ -241,49 +242,218 @@ namespace WebEcommerce.Controllers
                 }
 
 
+                
                 // ==========================================
                 // 8. Gửi mail chào mừng
                 // ==========================================
 
-                try
+try
                 {
                     await UserManager.SendEmailAsync(
                         user.Id,
                         "Đăng ký tài khoản thành công - The Chill Shop",
                         $@"
-<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
-    <h2>Chào mừng bạn đến với The Chill Shop!</h2>
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Chào mừng đến với The Chill Shop</title>
+</head>
 
-    <p>
-        Xin chào
-        <strong>{HttpUtility.HtmlEncode(user.FullName)}</strong>,
-    </p>
+<body style='margin:0; padding:0; background-color:#f4f5f7;
+             font-family:Arial, Helvetica, sans-serif; color:#333333;'>
 
-    <p>
-        Tài khoản của bạn đã được đăng ký thành công.
-    </p>
+    <table role='presentation' width='100%' cellpadding='0'
+           cellspacing='0' border='0'
+           style='background-color:#f4f5f7; padding:30px 12px;'>
+        <tr>
+            <td align='center'>
 
-    <p>
-        <strong>Email đăng nhập:</strong>
-        {HttpUtility.HtmlEncode(user.Email)}
-    </p>
+                <table role='presentation' width='600' cellpadding='0'
+                       cellspacing='0' border='0'
+                       style='width:100%; max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:10px; overflow:hidden;'>
 
-    <p>
-        Email của bạn đã được xác thực thành công.
-    </p>
+                    <!-- HEADER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#d70018;
+                                   padding:28px 20px;'>
 
-    <p>
-        Bạn có thể sử dụng tài khoản này để đăng nhập
-        và mua sắm trên hệ thống.
-    </p>
+                            <div style='font-size:26px; font-weight:bold;
+                                        color:#ffffff; letter-spacing:0.3px;'>
+                                The Chill Shop
+                            </div>
 
-    <br />
+                            <div style='font-size:13px; color:#ffffff;
+                                        margin-top:8px;'>
+                                Công nghệ trong tầm tay
+                            </div>
+                        </td>
+                    </tr>
 
-    <p>
-        Trân trọng,<br />
-        <strong>The Chill Shop</strong>
-    </p>
-</div>"
+                    <!-- WELCOME BANNER -->
+                    <tr>
+                        <td align='center'
+                            style='padding:32px 24px 16px;'>
+
+                            <div style='display:inline-block;
+                                        background-color:#fff0f1;
+                                        color:#d70018;
+                                        padding:8px 16px;
+                                        border-radius:20px;
+                                        font-size:12px;
+                                        font-weight:bold;'>
+                                ĐĂNG KÝ THÀNH CÔNG
+                            </div>
+
+                            <h1 style='margin:20px 0 10px;
+                                       font-size:25px;
+                                       line-height:1.4;
+                                       color:#222222;'>
+                                Chào mừng bạn đến với
+                                <span style='color:#d70018;'>
+                                    The Chill Shop!
+                                </span>
+                            </h1>
+
+                            <p style='margin:0; font-size:14px;
+                                      line-height:1.8; color:#666666;'>
+                                Cảm ơn bạn đã lựa chọn đồng hành cùng chúng tôi.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- MAIN CONTENT -->
+                    <tr>
+                        <td style='padding:12px 30px 30px;
+                                   font-size:14px; line-height:1.9;
+                                   color:#444444;'>
+
+                            <p>
+                                Xin chào
+                                <strong style='color:#222222;'>
+                                    {HttpUtility.HtmlEncode(user.FullName)}
+                                </strong>,
+                            </p>
+
+                            <p>
+                                Tài khoản của bạn đã được đăng ký thành công
+                                và email đã được xác thực.
+                                Bạn đã sẵn sàng khám phá thế giới công nghệ
+                                tại The Chill Shop!
+                            </p>
+
+                            <!-- ACCOUNT INFORMATION -->
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='background-color:#fff5f5;
+                                          border:1px solid #ffe0e3;
+                                          border-radius:8px;
+                                          margin:22px 0;'>
+                                <tr>
+                                    <td style='padding:18px 20px;'>
+
+                                        <p style='margin:0 0 12px;
+                                                  font-size:15px;
+                                                  font-weight:bold;
+                                                  color:#d70018;'>
+                                            THÔNG TIN TÀI KHOẢN
+                                        </p>
+
+                                        <p style='margin:0 0 6px;'>
+                                            <strong>Email đăng nhập:</strong>
+                                        </p>
+
+                                        <p style='margin:0;
+                                                  color:#333333;
+                                                  word-break:break-word;'>
+                                            {HttpUtility.HtmlEncode(user.Email)}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p>
+                                Bạn có thể đăng nhập để khám phá các sản phẩm,
+                                cập nhật ưu đãi và trải nghiệm mua sắm
+                                thuận tiện tại cửa hàng.
+                            </p>
+
+                            <!-- CTA BUTTON -->
+                            <table role='presentation' cellpadding='0'
+                                   cellspacing='0' border='0'
+                                   align='center'
+                                   style='margin:28px auto;'>
+                                <tr>
+                                    <td align='center'
+                                        bgcolor='#d70018'
+                                        style='border-radius:6px;'>
+                                        <a href='https://YOUR-WEBSITE-URL'
+                                           style='display:inline-block;
+                                                  padding:14px 30px;
+                                                  font-size:14px;
+                                                  font-weight:bold;
+                                                  color:#ffffff;
+                                                  text-decoration:none;
+                                                  border-radius:6px;'>
+                                            KHÁM PHÁ CỬA HÀNG
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style='margin-top:24px;'>
+                                Nếu bạn không thực hiện đăng ký tài khoản này,
+                                vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi.
+                            </p>
+
+                            <p style='margin-bottom:0;'>
+                                Trân trọng,<br>
+                                <strong style='color:#d70018;'>
+                                    Đội ngũ The Chill Shop
+                                </strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#f8f8f8;
+                                   border-top:1px solid #eeeeee;
+                                   padding:22px 20px;'>
+
+                            <p style='margin:0 0 8px;
+                                      font-size:13px;
+                                      font-weight:bold;
+                                      color:#d70018;'>
+                                THE CHILL SHOP
+                            </p>
+
+                            <p style='margin:0;
+                                      font-size:12px;
+                                      line-height:1.8;
+                                      color:#888888;'>
+                                Cảm ơn bạn đã tin tưởng và lựa chọn chúng tôi.
+                                <br>
+                                Email này được gửi tự động.
+                                Vui lòng không trả lời trực tiếp email này.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>"
                     );
                 }
                 catch (Exception emailEx)
@@ -295,6 +465,7 @@ namespace WebEcommerce.Controllers
                         $"[Welcome Email Error] {emailEx.Message}"
                     );
                 }
+            
 
 
                 // ==========================================
@@ -440,46 +611,205 @@ namespace WebEcommerce.Controllers
 
                             Subject =
                                 "Mã xác thực mới - The Chill Shop",
-
                             Body = $@"
-<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
-    <h2>Mã xác thực mới</h2>
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Mã xác thực mới - The Chill Shop</title>
+</head>
 
-    <p>
-        Xin chào
-        <strong>{HttpUtility.HtmlEncode(fullName)}</strong>,
-    </p>
+<body style='margin:0; padding:0; background-color:#f4f5f7;
+             font-family:Arial, Helvetica, sans-serif; color:#333333;'>
 
-    <p>
-        Đây là mã xác thực mới cho tài khoản
-        <strong>The Chill Shop</strong>.
-    </p>
+    <table role='presentation' width='100%' cellpadding='0'
+           cellspacing='0' border='0'
+           style='background-color:#f4f5f7; padding:30px 12px;'>
+        <tr>
+            <td align='center'>
 
-    <div style='
-        font-size: 32px;
-        font-weight: bold;
-        letter-spacing: 8px;
-        margin: 20px 0;
-    '>
-        {newOtp}
-    </div>
+                <table role='presentation' width='600' cellpadding='0'
+                       cellspacing='0' border='0'
+                       style='width:100%; max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:10px; overflow:hidden;'>
 
-    <p>
-        Mã xác thực có hiệu lực trong
-        <strong>10 phút</strong>.
-    </p>
+                    <!-- HEADER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#d70018;
+                                   padding:26px 20px;'>
 
-    <p>
-        Mã xác thực trước đó đã không còn hiệu lực.
-    </p>
+                            <div style='font-size:26px; font-weight:bold;
+                                        color:#ffffff;'>
+                                The Chill Shop
+                            </div>
 
-    <br />
+                            <div style='font-size:13px; color:#ffffff;
+                                        margin-top:8px;'>
+                                Công nghệ trong tầm tay
+                            </div>
+                        </td>
+                    </tr>
 
-    <p>
-        Trân trọng,<br />
-        <strong>The Chill Shop</strong>
-    </p>
-</div>"
+                    <!-- TITLE -->
+                    <tr>
+                        <td align='center'
+                            style='padding:32px 24px 12px;'>
+
+                            <div style='display:inline-block;
+                                        background-color:#fff0f1;
+                                        color:#d70018;
+                                        padding:8px 16px;
+                                        border-radius:20px;
+                                        font-size:12px;
+                                        font-weight:bold;'>
+                                GỬI LẠI MÃ XÁC THỰC
+                            </div>
+
+                            <h1 style='margin:20px 0 10px;
+                                       font-size:24px;
+                                       line-height:1.4;
+                                       color:#222222;'>
+                                Mã OTP mới của bạn
+                            </h1>
+
+                            <p style='margin:0; font-size:14px;
+                                      line-height:1.8; color:#666666;'>
+                                Sử dụng mã mới bên dưới để tiếp tục đăng ký.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- CONTENT -->
+                    <tr>
+                        <td style='padding:12px 30px 30px;
+                                   font-size:14px; line-height:1.9;
+                                   color:#444444;'>
+
+                            <p>
+                                Xin chào
+                                <strong style='color:#222222;'>
+                                    {HttpUtility.HtmlEncode(fullName)}
+                                </strong>,
+                            </p>
+
+                            <p>
+                                Chúng tôi đã nhận được yêu cầu gửi lại mã
+                                xác thực cho tài khoản The Chill Shop của bạn.
+                                Vui lòng sử dụng mã OTP mới dưới đây.
+                            </p>
+
+                            <!-- OTP BOX -->
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='margin:24px 0;
+                                          background-color:#fff5f5;
+                                          border:1px solid #ffd9de;
+                                          border-radius:8px;'>
+                                <tr>
+                                    <td align='center'
+                                        style='padding:24px 16px;'>
+
+                                        <p style='margin:0 0 12px;
+                                                  font-size:13px;
+                                                  color:#666666;'>
+                                            MÃ XÁC THỰC MỚI CỦA BẠN
+                                        </p>
+
+                                        <div style='font-size:32px;
+                                                    font-weight:bold;
+                                                    letter-spacing:8px;
+                                                    color:#d70018;
+                                                    line-height:1.5;
+                                                    overflow-wrap:anywhere;'>
+                                            {newOtp}
+                                        </div>
+
+                                        <p style='margin:12px 0 0;
+                                                  font-size:13px;
+                                                  color:#666666;'>
+                                            Có hiệu lực trong
+                                            <strong style='color:#d70018;'>
+                                                10 phút
+                                            </strong>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- OLD OTP NOTICE -->
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='background-color:#f8f8f8;
+                                          border-left:4px solid #d70018;
+                                          margin:20px 0;'>
+                                <tr>
+                                    <td style='padding:14px 16px;
+                                               font-size:13px;
+                                               line-height:1.8;
+                                               color:#555555;'>
+
+                                        <strong style='color:#333333;'>
+                                            Lưu ý quan trọng
+                                        </strong>
+                                        <br>
+                                        Mã OTP trước đó đã hết hiệu lực.
+                                        Bạn chỉ nên sử dụng mã mới nhất
+                                        được gửi đến email này.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p>
+                                Vì lý do bảo mật, vui lòng không chia sẻ mã OTP
+                                với bất kỳ ai. Nếu bạn không yêu cầu gửi lại mã,
+                                hãy bỏ qua email này.
+                            </p>
+
+                            <p style='margin-bottom:0;'>
+                                Trân trọng,<br>
+                                <strong style='color:#d70018;'>
+                                    Đội ngũ The Chill Shop
+                                </strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#f8f8f8;
+                                   border-top:1px solid #eeeeee;
+                                   padding:22px 20px;'>
+
+                            <p style='margin:0 0 8px;
+                                      font-size:13px;
+                                      font-weight:bold;
+                                      color:#d70018;'>
+                                THE CHILL SHOP
+                            </p>
+
+                            <p style='margin:0;
+                                      font-size:12px;
+                                      line-height:1.8;
+                                      color:#888888;'>
+                                Email được gửi tự động để xác thực tài khoản.
+                                <br>
+                                Vui lòng không trả lời trực tiếp email này.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>"
                         }
                     );
                 }
@@ -639,46 +969,202 @@ namespace WebEcommerce.Controllers
                             Destination = model.Email,
                             Subject = "Mã xác thực đăng ký - The Chill Shop",
                             Body = $@"
-<div style='font-family: Arial, sans-serif; line-height: 1.6;'>
-    <h2>Xác thực email đăng ký</h2>
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Xác thực email - The Chill Shop</title>
+</head>
 
-    <p>
-        Xin chào <strong>{HttpUtility.HtmlEncode(model.FullName)}</strong>,
-    </p>
+<body style='margin:0; padding:0; background-color:#f4f5f7;
+             font-family:Arial, Helvetica, sans-serif; color:#333333;'>
 
-    <p>
-        Cảm ơn bạn đã đăng ký tài khoản tại <strong>The Chill Shop</strong>.
-    </p>
+    <table role='presentation' width='100%' cellpadding='0'
+           cellspacing='0' border='0'
+           style='background-color:#f4f5f7; padding:30px 12px;'>
+        <tr>
+            <td align='center'>
 
-    <p>
-        Mã xác thực của bạn là:
-    </p>
+                <table role='presentation' width='600' cellpadding='0'
+                       cellspacing='0' border='0'
+                       style='width:100%; max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:10px; overflow:hidden;'>
 
-    <div style='
-        font-size: 32px;
-        font-weight: bold;
-        letter-spacing: 8px;
-        margin: 20px 0;
-    '>
-        {otp}
-    </div>
+                    <!-- HEADER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#d70018; padding:26px 20px;'>
 
-    <p>
-        Mã xác thực có hiệu lực trong <strong>10 phút</strong>.
-    </p>
+                            <div style='font-size:26px; font-weight:bold;
+                                        color:#ffffff;'>
+                                The Chill Shop
+                            </div>
 
-    <p>
-        Nếu bạn không thực hiện đăng ký tài khoản,
-        vui lòng bỏ qua email này.
-    </p>
+                            <div style='font-size:13px; color:#ffffff;
+                                        margin-top:8px;'>
+                                Công nghệ trong tầm tay
+                            </div>
+                        </td>
+                    </tr>
 
-    <br />
+                    <!-- TITLE -->
+                    <tr>
+                        <td align='center'
+                            style='padding:32px 24px 12px;'>
 
-    <p>
-        Trân trọng,<br />
-        <strong>The Chill Shop</strong>
-    </p>
-</div>"
+                            <div style='display:inline-block;
+                                        background-color:#fff0f1;
+                                        color:#d70018;
+                                        padding:8px 16px;
+                                        border-radius:20px;
+                                        font-size:12px;
+                                        font-weight:bold;'>
+                                XÁC THỰC TÀI KHOẢN
+                            </div>
+
+                            <h1 style='margin:20px 0 10px;
+                                       font-size:24px;
+                                       line-height:1.4;
+                                       color:#222222;'>
+                                Xác thực email của bạn
+                            </h1>
+
+                            <p style='margin:0; font-size:14px;
+                                      line-height:1.8; color:#666666;'>
+                                Chỉ còn một bước nữa để hoàn tất đăng ký!
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- CONTENT -->
+                    <tr>
+                        <td style='padding:12px 30px 30px;
+                                   font-size:14px; line-height:1.9;
+                                   color:#444444;'>
+
+                            <p>
+                                Xin chào
+                                <strong style='color:#222222;'>
+                                    {HttpUtility.HtmlEncode(model.FullName)}
+                                </strong>,
+                            </p>
+
+                            <p>
+                                Cảm ơn bạn đã đăng ký tài khoản tại
+                                <strong>The Chill Shop</strong>.
+                                Vui lòng sử dụng mã xác thực bên dưới
+                                để xác minh địa chỉ email của bạn.
+                            </p>
+
+                            <!-- OTP BOX -->
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='margin:24px 0;
+                                          background-color:#fff5f5;
+                                          border:1px solid #ffd9de;
+                                          border-radius:8px;'>
+                                <tr>
+                                    <td align='center'
+                                        style='padding:24px 16px;'>
+
+                                        <p style='margin:0 0 12px;
+                                                  font-size:13px;
+                                                  color:#666666;'>
+                                            MÃ XÁC THỰC CỦA BẠN
+                                        </p>
+
+                                        <div style='font-size:32px;
+                                                    font-weight:bold;
+                                                    letter-spacing:8px;
+                                                    color:#d70018;
+                                                    line-height:1.5;
+                                                    overflow-wrap:anywhere;'>
+                                            {otp}
+                                        </div>
+
+                                        <p style='margin:12px 0 0;
+                                                  font-size:13px;
+                                                  color:#666666;'>
+                                            Mã có hiệu lực trong
+                                            <strong style='color:#d70018;'>
+                                                10 phút
+                                            </strong>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- SECURITY NOTICE -->
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='background-color:#f8f8f8;
+                                          border-left:4px solid #d70018;
+                                          margin:20px 0;'>
+                                <tr>
+                                    <td style='padding:14px 16px;
+                                               font-size:13px;
+                                               line-height:1.8;
+                                               color:#555555;'>
+                                        <strong style='color:#333333;'>
+                                            Lưu ý bảo mật
+                                        </strong>
+                                        <br>
+                                        Không chia sẻ mã OTP này với bất kỳ ai.
+                                        The Chill Shop sẽ không yêu cầu bạn
+                                        cung cấp mã xác thực qua điện thoại.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p>
+                                Nếu bạn không thực hiện đăng ký tài khoản,
+                                vui lòng bỏ qua email này và không chia sẻ mã OTP.
+                            </p>
+
+                            <p style='margin-bottom:0;'>
+                                Trân trọng,<br>
+                                <strong style='color:#d70018;'>
+                                    Đội ngũ The Chill Shop
+                                </strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#f8f8f8;
+                                   border-top:1px solid #eeeeee;
+                                   padding:22px 20px;'>
+
+                            <p style='margin:0 0 8px;
+                                      font-size:13px;
+                                      font-weight:bold;
+                                      color:#d70018;'>
+                                THE CHILL SHOP
+                            </p>
+
+                            <p style='margin:0;
+                                      font-size:12px;
+                                      line-height:1.8;
+                                      color:#888888;'>
+                                Email được gửi tự động để xác thực tài khoản.
+                                <br>
+                                Vui lòng không trả lời trực tiếp email này.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>"
                         }
                     );
                 }
@@ -929,164 +1415,252 @@ namespace WebEcommerce.Controllers
                 // Phúc làm lại template email đẹp hơn, gửi HTML email
                 await UserManager.SendEmailAsync(
     user.Id,
-    "Đặt lại mật khẩu - The Chill Shop",
-    $@"
+"Đặt lại mật khẩu - The Chill Shop",
+$@"
 <!DOCTYPE html>
-<html>
+<html lang='vi'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Đặt lại mật khẩu - The Chill Shop</title>
 </head>
 
-<body style='margin:0; padding:0; background-color:#f1f5f9; font-family:Arial, Helvetica, sans-serif;'>
+<body style='margin:0; padding:0; background-color:#f4f5f7;
+             font-family:Arial, Helvetica, sans-serif; color:#333333;'>
 
-    <table width='100%' cellpadding='0' cellspacing='0' border='0'
-           style='background-color:#f1f5f9; padding:40px 15px;'>
-
+    <table role='presentation' width='100%' cellpadding='0'
+           cellspacing='0' border='0'
+           style='background-color:#f4f5f7; padding:30px 12px;'>
         <tr>
             <td align='center'>
 
-                <table width='100%' cellpadding='0' cellspacing='0' border='0'
-                       style='max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden;'>
+                <table role='presentation' width='600' cellpadding='0'
+                       cellspacing='0' border='0'
+                       style='width:100%; max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:10px; overflow:hidden;'>
 
-                    <!-- Header -->
+                    <!-- HEADER -->
                     <tr>
                         <td align='center'
-                            style='padding:30px 30px 20px 30px; background:#ffffff;'>
+                            style='background-color:#d70018;
+                                   padding:26px 20px;'>
 
-                            <div style='font-size:24px; font-weight:bold; color:#0d47a1;'>
+                            <div style='font-size:26px; font-weight:bold;
+                                        color:#ffffff;'>
                                 The Chill Shop
                             </div>
 
-                            <div style='margin-top:6px; font-size:13px; color:#64748b;'>
-                                Online Shopping
+                            <div style='font-size:13px; color:#ffffff;
+                                        margin-top:8px;'>
+                                Công nghệ trong tầm tay
                             </div>
-
                         </td>
                     </tr>
 
-                    <!-- Icon -->
+                    <!-- ICON -->
                     <tr>
-                        <td align='center' style='padding:10px 30px 0 30px;'>
+                        <td align='center'
+                            style='padding:28px 20px 0;'>
 
-                            <div style='width:64px; height:64px; background:#eff6ff;
-                                        border-radius:16px; line-height:64px;
-                                        font-size:30px; color:#0d47a1;'>
-                                🔐
+                            <div style='width:64px; height:64px;
+                                        background-color:#fff0f1;
+                                        border-radius:16px;
+                                        line-height:64px;
+                                        font-size:30px;
+                                        color:#d70018;'>
+                                &#128274;
                             </div>
-
                         </td>
                     </tr>
 
-                    <!-- Content -->
+                    <!-- TITLE -->
                     <tr>
-                        <td style='padding:25px 40px 10px 40px;'>
+                        <td align='center'
+                            style='padding:24px 30px 10px;'>
 
-                            <h1 style='margin:0 0 15px 0;
-                                       text-align:center;
+                            <div style='display:inline-block;
+                                        background-color:#fff0f1;
+                                        color:#d70018;
+                                        padding:7px 14px;
+                                        border-radius:20px;
+                                        font-size:12px;
+                                        font-weight:bold;'>
+                                BẢO MẬT TÀI KHOẢN
+                            </div>
+
+                            <h1 style='margin:18px 0 12px;
                                        font-size:24px;
-                                       color:#0f172a;'>
+                                       line-height:1.4;
+                                       color:#222222;'>
                                 Đặt lại mật khẩu
                             </h1>
 
-                            <p style='font-size:15px;
-                                      line-height:1.7;
-                                      color:#475569;
-                                      margin:0 0 15px 0;'>
+                            <p style='margin:0;
+                                      font-size:14px;
+                                      line-height:1.8;
+                                      color:#666666;'>
+                                Khôi phục quyền truy cập tài khoản của bạn
+                                một cách an toàn.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- CONTENT -->
+                    <tr>
+                        <td style='padding:18px 30px 10px;
+                                   font-size:14px;
+                                   line-height:1.9;
+                                   color:#444444;'>
+
+                            <p style='margin:0 0 15px;'>
                                 Xin chào,
                             </p>
 
-                            <p style='font-size:15px;
-                                      line-height:1.7;
-                                      color:#475569;
-                                      margin:0 0 15px 0;'>
+                            <p style='margin:0 0 15px;'>
                                 Chúng tôi nhận được yêu cầu đặt lại mật khẩu
-                                cho tài khoản <strong>The Chill Shop</strong>
+                                cho tài khoản
+                                <strong style='color:#d70018;'>
+                                    The Chill Shop
+                                </strong>
                                 của bạn.
                             </p>
 
-                            <p style='font-size:15px;
-                                      line-height:1.7;
-                                      color:#475569;
-                                      margin:0 0 25px 0;'>
-                                Nhấn vào nút bên dưới để tạo mật khẩu mới:
+                            <p style='margin:0 0 15px;'>
+                                Nếu bạn đã thực hiện yêu cầu này,
+                                hãy nhấn vào nút bên dưới để tạo mật khẩu mới.
                             </p>
 
                         </td>
                     </tr>
 
-                    <!-- Button -->
+                    <!-- BUTTON -->
                     <tr>
-                        <td align='center' style='padding:5px 40px 30px 40px;'>
+                        <td align='center'
+                            style='padding:15px 24px 28px;'>
 
-                            <a href='{callbackUrl}'
-                               style='display:inline-block;
-                                      background:#0d47a1;
-                                      color:#ffffff;
-                                      text-decoration:none;
-                                      font-size:15px;
+                            <table role='presentation' cellpadding='0'
+                                   cellspacing='0' border='0'>
+                                <tr>
+                                    <td align='center'
+                                        bgcolor='#d70018'
+                                        style='border-radius:6px;'>
+
+                                        <a href='{callbackUrl}'
+                                           style='display:inline-block;
+                                                  padding:14px 30px;
+                                                  font-size:14px;
+                                                  font-weight:bold;
+                                                  line-height:1.4;
+                                                  color:#ffffff;
+                                                  text-decoration:none;
+                                                  border-radius:6px;'>
+                                            ĐẶT LẠI MẬT KHẨU
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- EXPIRY NOTICE -->
+                    <tr>
+                        <td style='padding:0 30px 24px;'>
+
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='background-color:#fff5f5;
+                                          border:1px solid #ffd9de;
+                                          border-radius:8px;'>
+                                <tr>
+                                    <td align='center'
+                                        style='padding:16px;'>
+
+                                        <p style='margin:0;
+                                                  font-size:13px;
+                                                  line-height:1.8;
+                                                  color:#555555;'>
+                                            <strong style='color:#d70018;'>
+                                                &#9200; Lưu ý về thời hạn
+                                            </strong>
+                                            <br>
+                                            Liên kết đặt lại mật khẩu có hiệu lực
+                                            trong
+                                            <strong style='color:#d70018;'>
+                                                24 giờ
+                                            </strong>.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- SECURITY NOTICE -->
+                    <tr>
+                        <td style='padding:0 30px 28px;'>
+
+                            <table role='presentation' width='100%'
+                                   cellpadding='0' cellspacing='0' border='0'
+                                   style='background-color:#f8f8f8;
+                                          border-left:4px solid #d70018;'>
+                                <tr>
+                                    <td style='padding:14px 16px;
+                                               font-size:13px;
+                                               line-height:1.8;
+                                               color:#555555;'>
+
+                                        <strong style='color:#333333;'>
+                                            Thông báo bảo mật
+                                        </strong>
+                                        <br>
+                                        Nếu bạn không yêu cầu đặt lại mật khẩu,
+                                        vui lòng bỏ qua email này.
+                                        Mật khẩu hiện tại của bạn sẽ không
+                                        thay đổi chỉ vì email này được gửi đi.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style='margin:22px 0 0;
+                                      font-size:13px;
+                                      line-height:1.8;
+                                      color:#666666;'>
+                                Trân trọng,<br>
+                                <strong style='color:#d70018;'>
+                                    Đội ngũ The Chill Shop
+                                </strong>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align='center'
+                            style='background-color:#f8f8f8;
+                                   border-top:1px solid #eeeeee;
+                                   padding:22px 20px;'>
+
+                            <p style='margin:0 0 8px;
+                                      font-size:13px;
                                       font-weight:bold;
-                                      padding:14px 30px;
-                                      border-radius:10px;'>
-                                Đặt lại mật khẩu
-                            </a>
-
-                        </td>
-                    </tr>
-
-                    <!-- Expiry -->
-                    <tr>
-                        <td style='padding:0 40px 25px 40px;'>
-
-                            <div style='background:#eff6ff;
-                                        border:1px solid #dbeafe;
-                                        border-radius:10px;
-                                        padding:14px 16px;
-                                        text-align:center;'>
-
-                                <span style='font-size:13px; color:#1e40af;'>
-                                    ⏱ Liên kết này có hiệu lực trong
-                                    <strong>24 giờ</strong>.
-                                </span>
-
-                            </div>
-
-                        </td>
-                    </tr>
-
-                    <!-- Security Notice -->
-                    <tr>
-                        <td style='padding:0 40px 25px 40px;'>
-
-                            <p style='font-size:12px;
-                                      line-height:1.6;
-                                      color:#94a3b8;
-                                      margin:0;'>
-                                Nếu bạn không yêu cầu đặt lại mật khẩu,
-                                vui lòng bỏ qua email này.
-                                Tài khoản của bạn vẫn an toàn.
+                                      color:#d70018;'>
+                                THE CHILL SHOP
                             </p>
-
-                        </td>
-                    </tr>
-
-                    <!-- Footer -->
-                    <tr>
-                        <td style='border-top:1px solid #e2e8f0;
-                                   padding:20px 40px 25px 40px;
-                                   text-align:center;'>
 
                             <p style='margin:0;
-                                      font-size:13px;
-                                      color:#64748b;'>
-                                Trân trọng,
-                            </p>
-
-                            <p style='margin:5px 0 0 0;
-                                      font-size:14px;
-                                      font-weight:bold;
-                                      color:#0d47a1;'>
-                                The Chill Shop
+                                      font-size:12px;
+                                      line-height:1.8;
+                                      color:#888888;'>
+                                Email được gửi tự động liên quan đến
+                                bảo mật tài khoản.
+                                <br>
+                                Vui lòng không trả lời trực tiếp email này.
                             </p>
 
                         </td>
@@ -1096,7 +1670,6 @@ namespace WebEcommerce.Controllers
 
             </td>
         </tr>
-
     </table>
 
 </body>

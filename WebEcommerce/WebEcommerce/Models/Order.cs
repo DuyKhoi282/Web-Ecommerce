@@ -65,6 +65,21 @@ namespace WebEcommerce.Models
         [Column("Notes")]
         public string Notes { get; set; }
 
+
+            // Phúc thêm các thuộc tính liên quan đến cancel đơn 
+        [StringLength(1000)]
+        [Column("CancellationReason")]
+        public string CancellationReason { get; set; }
+
+        [StringLength(50)]
+        [Column("CancelledBy")]
+        public string CancelledBy { get; set; }
+
+        [Column("CancelledAt")]
+        public DateTime? CancelledAt { get; set; }
+            //Hết phần phúc thêm
+
+
         // Navigation properties
         [ForeignKey("UserID")]
         public virtual ApplicationUser User { get; set; }

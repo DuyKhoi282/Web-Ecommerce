@@ -92,6 +92,7 @@ namespace WebEcommerce.Controllers
             try
             {
                 var order = await _context.Orders
+                    .Include(o => o.User)
                     .Include(o => o.OrderDetails.Select(od => od.Product))
                     .FirstOrDefaultAsync(o => o.OrderID == orderId);
 
@@ -108,6 +109,7 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
+                bool updateSucceeded = false;
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     try
@@ -142,13 +144,161 @@ namespace WebEcommerce.Controllers
                         await _context.SaveChangesAsync();
                         transaction.Commit();
 
-                        TempData["SuccessMessage"] = $"Đã cập nhật trạng thái đơn hàng #{orderId} thành \"{newStatus}\".";
+                        updateSucceeded = true;
+
+                        TempData["SuccessMessage"] =
+                            $"Đã cập nhật trạng thái đơn hàng #{orderId} thành \"{newStatus}\".";
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
                         System.Diagnostics.Debug.WriteLine($"[AdminOrder/UpdateStatus Transaction] {ex}");
                         TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật trạng thái.";
+                    }
+                }
+
+                // Chỉ gửi email khi cập nhật trạng thái thành công
+                if (updateSucceeded && newStatus == "Confirmed")
+                {
+                    try
+                    {
+                        if (order.User != null &&
+                            !string.IsNullOrWhiteSpace(order.User.Email))
+                        {
+                            var emailService = new EmailService();
+
+                            var productRows = string.Join("", order.OrderDetails.Select(d =>
+                                $@"
+                <tr>
+                    <td style='padding:12px 8px;border-bottom:1px solid #eee;'>
+                        {System.Web.HttpUtility.HtmlEncode(d.Product?.Name ?? "Sản phẩm")}
+                    </td>
+                    <td style='padding:12px 8px;text-align:center;border-bottom:1px solid #eee;'>
+                        {d.Quantity}
+                    </td>
+                    <td style='padding:12px 8px;text-align:right;border-bottom:1px solid #eee;'>
+                        {d.UnitPrice:N0}đ
+                    </td>
+                    <td style='padding:12px 8px;text-align:right;border-bottom:1px solid #eee;'>
+                        {d.Subtotal:N0}đ
+                    </td>
+                </tr>"
+                            ));
+
+                            var htmlBody = $@"
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+</head>
+<body style='margin:0;padding:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#333;'>
+    <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
+           style='background:#f4f5f7;padding:24px 10px;'>
+        <tr>
+            <td align='center'>
+                <table role='presentation' width='600' cellpadding='0' cellspacing='0'
+                       style='width:100%;max-width:600px;background:#fff;border-radius:12px;overflow:hidden;'>
+                    <tr>
+                        <td style='background:#d70018;padding:26px 24px;text-align:center;color:#fff;'>
+                            <h1 style='margin:0;font-size:25px;'>The Chill Shop</h1>
+                            <p style='margin:8px 0 0;font-size:14px;'>Công nghệ trong tầm tay</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding:28px 24px;'>
+                            <h2 style='margin:0 0 16px;color:#d70018;font-size:22px;'>
+                                Đơn hàng đã được xác nhận!
+                            </h2>
+
+                            <p>Xin chào
+                                <strong>{System.Web.HttpUtility.HtmlEncode(order.User.FullName ?? "Quý khách")}</strong>,
+                            </p>
+
+                            <p>Đơn hàng của bạn đã được xác nhận và đang được chuẩn bị.</p>
+
+                            <p><strong>Mã đơn hàng:</strong> #{order.OrderID}</p>
+                            <p><strong>Ngày đặt:</strong> {order.OrderDate:dd/MM/yyyy HH:mm}</p>
+
+                            <h3 style='margin:24px 0 10px;'>Chi tiết đơn hàng</h3>
+
+                            <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
+                                   style='border-collapse:collapse;font-size:13px;'>
+                                <tr style='background:#fff0f1;'>
+                                    <th align='left' style='padding:12px 8px;'>Sản phẩm</th>
+                                    <th style='padding:12px 8px;'>SL</th>
+                                    <th align='right' style='padding:12px 8px;'>Đơn giá</th>
+                                    <th align='right' style='padding:12px 8px;'>Thành tiền</th>
+                                </tr>
+                                {productRows}
+                            </table>
+
+                            <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
+                                   style='margin-top:18px;font-size:14px;'>
+                                <tr>
+                                    <td style='padding:6px 0;'>Tạm tính</td>
+                                    <td align='right' style='padding:6px 0;'>{order.TotalAmount:N0}đ</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding:6px 0;'>Giảm giá</td>
+                                    <td align='right' style='padding:6px 0;'>-{order.DiscountAmount:N0}đ</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding:12px 0;border-top:1px solid #ddd;font-weight:bold;'>
+                                        Tổng thanh toán
+                                    </td>
+                                    <td align='right'
+                                        style='padding:12px 0;border-top:1px solid #ddd;font-weight:bold;color:#d70018;font-size:18px;'>
+                                        {order.FinalAmount:N0}đ
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <h3 style='margin:24px 0 10px;'>Thông tin nhận hàng</h3>
+                            <p style='margin:6px 0;'>
+                                <strong>Địa chỉ:</strong>
+                                {System.Web.HttpUtility.HtmlEncode(order.ShippingAddress ?? "")}
+                            </p>
+                            <p style='margin:6px 0;'>
+                                <strong>Số điện thoại:</strong>
+                                {System.Web.HttpUtility.HtmlEncode(order.ReceiverPhone ?? "")}
+                            </p>
+                            <p style='margin:6px 0;'>
+                                <strong>Thanh toán:</strong>
+                                {System.Web.HttpUtility.HtmlEncode(order.PaymentMethod ?? "")}
+                            </p>
+
+                            <p style='margin-top:24px;'>
+                                Cảm ơn bạn đã mua sắm tại The Chill Shop!
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding:18px 24px;background:#f8f8f8;text-align:center;font-size:12px;color:#777;'>
+                            The Chill Shop · Công nghệ trong tầm tay
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>";
+
+                            await emailService.SendAsync(new IdentityMessage
+                            {
+                                Destination = order.User.Email,
+                                Subject = $"Xác nhận đơn hàng #{order.OrderID} - The Chill Shop",
+                                Body = htmlBody
+                            });
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        // Email lỗi không làm đảo ngược đơn hàng đã xác nhận.
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Order Confirmation Email Error] Order #{orderId}: {emailEx}"
+                        );
                     }
                 }
 
