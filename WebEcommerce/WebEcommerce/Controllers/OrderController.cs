@@ -1,9 +1,11 @@
 using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using WebEcommerce.Helpers;
 using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
@@ -27,11 +29,47 @@ namespace WebEcommerce.Controllers
             try
             {
                 var userId = User.Identity.GetUserId();
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems.Select(ci => ci.Product.ProductImages))
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
 
-                if (cart == null || !cart.CartItems.Any())
+                if (!cookieItems.Any())
+                {
+                    TempData["ErrorMessage"] = "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                    return RedirectToAction("Index", "Cart");
+                }
+
+                // Load products from DB
+                var productIds = cookieItems.Select(ci => ci.ProductID).ToList();
+                var products = await _context.Products
+                    .Include(p => p.ProductImages)
+                    .Where(p => productIds.Contains(p.ProductID))
+                    .ToListAsync();
+
+                // Build cart view model for the checkout page
+                var cartVm = new CartViewModel();
+                foreach (var ci in cookieItems)
+                {
+                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                    if (product == null) continue;
+
+                    var unitPrice = GetCurrentProductPrice(product);
+                    var image = product.ProductImages?
+                        .FirstOrDefault(x => x.IsMain)
+                        ?? product.ProductImages?.FirstOrDefault();
+
+                    cartVm.Items.Add(new CartItemViewModel
+                    {
+                        ProductID = product.ProductID,
+                        ProductName = product.Name,
+                        ImageURL = image?.ImageURL,
+                        UnitPrice = unitPrice,
+                        Quantity = ci.Quantity,
+                        ItemTotal = unitPrice * ci.Quantity,
+                        StockQuantity = product.StockQuantity
+                    });
+                }
+                cartVm.CartTotal = cartVm.Items.Sum(i => i.ItemTotal);
+
+                if (!cartVm.Items.Any())
                 {
                     TempData["ErrorMessage"] = "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
                     return RedirectToAction("Index", "Cart");
@@ -45,8 +83,8 @@ namespace WebEcommerce.Controllers
                     ReceiverPhone = user?.PhoneNumber ?? ""
                 };
 
-                ViewBag.Cart = cart;
-                ViewBag.CartTotal = cart.CartItems.Sum(ci => ci.UnitPriceAtAddition * ci.Quantity);
+                ViewBag.Cart = cartVm;
+                ViewBag.CartTotal = cartVm.CartTotal;
                 return View(vm);
             }
             catch (Exception ex)
@@ -68,20 +106,31 @@ namespace WebEcommerce.Controllers
 
             try
             {
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems.Select(ci => ci.Product))
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
+                // ========================================
+                // Read cart from Cookie
+                // ========================================
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
 
-                if (cart == null || !cart.CartItems.Any())
+                if (!cookieItems.Any())
                 {
                     TempData["ErrorMessage"] = "Giỏ hàng trống.";
                     return RedirectToAction("Index", "Cart");
                 }
 
+                // Load products from DB
+                var productIds = cookieItems.Select(ci => ci.ProductID).ToList();
+                var products = await _context.Products
+                    .Include(p => p.ProductImages)
+                    .Where(p => productIds.Contains(p.ProductID))
+                    .ToListAsync();
+
+                // Build cart view model
+                var cartVm = BuildCartViewModel(cookieItems, products);
+
                 if (!ModelState.IsValid)
                 {
-                    ViewBag.Cart = cart;
-                    ViewBag.CartTotal = cart.CartItems.Sum(ci => ci.UnitPriceAtAddition * ci.Quantity);
+                    ViewBag.Cart = cartVm;
+                    ViewBag.CartTotal = cartVm.CartTotal;
                     return View(model);
                 }
 
@@ -89,25 +138,25 @@ namespace WebEcommerce.Controllers
                 if (model.PaymentMethod != "COD" && model.PaymentMethod != "BankTransfer")
                 {
                     ModelState.AddModelError("PaymentMethod", "Phương thức thanh toán không hợp lệ.");
-                    ViewBag.Cart = cart;
-                    ViewBag.CartTotal = cart.CartItems.Sum(ci => ci.UnitPriceAtAddition * ci.Quantity);
+                    ViewBag.Cart = cartVm;
+                    ViewBag.CartTotal = cartVm.CartTotal;
                     return View(model);
                 }
 
                 // ========================================
                 // RE-CHECK STOCK tại thời điểm checkout
                 // ========================================
-                foreach (var item in cart.CartItems)
+                foreach (var ci in cookieItems)
                 {
-                    var product = item.Product;
+                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
                     if (product == null || product.Status != 1)
                     {
                         TempData["ErrorMessage"] = $"Sản phẩm \"{product?.Name ?? "không xác định"}\" không còn kinh doanh.";
                         return RedirectToAction("Index", "Cart");
                     }
-                    if (item.Quantity > product.StockQuantity)
+                    if (ci.Quantity > product.StockQuantity)
                     {
-                        TempData["ErrorMessage"] = $"Sản phẩm \"{product.Name}\" chỉ còn {product.StockQuantity} trong kho, nhưng giỏ hàng có {item.Quantity}.";
+                        TempData["ErrorMessage"] = $"Sản phẩm \"{product.Name}\" chỉ còn {product.StockQuantity} trong kho, nhưng giỏ hàng có {ci.Quantity}.";
                         return RedirectToAction("Index", "Cart");
                     }
                 }
@@ -116,11 +165,15 @@ namespace WebEcommerce.Controllers
                 // TÍNH TOÁN SERVER-SIDE (không tin client)
                 // ========================================
                 decimal totalAmount = 0;
-                foreach (var item in cart.CartItems)
+                // Build a lookup: ProductID → (Product, Quantity, CurrentPrice)
+                var orderItems = new List<(Product Product, int Quantity, decimal CurrentPrice)>();
+                foreach (var ci in cookieItems)
                 {
-                    var currentPrice = GetCurrentProductPrice(item.Product);
-                    item.UnitPriceAtAddition = currentPrice;
-                    totalAmount += currentPrice * item.Quantity;
+                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                    if (product == null) continue;
+                    var currentPrice = GetCurrentProductPrice(product);
+                    totalAmount += currentPrice * ci.Quantity;
+                    orderItems.Add((product, ci.Quantity, currentPrice));
                 }
 
                 decimal discountAmount = 0;
@@ -137,7 +190,7 @@ namespace WebEcommerce.Controllers
                     if (promo == null)
                     {
                         TempData["ErrorMessage"] = "Mã giảm giá không tồn tại.";
-                        ViewBag.Cart = cart;
+                        ViewBag.Cart = cartVm;
                         ViewBag.CartTotal = totalAmount;
                         return View(model);
                     }
@@ -146,7 +199,7 @@ namespace WebEcommerce.Controllers
                     if (!promo.IsActive || promo.StartDate > now || promo.EndDate < now)
                     {
                         TempData["ErrorMessage"] = "Mã giảm giá đã hết hạn hoặc chưa có hiệu lực.";
-                        ViewBag.Cart = cart;
+                        ViewBag.Cart = cartVm;
                         ViewBag.CartTotal = totalAmount;
                         return View(model);
                     }
@@ -154,7 +207,7 @@ namespace WebEcommerce.Controllers
                     if (promo.CurrentUsage >= promo.MaxUsage)
                     {
                         TempData["ErrorMessage"] = "Mã giảm giá đã hết lượt sử dụng.";
-                        ViewBag.Cart = cart;
+                        ViewBag.Cart = cartVm;
                         ViewBag.CartTotal = totalAmount;
                         return View(model);
                     }
@@ -162,7 +215,7 @@ namespace WebEcommerce.Controllers
                     if (totalAmount < promo.MinOrderAmount)
                     {
                         TempData["ErrorMessage"] = $"Đơn hàng tối thiểu {promo.MinOrderAmount:N0}đ để áp dụng mã này.";
-                        ViewBag.Cart = cart;
+                        ViewBag.Cart = cartVm;
                         ViewBag.CartTotal = totalAmount;
                         return View(model);
                     }
@@ -216,16 +269,15 @@ namespace WebEcommerce.Controllers
                         await _context.SaveChangesAsync();
 
                         // 2. Create OrderDetails + Decrement Stock
-                        foreach (var item in cart.CartItems)
+                        foreach (var item in orderItems)
                         {
-                            var currentPrice = GetCurrentProductPrice(item.Product);
                             var orderDetail = new OrderDetail
                             {
                                 OrderID = order.OrderID,
-                                ProductID = item.ProductID,
+                                ProductID = item.Product.ProductID,
                                 Quantity = item.Quantity,
-                                UnitPrice = currentPrice,
-                                Subtotal = currentPrice * item.Quantity
+                                UnitPrice = item.CurrentPrice,
+                                Subtotal = item.CurrentPrice * item.Quantity
                             };
                             _context.OrderDetails.Add(orderDetail);
 
@@ -248,12 +300,11 @@ namespace WebEcommerce.Controllers
                             }
                         }
 
-                        // 4. Clear cart
-                        _context.CartItems.RemoveRange(cart.CartItems);
-                        cart.UpdatedAt = DateTime.UtcNow;
-
                         await _context.SaveChangesAsync();
                         transaction.Commit();
+
+                        // 4. Clear cart cookie after successful order
+                        CookieCartHelper.ClearCart(Response);
 
                         TempData["SuccessMessage"] = "Đặt hàng thành công! Mã đơn hàng: #" + order.OrderID;
                         return RedirectToAction("Detail", new { id = order.OrderID });
@@ -263,7 +314,7 @@ namespace WebEcommerce.Controllers
                         transaction.Rollback();
                         System.Diagnostics.Debug.WriteLine($"[Order/Checkout POST Transaction] {ex}");
                         TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.";
-                        ViewBag.Cart = cart;
+                        ViewBag.Cart = cartVm;
                         ViewBag.CartTotal = totalAmount;
                         return View(model);
                     }
@@ -427,16 +478,26 @@ namespace WebEcommerce.Controllers
                 if (promo.CurrentUsage >= promo.MaxUsage)
                     return Json(new { success = false, message = "Mã giảm giá đã hết lượt sử dụng." });
 
-                // Server recalculate cart total
-                var userId = User.Identity.GetUserId();
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems.Select(ci => ci.Product))
-                    .FirstOrDefaultAsync(c => c.UserID == userId);
+                // Server recalculate cart total from cookie
+                var cookieItems = CookieCartHelper.GetCartItems(Request);
 
-                if (cart == null || !cart.CartItems.Any())
+                if (!cookieItems.Any())
                     return Json(new { success = false, message = "Giỏ hàng trống." });
 
-                var serverTotal = cart.CartItems.Sum(ci => GetCurrentProductPrice(ci.Product) * ci.Quantity);
+                var productIds = cookieItems.Select(ci => ci.ProductID).ToList();
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.ProductID))
+                    .ToListAsync();
+
+                decimal serverTotal = 0;
+                foreach (var ci in cookieItems)
+                {
+                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                    if (product != null)
+                    {
+                        serverTotal += GetCurrentProductPrice(product) * ci.Quantity;
+                    }
+                }
 
                 if (serverTotal < promo.MinOrderAmount)
                     return Json(new { success = false, message = $"Đơn hàng tối thiểu {promo.MinOrderAmount:N0}đ." });
@@ -463,6 +524,39 @@ namespace WebEcommerce.Controllers
                 System.Diagnostics.Debug.WriteLine($"[Order/ApplyPromoCode] {ex}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi." });
             }
+        }
+
+        // ==============================================
+        // Helper: Build CartViewModel from cookie + DB products
+        // ==============================================
+        private CartViewModel BuildCartViewModel(
+            List<CookieCartItem> cookieItems,
+            List<Product> products)
+        {
+            var vm = new CartViewModel();
+            foreach (var ci in cookieItems)
+            {
+                var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
+                if (product == null) continue;
+
+                var unitPrice = GetCurrentProductPrice(product);
+                var image = product.ProductImages?
+                    .FirstOrDefault(x => x.IsMain)
+                    ?? product.ProductImages?.FirstOrDefault();
+
+                vm.Items.Add(new CartItemViewModel
+                {
+                    ProductID = product.ProductID,
+                    ProductName = product.Name,
+                    ImageURL = image?.ImageURL,
+                    UnitPrice = unitPrice,
+                    Quantity = ci.Quantity,
+                    ItemTotal = unitPrice * ci.Quantity,
+                    StockQuantity = product.StockQuantity
+                });
+            }
+            vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
+            return vm;
         }
 
         private decimal GetCurrentProductPrice(Product product)

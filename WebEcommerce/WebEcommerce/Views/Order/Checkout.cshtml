@@ -1,7 +1,7 @@
 @model WebEcommerce.Models.CheckoutViewModel
 @{
     ViewBag.Title = "Thanh toán";
-    var cart = ViewBag.Cart as WebEcommerce.Models.Cart;
+    var cart = ViewBag.Cart as WebEcommerce.Models.CartViewModel;
     var cartTotal = (decimal)(ViewBag.CartTotal ?? 0m);
 }
 
@@ -94,15 +94,15 @@
             <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm lg:sticky lg:top-28">
                 <h2 class="font-headline font-extrabold text-lg text-slate-900 mb-5">Tóm tắt đơn hàng</h2>
 
-                @if (cart != null && cart.CartItems != null)
+                @if (cart != null && cart.Items != null)
                 {
                     <div class="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                        @foreach (var item in cart.CartItems)
+                        @foreach (var item in cart.Items)
                         {
                             <div class="flex items-center gap-3 text-sm">
                                 <span class="text-slate-500">x@(item.Quantity)</span>
-                                <span class="flex-1 text-slate-900 font-medium truncate">@item.Product?.Name</span>
-                                <span class="font-bold text-slate-900">@string.Format("{0:N0}đ", item.UnitPriceAtAddition * item.Quantity)</span>
+                                <span class="flex-1 text-slate-900 font-medium truncate">@item.ProductName</span>
+                                <span class="font-bold text-slate-900">@string.Format("{0:N0}đ", item.ItemTotal)</span>
                             </div>
                         }
                     </div>
