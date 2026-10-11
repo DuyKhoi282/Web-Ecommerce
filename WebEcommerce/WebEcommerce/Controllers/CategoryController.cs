@@ -9,7 +9,7 @@ using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
 {
-    [CustomAuthorize(Roles = "Administrator,StoreManager")]
+    [CustomAuthorize(Roles = "StoreManager")]
     public class CategoryController : Controller
     {
         private readonly ApplicationDbContext _context;

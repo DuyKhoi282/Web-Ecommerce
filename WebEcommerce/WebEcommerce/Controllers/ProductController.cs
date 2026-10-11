@@ -11,7 +11,7 @@ using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
 {
-    [CustomAuthorize(Roles = "Administrator,StoreManager")]
+    [CustomAuthorize(Roles = "StoreManager")]
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext _context;
