@@ -100,6 +100,7 @@ namespace WebEcommerce.Controllers
 
         // POST: /Cart/AddToCart
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> AddToCart(
             int productId,

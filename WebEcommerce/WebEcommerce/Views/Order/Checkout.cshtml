@@ -146,29 +146,61 @@
 
 @section scripts {
     <script>
-        $(document).ready(function () {
+        document.addEventListener("DOMContentLoaded", function () {
             var cartTotal = @((int)cartTotal);
+            var btnApplyPromo = document.getElementById("btn-apply-promo");
+            if (!btnApplyPromo) return;
 
-            $("#btn-apply-promo").on("click", function () {
-                var code = $("#promo-code-input").val();
-                if (!code) { alert("Vui lòng nhập mã giảm giá."); return; }
-                var token = $('input[name="__RequestVerificationToken"]').first().val();
-                $.ajax({
-                    url: "/Order/ApplyPromoCode",
-                    type: "POST",
-                    data: { code: code, cartTotal: cartTotal, __RequestVerificationToken: token },
-                    success: function (r) {
-                        var msg = $("#promo-message");
-                        msg.removeClass("hidden text-green-600 text-red-600");
+            btnApplyPromo.addEventListener("click", function () {
+                var codeInput = document.getElementById("promo-code-input");
+                var code = codeInput ? codeInput.value.trim() : "";
+                if (!code) {
+                    alert("Vui lòng nhập mã giảm giá.");
+                    return;
+                }
+
+                var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                var formData = new URLSearchParams();
+                formData.append('code', code);
+                formData.append('cartTotal', cartTotal);
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                btnApplyPromo.disabled = true;
+                btnApplyPromo.style.opacity = '0.6';
+
+                fetch('@Url.Action("ApplyPromoCode", "Order")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function (r) {
+                    var msg = document.getElementById("promo-message");
+                    if (msg) {
+                        msg.classList.remove("hidden", "text-green-600", "text-red-600");
                         if (r.success) {
-                            msg.addClass("text-green-600").text(r.message);
-                            $("#checkout-discount").text("-" + parseInt(r.discount).toLocaleString("vi-VN") + "đ");
-                            $("#checkout-total").text(parseInt(r.finalAmount).toLocaleString("vi-VN") + "đ");
+                            msg.classList.add("text-green-600");
+                            msg.innerText = r.message;
+                            var discEl = document.getElementById("checkout-discount");
+                            var totalEl = document.getElementById("checkout-total");
+                            if (discEl) discEl.innerText = "-" + parseInt(r.discount).toLocaleString("vi-VN") + "đ";
+                            if (totalEl) totalEl.innerText = parseInt(r.finalAmount).toLocaleString("vi-VN") + "đ";
                         } else {
-                            msg.addClass("text-red-600").text(r.message);
+                            msg.classList.add("text-red-600");
+                            msg.innerText = r.message;
                         }
-                    },
-                    error: function () { alert("Lỗi khi áp dụng mã."); }
+                    }
+                })
+                .catch(function (err) {
+                    console.error('[ApplyPromo Error]', err);
+                    alert("Lỗi khi áp dụng mã giảm giá.");
+                })
+                .finally(function () {
+                    btnApplyPromo.disabled = false;
+                    btnApplyPromo.style.opacity = '1';
                 });
             });
         });

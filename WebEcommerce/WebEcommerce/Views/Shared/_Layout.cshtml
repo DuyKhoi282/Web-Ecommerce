@@ -807,7 +807,7 @@ header.is-scrolled {
     });
 
     window.addToCart = function(productId, qty = 1) {
-        const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value;
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
         const formData = new URLSearchParams();
         formData.append('productId', productId);
         formData.append('quantity', qty);
@@ -822,15 +822,23 @@ header.is-scrolled {
             },
             body: formData.toString()
         })
-        .then(res => res.json())
+        .then(res => {
+            if (res.redirected && res.url.toLowerCase().includes('login')) {
+                return { success: false, message: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.' };
+            }
+            if (!res.ok) {
+                throw new Error('HTTP ' + res.status);
+            }
+            return res.json();
+        })
         .then(data => {
             if(data.success) {
                 const badge = document.getElementById('cartBadgeCount');
                 if(badge) badge.innerText = data.cartItemCount;
-                alert(data.message); // Should use a proper toast notification ideally
-            } else {
                 alert(data.message);
-                if(data.message.includes('Phiên đăng nhập')) {
+            } else {
+                alert(data.message || 'Không thể thêm vào giỏ hàng.');
+                if(data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập'))) {
                     document.getElementById('authModal').classList.remove('hidden');
                 }
             }
