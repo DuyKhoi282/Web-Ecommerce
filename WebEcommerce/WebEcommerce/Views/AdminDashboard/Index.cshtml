@@ -8,7 +8,14 @@
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
         <h1 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">Bảng điều khiển tổng quan</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào! Dưới đây là tình hình hoạt động kinh doanh và người dùng của ShopeChill.</p>
+        @if (User.IsInRole("Administrator"))
+        {
+            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào Quản trị viên! Dưới đây là tình hình hoạt động tổng thể hệ thống và người dùng ShopeChill.</p>
+        }
+        else
+        {
+            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào Người bán! Dưới đây là tình hình kinh doanh, doanh thu, đơn hàng và hàng hóa của bạn.</p>
+        }
     </div>
     @if (User.IsInRole("Administrator"))
     {
@@ -16,6 +23,19 @@
             <a href="@Url.Action("Index", "AdminUser")" class="px-5 py-2.5 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#d70018]">
                 <span class="material-symbols-outlined text-base">person_search</span>
                 <span>Quản lý người dùng</span>
+            </a>
+        </div>
+    }
+    else if (User.IsInRole("StoreManager"))
+    {
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("Create", "Product")" class="px-5 py-2.5 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#d70018]">
+                <span class="material-symbols-outlined text-base">add_circle</span>
+                <span>Thêm sản phẩm</span>
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder")" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm border border-slate-300 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-base text-slate-500">receipt_long</span>
+                <span>Xem đơn hàng</span>
             </a>
         </div>
     }
@@ -122,7 +142,16 @@
     <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
             <h3 class="font-headline font-black text-base text-slate-900">Đơn hàng mới nhất</h3>
-            <span class="text-xs font-bold text-[#d70018] bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">Gần đây</span>
+            @if (User.IsInRole("StoreManager"))
+            {
+                <a href="@Url.Action("Index", "AdminOrder")" class="text-xs font-bold text-[#d70018] hover:underline flex items-center gap-1">
+                    Xem tất cả <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            }
+            else
+            {
+                <span class="text-xs font-bold text-[#d70018] bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">Gần đây</span>
+            }
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
@@ -166,7 +195,15 @@
 
     <!-- Right: Top Products (5 cols) -->
     <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] p-5">
-        <h3 class="font-headline font-black text-base text-slate-900 mb-4 pb-3 border-b border-slate-200">Sản phẩm nổi bật trong kho</h3>
+        <div class="mb-4 pb-3 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="font-headline font-black text-base text-slate-900">Sản phẩm nổi bật trong kho</h3>
+            @if (User.IsInRole("StoreManager"))
+            {
+                <a href="@Url.Action("Index", "Product")" class="text-xs font-bold text-[#d70018] hover:underline flex items-center gap-1">
+                    Quản lý kho <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            }
+        </div>
         <div class="space-y-3">
             @if (Model.TopProducts == null || !Model.TopProducts.Any())
             {

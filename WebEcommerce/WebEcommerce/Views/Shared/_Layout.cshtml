@@ -287,15 +287,30 @@
             <div class="py-2">
                 @if (isAdminOrManager)
                 {
-                    <a href="@Url.Action("Index", "AdminDashboard")" class="flex items-center gap-3 px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors group">
-                        <span class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-105 transition-transform">
-                            <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
-                        </span>
-                        <div>
-                            <span class="block leading-tight">Trang quản trị (Admin)</span>
-                            <span class="text-[10px] text-purple-500 font-normal">Quản lý hệ thống &amp; doanh thu</span>
-                        </div>
-                    </a>
+                    if (User.IsInRole("Administrator"))
+                    {
+                        <a href="@Url.Action("Index", "AdminDashboard")" class="flex items-center gap-3 px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors group">
+                            <span class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+                            </span>
+                            <div>
+                                <span class="block leading-tight">Trang quản trị (Admin)</span>
+                                <span class="text-[10px] text-purple-500 font-normal">Quản trị hệ thống &amp; tài khoản</span>
+                            </div>
+                        </a>
+                    }
+                    else if (User.IsInRole("StoreManager"))
+                    {
+                        <a href="@Url.Action("Index", "AdminDashboard")" class="flex items-center gap-3 px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors group">
+                            <span class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-[18px]">storefront</span>
+                            </span>
+                            <div>
+                                <span class="block leading-tight">Kênh người bán (Seller)</span>
+                                <span class="text-[10px] text-purple-500 font-normal">Quản lý sản phẩm, kho &amp; đơn hàng</span>
+                            </div>
+                        </a>
+                    }
                     <div class="border-t border-slate-100 my-1.5"></div>
                 }
 

@@ -4,11 +4,12 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using WebEcommerce.Filters;
 using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
 {
-    [Authorize(Roles = "StoreManager,Administrator")]
+    [CustomAuthorize(Roles = "StoreManager")]
     public class AdminOrderController : Controller
     {
         private readonly ApplicationDbContext _context;
