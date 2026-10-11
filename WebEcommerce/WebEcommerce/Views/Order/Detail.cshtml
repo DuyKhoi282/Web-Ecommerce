@@ -136,17 +136,50 @@
                 </div>
             </div>
 
+            ```cshtml
             @if (canCancel)
             {
                 using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post))
                 {
                     @Html.AntiForgeryToken()
-                    <button type="submit" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');" class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                        <span class="material-symbols-outlined text-lg">cancel</span>
-                        Hủy đơn hàng
-                    </button>
+
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <h2 class="font-headline font-bold text-lg text-slate-900 mb-3">
+                            Hủy đơn hàng
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mb-4">
+                            Nếu bạn muốn hủy đơn hàng, vui lòng cho chúng tôi biết lý do.
+                        </p>
+
+                        <label for="cancellationReason"
+                               class="block text-sm font-bold text-slate-700 mb-2">
+                            Lý do hủy đơn hàng <span class="text-red-500">*</span>
+                        </label>
+
+                        <textarea id="cancellationReason"
+                                  name="cancellationReason"
+                                  rows="4"
+                                  maxlength="1000"
+                                  required
+                                  placeholder="Ví dụ: Tôi đặt nhầm sản phẩm hoặc muốn thay đổi đơn hàng..."
+                                  class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm text-slate-800 outline-none focus:border-[#0d47a1] resize-y"></textarea>
+
+                        <p class="text-xs text-slate-400 mt-2 mb-4">
+                            Vui lòng nhập tối đa 1.000 ký tự.
+                        </p>
+
+                        <button type="submit"
+                                onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');"
+                                class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined text-lg">cancel</span>
+                            Xác nhận hủy đơn hàng
+                        </button>
+                    </div>
                 }
             }
+            ```
+
         </div>
     </div>
 </div>

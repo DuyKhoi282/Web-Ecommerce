@@ -87,7 +87,10 @@ namespace WebEcommerce.Controllers
         // ==============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> UpdateStatus(int orderId, string newStatus)
+        public async Task<ActionResult> UpdateStatus(
+    int orderId,
+    string newStatus,
+    string cancellationReason) // Phúc thêm cancellationReason 
         {
             try
             {
@@ -107,6 +110,24 @@ namespace WebEcommerce.Controllers
                 {
                     TempData["ErrorMessage"] = $"Không thể chuyển trạng thái từ \"{order.Status}\" sang \"{newStatus}\".";
                     return RedirectToAction("Detail", new { id = orderId });
+                }
+
+                // Kiểm tra lý do khi Manager hủy đơn
+                if (newStatus == "Cancelled")
+                {
+                    cancellationReason = (cancellationReason ?? "").Trim();
+
+                    if (string.IsNullOrWhiteSpace(cancellationReason))
+                    {
+                        TempData["ErrorMessage"] = "Vui lòng nhập lý do hủy đơn hàng.";
+                        return RedirectToAction("Detail", new { id = orderId });
+                    }
+
+                    if (cancellationReason.Length > 1000)
+                    {
+                        TempData["ErrorMessage"] = "Lý do hủy không được vượt quá 1000 ký tự.";
+                        return RedirectToAction("Detail", new { id = orderId });
+                    }
                 }
 
                 bool updateSucceeded = false;
@@ -140,7 +161,16 @@ namespace WebEcommerce.Controllers
                             }
                         }
 
+                        // Lưu thông tin hủy nếu Manager hủy đơn
+                        if (newStatus == "Cancelled")
+                        {
+                            order.CancellationReason = cancellationReason;
+                            order.CancelledBy = "Manager";
+                            order.CancelledAt = DateTime.UtcNow;
+                        }
+
                         order.Status = newStatus;
+
                         await _context.SaveChangesAsync();
                         transaction.Commit();
 
@@ -301,6 +331,123 @@ namespace WebEcommerce.Controllers
                         );
                     }
                 }
+
+
+                if (updateSucceeded && newStatus == "Cancelled")
+                {
+                    try
+                    {
+                        if (order.User != null &&
+                            !string.IsNullOrWhiteSpace(order.User.Email))
+                        {
+                            var emailService = new EmailService();
+
+                            string customerName =
+                                System.Web.HttpUtility.HtmlEncode(
+                                    order.User.FullName ?? "Quý khách");
+
+                            string safeReason =
+                                System.Web.HttpUtility.HtmlEncode(
+                                    order.CancellationReason ?? "");
+
+                            string htmlBody = $@"
+<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+</head>
+<body style='margin:0;padding:0;background:#f4f5f7;
+             font-family:Arial,Helvetica,sans-serif;color:#333;'>
+    <table role='presentation' width='100%' cellpadding='0' cellspacing='0'
+           style='background:#f4f5f7;padding:24px 10px;'>
+        <tr>
+            <td align='center'>
+                <table role='presentation' width='600' cellpadding='0' cellspacing='0'
+                       style='width:100%;max-width:600px;background:#fff;
+                              border-radius:12px;overflow:hidden;'>
+                    <tr>
+                        <td style='background:#d70018;padding:26px 24px;
+                                   text-align:center;color:#fff;'>
+                            <h1 style='margin:0;font-size:25px;'>The Chill Shop</h1>
+                            <p style='margin:8px 0 0;font-size:14px;'>
+                                Công nghệ trong tầm tay
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding:28px 24px;'>
+                            <h2 style='margin:0 0 16px;color:#d70018;font-size:22px;'>
+                                Thông báo hủy đơn hàng
+                            </h2>
+
+                            <p>Xin chào <strong>{customerName}</strong>,</p>
+
+                            <p>
+                                Chúng tôi rất tiếc phải thông báo rằng đơn hàng
+                                của bạn đã được hủy bởi bộ phận quản lý của
+                                The Chill Shop.
+                            </p>
+
+                            <div style='background:#fff0f1;border-radius:8px;
+                                        padding:16px;margin:20px 0;'>
+                                <p style='margin:0 0 10px;'>
+                                    <strong>Mã đơn hàng:</strong> #{order.OrderID}
+                                </p>
+                                <p style='margin:0 0 10px;'>
+                                    <strong>Ngày đặt:</strong>
+                                    {order.OrderDate.ToLocalTime():dd/MM/yyyy HH:mm}
+                                </p>
+                                <p style='margin:0 0 8px;'>
+                                    <strong>Lý do hủy:</strong>
+                                </p>
+                                <p style='margin:0;white-space:pre-line;'>
+                                    {safeReason}
+                                </p>
+                            </div>
+
+                            <p>
+                                Chúng tôi thành thật xin lỗi vì sự bất tiện này.
+                                Nếu bạn cần được hỗ trợ hoặc có thắc mắc về đơn
+                                hàng, vui lòng liên hệ bộ phận chăm sóc khách hàng
+                                của The Chill Shop.
+                            </p>
+
+                            <p>
+                                Cảm ơn bạn đã thông cảm và quan tâm đến
+                                The Chill Shop.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding:18px 24px;background:#f8f8f8;
+                                   text-align:center;font-size:12px;color:#777;'>
+                            The Chill Shop · Công nghệ trong tầm tay
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>";
+
+                            await emailService.SendAsync(new IdentityMessage
+                            {
+                                Destination = order.User.Email,
+                                Subject = $"Thông báo hủy đơn hàng #{order.OrderID} - The Chill Shop",
+                                Body = htmlBody
+                            });
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        // Email thất bại không làm hoàn tác đơn hàng đã hủy.
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Order Cancellation Email Error] Order #{orderId}: {emailEx}");
+                    }
+                }
+
 
                 return RedirectToAction("Detail", new { id = orderId });
             }

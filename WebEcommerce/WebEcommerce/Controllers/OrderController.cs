@@ -383,17 +383,36 @@ namespace WebEcommerce.Controllers
             }
         }
 
-        // ==============================================
-        // POST: /Order/Cancel/5
-        // ==============================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Cancel(int id)
+  
+// ==============================================
+// POST: /Order/Cancel/5
+// ==============================================
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<ActionResult> Cancel(int id, string cancellationReason)
         {
             try
             {
+                // 1. Validate lý do hủy ở phía server
+                cancellationReason = (cancellationReason ?? "").Trim();
+
+                if (string.IsNullOrWhiteSpace(cancellationReason))
+                {
+                    TempData["ErrorMessage"] = "Vui lòng nhập lý do hủy đơn hàng.";
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
+                if (cancellationReason.Length > 1000)
+                {
+                    TempData["ErrorMessage"] = "Lý do hủy không được vượt quá 1.000 ký tự.";
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
                 var userId = User.Identity.GetUserId();
+
+                // 2. Chỉ tải đơn hàng thuộc về khách hàng đang đăng nhập
                 var order = await _context.Orders
+                    .Include(o => o.User)
                     .Include(o => o.OrderDetails.Select(od => od.Product))
                     .FirstOrDefaultAsync(o => o.OrderID == id && o.UserID == userId);
 
@@ -403,42 +422,175 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Chỉ cancel khi Pending hoặc Confirmed
+                // 3. Chỉ được hủy đơn Pending hoặc Confirmed
                 if (order.Status != "Pending" && order.Status != "Confirmed")
                 {
-                    TempData["ErrorMessage"] = $"Không thể hủy đơn hàng ở trạng thái \"{order.Status}\".";
+                    TempData["ErrorMessage"] =
+                        $"Không thể hủy đơn hàng ở trạng thái \"{order.Status}\".";
+
                     return RedirectToAction("Detail", new { id = id });
                 }
 
+                // 4. Cập nhật đơn hàng và hoàn trả tồn kho trong transaction
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     try
                     {
-                        // Restore stock
                         foreach (var detail in order.OrderDetails)
                         {
                             if (detail.Product != null)
                             {
                                 detail.Product.StockQuantity += detail.Quantity;
-                                if (detail.Product.Status == 2 && detail.Product.StockQuantity > 0)
+
+                                if (detail.Product.Status == 2 &&
+                                    detail.Product.StockQuantity > 0)
                                 {
-                                    detail.Product.Status = 1; // Back in stock
+                                    detail.Product.Status = 1;
                                 }
                             }
                         }
 
+                        order.CancellationReason = cancellationReason;
+                        order.CancelledBy = "Customer";
+                        order.CancelledAt = DateTime.UtcNow;
                         order.Status = "Cancelled";
+
                         await _context.SaveChangesAsync();
                         transaction.Commit();
-
-                        TempData["SuccessMessage"] = "Đã hủy đơn hàng thành công.";
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
-                        System.Diagnostics.Debug.WriteLine($"[Order/Cancel Transaction] {ex}");
-                        TempData["ErrorMessage"] = "Đã xảy ra lỗi khi hủy đơn hàng.";
+
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Order/Cancel Transaction] {ex}");
+
+                        TempData["ErrorMessage"] =
+                            "Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại.";
+
+                        return RedirectToAction("Detail", new { id = id });
                     }
+                }
+
+                // 5. Đơn hàng đã được hủy thành công.
+                // Gửi email SAU KHI transaction đã commit.
+                bool emailSent = false;
+
+                try
+                {
+                    if (order.User != null &&
+                        !string.IsNullOrWhiteSpace(order.User.Email))
+                    {
+                        var emailService = new EmailService();
+
+                        string customerName = System.Web.HttpUtility.HtmlEncode(
+                            order.User.FullName ?? "Quý khách");
+
+                        string safeReason = System.Web.HttpUtility.HtmlEncode(
+                            order.CancellationReason);
+
+                        string orderDate = order.OrderDate
+                            .ToLocalTime()
+                            .ToString("dd/MM/yyyy HH:mm");
+
+                        string htmlBody = $@"
+<!DOCTYPE html>
+<html lang=""vi"">
+<head>
+    <meta charset=""UTF-8"">
+</head>
+<body style=""margin:0;padding:20px;background:#f4f5f7;
+             font-family:Arial,sans-serif;color:#333;"">
+    <div style=""max-width:600px;margin:0 auto;background:#fff;
+                border-radius:12px;overflow:hidden;"">
+
+        <div style=""background:#d70018;color:#fff;padding:24px;
+                    text-align:center;"">
+            <h1 style=""margin:0;font-size:24px;"">
+                THE CHILL SHOP
+            </h1>
+            <p style=""margin:8px 0 0;"">
+                Xác nhận hủy đơn hàng
+            </p>
+        </div>
+
+        <div style=""padding:28px;"">
+            <p>Xin chào <strong>{customerName}</strong>,</p>
+
+            <p>
+                Chúng tôi xác nhận rằng bạn đã hủy thành công
+                đơn hàng dưới đây.
+            </p>
+
+            <div style=""background:#f8fafc;padding:18px;
+                        border-radius:8px;margin:20px 0;"">
+                <p>
+                    <strong>Mã đơn hàng:</strong>
+                    #{order.OrderID}
+                </p>
+                <p>
+                    <strong>Ngày đặt hàng:</strong>
+                    {orderDate}
+                </p>
+                <p>
+                    <strong>Trạng thái:</strong>
+                    Đã hủy
+                </p>
+                <p style=""margin-bottom:0;"">
+                    <strong>Lý do hủy:</strong><br>
+                    {safeReason}
+                </p>
+            </div>
+
+            <p>
+                Nếu bạn thay đổi quyết định, bạn có thể truy cập
+                The Chill Shop để tham khảo và đặt hàng lại.
+            </p>
+
+            <p style=""margin-top:28px;"">
+                Cảm ơn bạn đã quan tâm đến The Chill Shop.
+            </p>
+
+            <p>
+                Trân trọng,<br>
+                <strong>Đội ngũ The Chill Shop</strong>
+            </p>
+        </div>
+
+        <div style=""background:#f4f5f7;padding:16px;
+                    text-align:center;font-size:12px;color:#777;"">
+            Email tự động từ The Chill Shop.
+        </div>
+    </div>
+</body>
+</html>";
+
+                        await emailService.SendAsync(new IdentityMessage
+                        {
+                            Destination = order.User.Email,
+                            Subject = $"Xác nhận hủy đơn hàng #{order.OrderID} - The Chill Shop",
+                            Body = htmlBody
+                        });
+
+                        emailSent = true;
+                    }
+                }
+                catch (Exception emailEx)
+                {
+                    // Không rollback đơn hàng nếu gửi email thất bại
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Customer Cancellation Email Error] Order #{id}: {emailEx}");
+                }
+
+                if (emailSent)
+                {
+                    TempData["SuccessMessage"] =
+                        "Đã hủy đơn hàng thành công. Email xác nhận đã được gửi đến bạn.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] =
+                        "Đã hủy đơn hàng thành công, nhưng email xác nhận chưa gửi được.";
                 }
 
                 return RedirectToAction("Detail", new { id = id });
@@ -446,10 +598,14 @@ namespace WebEcommerce.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[Order/Cancel] {ex}");
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi.";
+
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi. Vui lòng thử lại.";
+
                 return RedirectToAction("Index");
             }
         }
+
+
 
         // ==============================================
         // POST: /Order/ApplyPromoCode (AJAX)
