@@ -12,7 +12,146 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@@layer base{html,body{margin:0;padding:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>
+@@layer base {
+    html {
+        scroll-behavior: smooth;
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+    body {
+        overscroll-behavior: none;
+    }
+    main > :first-child {
+        margin-top: 0 !important;
+    }
+    main > :last-child {
+        margin-bottom: 0 !important;
+    }
+}
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Easing curves Apple / Linear */
+:root {
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scroll Reading Progress Bar */
+#scrollProgressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #F59E0B, #ff8a7a, #ffffff);
+    z-index: 9999;
+    width: 0%;
+    transition: width 0.1s ease-out;
+}
+
+/* Header transition on scroll */
+header {
+    transition: background-color 0.35s var(--ease-smooth), backdrop-filter 0.35s var(--ease-smooth), box-shadow 0.35s var(--ease-smooth);
+}
+header.is-scrolled {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(215, 0, 24, 0.94) !important;
+    box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* GPU-accelerated Scroll Reveal Animations */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+    will-change: opacity, transform;
+}
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-from-left {
+    opacity: 0;
+    transform: translateX(-36px);
+    transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo);
+    will-change: opacity, transform;
+}
+.reveal-from-left.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-from-right {
+    opacity: 0;
+    transform: translateX(36px);
+    transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo);
+    will-change: opacity, transform;
+}
+.reveal-from-right.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo);
+    will-change: opacity, transform;
+}
+.reveal-scale.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Stagger delay children */
+.reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+}
+.reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0.04s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 0.10s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 0.22s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 0.28s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 0.34s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(7) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(8) { transition-delay: 0.46s; opacity: 1; transform: translateY(0); }
+
+/* Card Micro-interactions */
+.card-hover-smooth {
+    transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo), border-color 0.25s var(--ease-smooth);
+}
+.card-hover-smooth:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.12);
+}
+
+/* Accessibility: Reduced motion support */
+@@media (prefers-reduced-motion: reduce) {
+    .reveal-on-scroll, .reveal-from-left, .reveal-from-right, .reveal-scale, .reveal-stagger > * {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
     darkMode: "class",
     theme: {
       extend: {
@@ -20,7 +159,7 @@
           "secondary": "#0058be",
           "on-secondary": "#ffffff",
           "on-background": "#111c2d",
-          "border-subtle": "#E2E8F0",
+          "border-subtle": "#CBD5E1",
           "badge-discount-text": "#D70018",
           "on-secondary-fixed": "#001a42",
           "inverse-on-surface": "#ecf1ff",
@@ -34,10 +173,10 @@
           "on-secondary-fixed-variant": "#004395",
           "badge-spec-bg": "#F1F5F9",
           "on-primary-fixed": "#410002",
-          "surface-canvas": "#F4F6F8",
+          "surface-canvas": "#EEF2F6",
           "secondary-fixed-dim": "#adc6ff",
           "surface-card": "#FFFFFF",
-          "surface": "#f9f9ff",
+          "surface": "#f1f5f9",
           "text-muted": "#64748B",
           "surface-container-highest": "#d8e3fb",
           "tertiary-fixed-dim": "#4edea3",
@@ -215,7 +354,7 @@
         }
       }
     }
-  }</script></head><body class="bg-surface-canvas font-body-default text-body-default text-on-surface">
+  }</script></head><body class="bg-surface-canvas font-body-default text-body-default text-on-surface"><div id="scrollProgressBar"></div>
 @{
     var db = new WebEcommerce.Models.ApplicationDbContext();
     var layoutCategories = db.Categories.Where(c => c.IsActive && c.ParentCategoryID == null).OrderBy(c => c.DisplayOrder).ToList();
@@ -413,7 +552,7 @@
   {
       <a class="px-3 py-1.5 text-body-medium font-body-medium text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors" href="@Url.Action("Index", "Search", new { categoryId = cat.CategoryID })">@cat.Name</a>
   }
-</nav></div></header><main class="w-full pt-20 bg-surface-canvas"><div class="flex flex-col w-full">
+</nav></div></header><main class="w-full pt-[140px] bg-surface-canvas"><div class="flex flex-col w-full">
 @RenderBody()
 </div></main><footer class="w-full bg-surface-card mt-12 border-t border-border-subtle"><div class="max-w-[1280px] mx-auto px-4 py-10"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Tổng đài hỗ trợ miễn phí</p><div class="space-y-1 text-body-default font-body-default text-text-muted"><p>Gọi mua hàng: <strong class="text-primary-container font-semibold">1800.2097</strong> (7h30 - 22h00)</p><p>Khiếu nại, góp ý: <strong class="text-primary-container font-semibold">1800.2063</strong> (8h00 - 21h30)</p><p>Bảo hành, kỹ thuật: <strong class="text-primary-container font-semibold">1800.2064</strong> (8h00 - 21h00)</p></div><p class="font-title-sm text-title-sm text-on-surface font-bold pt-2">Phương thức thanh toán</p><div class="flex flex-wrap gap-2 text-caption-sm font-caption-sm text-text-muted"><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">Apple Pay</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">VNPAY</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">MoMo</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">Kredivo</span><span class="px-2 py-1 bg-badge-spec-bg rounded border border-border-subtle">OnePay</span></div></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Thông tin chính sách</p><ul class="space-y-2 text-body-default font-body-default text-text-muted"><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Mua hàng và thanh toán Online</a></li><li></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách giao hàng 2h siêu tốc</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách đổi trả &amp; bảo hành</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách bảo mật thông tin</a></li><li><a class="hover:text-primary-container transition-colors" data-path="policy" href="#">Chính sách khui hộp máy Apple</a></li></ul></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Hệ sinh thái thành viên</p><div class="space-y-2 text-body-default font-body-default text-text-muted"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span><span><strong>Điện Thoại Vui:</strong> Hệ thống sửa chữa ĐTDĐ, Laptop</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span><span><strong>CareS:</strong> Trung tâm bảo hành ủy quyền Apple</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gold-star"></span><span><strong>Schannel:</strong> Kênh giải trí &amp; review công nghệ</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span><strong>Sforum:</strong> Chuyên trang tin công nghệ nóng 24/7</span></div></div></div><div class="space-y-3"><p class="font-title-sm text-title-sm text-on-surface font-bold">Cam kết chất lượng</p><div class="space-y-2 text-caption-sm font-caption-sm text-text-muted"><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-tertiary text-[18px]">verified</span> 100% hàng chính hãng, đầy đủ VAT</p><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-secondary text-[18px]">rocket_launch</span> Miễn phí giao hàng 2h cho đơn từ 300.000đ</p><p class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-primary text-[18px]">published_with_changes</span> Bảo hành 1 đổi 1 trong 30 ngày lỗi nhà sản xuất</p></div><div class="pt-2 flex items-center gap-3"><div class="px-2 py-1 bg-badge-spec-bg rounded text-caption-sm text-badge-spec-text border border-border-subtle">Chứng nhận Bộ Công Thương</div><div class="px-2 py-1 bg-badge-spec-bg rounded text-caption-sm text-badge-spec-text border border-border-subtle">DMCA Protected</div></div></div></div><div class="mt-8 pt-6 border-t border-border-subtle text-center text-caption-sm font-caption-sm text-text-muted"><p>© 2025 Công ty TNHH Thương mại Công nghệ ShopeChill - 350-352 Võ Văn Kiệt, Phường Cô Giang, Quận 1, TP. Hồ Chí Minh.</p></div></div></footer><!-- Auth Modal -->
 <div id="authModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
@@ -738,6 +877,75 @@
         var menu = document.getElementById('headerUserDropdownMenu');
         if (wrapper && menu && !wrapper.contains(e.target)) {
             menu.classList.add('hidden');
+        }
+    });
+</script>
+
+<!-- Floating Back to Top Button -->
+<button id="backToTopBtn" type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" 
+        class="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center opacity-0 pointer-events-none translate-y-4 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:bg-brand-red-vibrant active:scale-95 cursor-pointer" 
+        title="Lên đầu trang">
+    <span class="material-symbols-outlined text-[24px]">keyboard_arrow_up</span>
+</button>
+
+<script>
+    // Lightweight Native Scroll Animations & Progress Tracking
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.getElementById('scrollProgressBar');
+        const header = document.querySelector('header');
+        const backToTopBtn = document.getElementById('backToTopBtn');
+
+        // Scroll listener with passive flag for high frame-rate scrolling
+        window.addEventListener('scroll', function () {
+            const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            if (height > 0 && progressBar) {
+                const scrolled = (winScroll / height) * 100;
+                progressBar.style.width = scrolled + '%';
+            }
+
+            if (header) {
+                if (winScroll > 30) {
+                    header.classList.add('is-scrolled');
+                } else {
+                    header.classList.remove('is-scrolled');
+                }
+            }
+
+            if (backToTopBtn) {
+                if (winScroll > 320) {
+                    backToTopBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    backToTopBtn.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+                } else {
+                    backToTopBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+                }
+            }
+        }, { passive: true });
+
+        // IntersectionObserver for elements with scroll-reveal classes
+        const revealElements = document.querySelectorAll('.reveal-on-scroll, .reveal-from-left, .reveal-from-right, .reveal-scale, .reveal-stagger');
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '0px 0px -40px 0px',
+                threshold: 0.1
+            });
+
+            revealElements.forEach(function (el) {
+                revealObserver.observe(el);
+            });
+        } else {
+            revealElements.forEach(function (el) {
+                el.classList.add('is-visible');
+            });
         }
     });
 </script>
