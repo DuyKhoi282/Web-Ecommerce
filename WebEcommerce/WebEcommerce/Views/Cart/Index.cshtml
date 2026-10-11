@@ -296,13 +296,13 @@
     document.addEventListener("DOMContentLoaded", function () {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
-        function updateCartUI(productId, data) {
-            if (data.removed) {
+        function updateCartUI(productId, data, action) {
+            if (data.removed || action === 'RemoveItem') {
                 const itemEl = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
                 if (itemEl) itemEl.remove();
                 
                 // If cart is empty, reload to show empty state
-                if (data.cartItemCount === 0) {
+                if (data.cartItemCount === 0 || document.querySelectorAll('.cart-item').length === 0) {
                     window.location.reload();
                     return;
                 }
@@ -311,8 +311,8 @@
                 if (itemEl) {
                     const qtyEl = itemEl.querySelector('.cart-item-quantity');
                     const itemTotalEl = itemEl.querySelector('.cart-item-total');
-                    if (qtyEl) qtyEl.innerText = data.quantity;
-                    if (itemTotalEl) itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
+                    if (qtyEl && data.quantity !== undefined) qtyEl.innerText = data.quantity;
+                    if (itemTotalEl && data.itemTotal !== undefined) itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
                 }
             }
 
@@ -320,9 +320,9 @@
             const totalEl = document.getElementById('cart-total');
             const badge = document.getElementById('cartBadgeCount');
             
-            if (subtotalEl) subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
-            if (totalEl) totalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
-            if (badge) badge.innerText = data.cartItemCount;
+            if (subtotalEl && data.cartTotal !== undefined) subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            if (totalEl && data.cartTotal !== undefined) totalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            if (badge && data.cartItemCount !== undefined) badge.innerText = data.cartItemCount;
         }
 
         function sendCartAction(action, productId, triggerBtn) {
@@ -353,7 +353,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    updateCartUI(productId, data);
+                    updateCartUI(productId, data, action);
                 } else {
                     alert(data.message || 'Thao tác không thành công.');
                 }

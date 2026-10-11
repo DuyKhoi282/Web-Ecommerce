@@ -567,6 +567,7 @@ namespace WebEcommerce.Controllers
                 return Json(new
                 {
                     success = true,
+                    removed = true,
                     message = "Đã xóa sản phẩm khỏi giỏ hàng.",
                     cartTotal = cartTotal,
                     cartItemCount = cartItemCount
