@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS "Orders" (
     "PaymentMethod" VARCHAR(50) NOT NULL DEFAULT 'COD', -- COD, BankTransfer
     "PaymentStatus" VARCHAR(50) NOT NULL DEFAULT 'Unpaid', -- Unpaid, PendingConfirmation, Paid
     "PaymentDate" TIMESTAMP,
-    "Notes" TEXT
+    "Notes" TEXT,
     "CancellationReason" VARCHAR(1000),
     "CancelledBy" VARCHAR(50),
     "CancelledAt" TIMESTAMP
