@@ -171,7 +171,7 @@ The palette is engineered around high optical contrast and disciplined functiona
 ### Role Assignments
 - **Primary (`#D70018`):** The signature brand crimson. Reserved strictly for primary action buttons (Buy Now, Add to Cart), key promo headlines, live flash deal timers, and active filter tabs.
 - **Secondary (`#2F80ED`):** An electric tech blue allocated to auxiliary utilities, installment calculators (Trả góp 0%), trade-in indicators (Thu cũ đổi mới), and clickable spec tags.
-- **Tertiary (`#FF9900`):** Energetic amber dedicated to member loyalty (Smember points), review ratings, and limited bundle warnings.
+- **Tertiary (`#FF9900`):** Energetic amber dedicated to member loyalty (ChillMember points), review ratings, and limited bundle warnings.
 - **Neutral (`#0F172A`):** Deep slate midnight providing near-black contrast for headings, sharp typography, and structural borders, replacing muddy low-contrast grays.
 
 ### Functional Shading & Surfaces
@@ -235,7 +235,7 @@ The design system adopts a curated Level 2 (Rounded) shape language, delivering 
 - **Pricing Block:**
   - Active Price: `price-hero` in `#D70018`.
   - Strikethrough Anchor: `price-strike` in `#94A3B8`.
-- **Promo & Perk Ribbon:** Compact light slate or soft red box (`#FEF2F2`) with 1-line condensed perk (e.g., `Smember giảm thêm 1%`, `Tặng túi chống sốc`).
+- **Promo & Perk Ribbon:** Compact light slate or soft red box (`#FEF2F2`) with 1-line condensed perk (e.g., `ChillMember giảm thêm 1%`, `Tặng túi chống sốc`).
 - **Footer Metadata:** Compact 5-star rating icon in `#F59E0B` alongside wishlisting heart icon.
 
 ### 2. Buttons
@@ -258,5 +258,5 @@ The design system adopts a curated Level 2 (Rounded) shape language, delivering 
 
 ### 6. Badges & Promo Tags
 - **Flash Tag:** `#D70018` background, `#FFFFFF` text, `label-xs`, uppercase tracking.
-- **Smember Privilege Badge:** `#FFFBEB` background, `#B45309` text, subtle gold highlight.
+- **ChillMember Privilege Badge:** `#FFFBEB` background, `#B45309` text, subtle gold highlight.
 - **Trade-in / Eco Badge:** `#EFF6FF` background, `#1D4ED8` text for device exchange incentives.
