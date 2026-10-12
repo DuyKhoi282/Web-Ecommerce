@@ -778,7 +778,11 @@ header.is-scrolled {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
+                showToast({
+                    type: 'success',
+                    title: 'Đăng ký thành công',
+                    message: data.message || 'Tài khoản đã tạo thành công. Vui lòng đăng nhập.'
+                });
                 switchAuthTab('login');
                 const loginEmail = document.getElementById('loginEmail');
                 if (loginEmail) loginEmail.value = em;
@@ -809,6 +813,123 @@ header.is-scrolled {
         fetchCartCount();
     });
 
+    // Global Modern Toast Notification System
+    window.showToast = function (opts) {
+        if (typeof opts === 'string') {
+            opts = { message: opts, type: 'info' };
+        }
+        var type = opts.type || 'info';
+        var title = opts.title || (type === 'success' ? 'Thành công' : (type === 'error' ? 'Có lỗi xảy ra' : (type === 'warning' ? 'Chú ý' : 'Thông báo')));
+        var message = opts.message || '';
+        var duration = opts.duration !== undefined ? opts.duration : 4000;
+        var actionText = opts.actionText || null;
+        var onAction = opts.onAction || null;
+
+        var container = document.getElementById('toastNotificationContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastNotificationContainer';
+            container.className = 'fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0';
+            document.body.appendChild(container);
+        }
+
+        var config = {
+            success: {
+                icon: 'check_circle',
+                border: 'border-l-emerald-500',
+                iconBg: 'bg-emerald-100 text-emerald-600',
+                bar: 'bg-emerald-500'
+            },
+            error: {
+                icon: 'error',
+                border: 'border-l-red-500',
+                iconBg: 'bg-red-100 text-red-600',
+                bar: 'bg-red-500'
+            },
+            warning: {
+                icon: 'lock',
+                border: 'border-l-amber-500',
+                iconBg: 'bg-amber-100 text-amber-600',
+                bar: 'bg-amber-500'
+            },
+            info: {
+                icon: 'info',
+                border: 'border-l-blue-500',
+                iconBg: 'bg-blue-100 text-blue-600',
+                bar: 'bg-blue-500'
+            }
+        }[type] || {
+            icon: 'info',
+            border: 'border-l-blue-500',
+            iconBg: 'bg-blue-100 text-blue-600',
+            bar: 'bg-blue-500'
+        };
+
+        var toast = document.createElement('div');
+        toast.className = 'pointer-events-auto bg-white/95 backdrop-blur-md rounded-xl p-3.5 shadow-[0_10px_25px_rgba(0,0,0,0.12)] border border-slate-200/90 border-l-4 ' + config.border + ' flex items-start gap-3 transition-all duration-300 transform translate-y-[-10px] opacity-0 relative overflow-hidden text-left';
+        
+        var actionHtml = actionText ? '<button type="button" class="toast-action-btn mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-brand-red-vibrant transition-colors cursor-pointer">' + actionText + ' <span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>' : '';
+
+        toast.innerHTML = 
+            '<div class="w-8 h-8 rounded-lg ' + config.iconBg + ' flex items-center justify-center shrink-0 mt-0.5">' +
+                '<span class="material-symbols-outlined text-[19px]">' + config.icon + '</span>' +
+            '</div>' +
+            '<div class="flex-1 min-w-0 pr-4">' +
+                '<h5 class="text-xs font-bold text-slate-800 leading-tight">' + title + '</h5>' +
+                '<p class="text-[12px] text-slate-600 leading-snug mt-1 break-words">' + message + '</p>' +
+                actionHtml +
+            '</div>' +
+            '<button type="button" class="toast-close-btn absolute top-2.5 right-2.5 text-slate-400 hover:text-slate-700 transition-colors p-1" title="Đóng">' +
+                '<span class="material-symbols-outlined text-[15px]">close</span>' +
+            '</button>' +
+            (duration > 0 ? '<div class="toast-progress-bar absolute bottom-0 left-0 h-[2.5px] ' + config.bar + ' transition-all linear" style="width: 100%;"></div>' : '');
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(function () {
+            toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            if (duration > 0) {
+                var bar = toast.querySelector('.toast-progress-bar');
+                if (bar) {
+                    bar.style.transitionDuration = duration + 'ms';
+                    requestAnimationFrame(function () {
+                        bar.style.width = '0%';
+                    });
+                }
+            }
+        });
+
+        function removeToast() {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-8px]', 'opacity-0');
+            setTimeout(function () {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        var closeBtn = toast.querySelector('.toast-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', removeToast);
+        }
+
+        if (actionText && onAction) {
+            var actionBtn = toast.querySelector('.toast-action-btn');
+            if (actionBtn) {
+                actionBtn.addEventListener('click', function () {
+                    onAction();
+                    removeToast();
+                });
+            }
+        }
+
+        if (duration > 0) {
+            setTimeout(removeToast, duration);
+        }
+    };
+
     window.addToCart = function(productId, qty = 1) {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
         const formData = new URLSearchParams();
@@ -827,7 +948,7 @@ header.is-scrolled {
         })
         .then(res => {
             if (res.redirected && res.url.toLowerCase().includes('login')) {
-                return { success: false, message: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.' };
+                return { success: false, isAuth: true, message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.' };
             }
             if (!res.ok) {
                 throw new Error('HTTP ' + res.status);
@@ -838,17 +959,43 @@ header.is-scrolled {
             if(data.success) {
                 const badge = document.getElementById('cartBadgeCount');
                 if(badge) badge.innerText = data.cartItemCount;
-                alert(data.message);
+                showToast({
+                    type: 'success',
+                    title: 'Đã thêm vào giỏ hàng',
+                    message: data.message || 'Sản phẩm đã được thêm vào giỏ hàng thành công.',
+                    actionText: 'Xem giỏ hàng',
+                    onAction: function() { window.location.href = '@Url.Action("Index", "Cart")'; }
+                });
             } else {
-                alert(data.message || 'Không thể thêm vào giỏ hàng.');
-                if(data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập'))) {
-                    window.location.href = '@Url.Action("Login", "Account")';
+                var isAuthExpired = data.isAuth || (data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập')));
+                if (isAuthExpired) {
+                    showToast({
+                        type: 'warning',
+                        title: 'Yêu cầu đăng nhập',
+                        message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Đang chuyển hướng...',
+                        actionText: 'Đăng nhập ngay',
+                        duration: 3500,
+                        onAction: function() { window.location.href = '@Url.Action("Login", "Account")'; }
+                    });
+                    setTimeout(function() {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    }, 1800);
+                } else {
+                    showToast({
+                        type: 'error',
+                        title: 'Không thể thêm giỏ hàng',
+                        message: data.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'
+                    });
                 }
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Đã xảy ra lỗi khi thêm vào giỏ hàng.');
+            showToast({
+                type: 'error',
+                title: 'Lỗi hệ thống',
+                message: 'Đã xảy ra lỗi khi thêm vào giỏ hàng. Vui lòng thử lại.'
+            });
         });
     };
 
@@ -925,6 +1072,9 @@ header.is-scrolled {
         }
     });
 </script>
+
+<!-- Modern Toast Notification Container -->
+<div id="toastNotificationContainer" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
 <!-- Floating Back to Top Button -->
 <button id="backToTopBtn" type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" 
