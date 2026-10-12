@@ -338,7 +338,7 @@ namespace WebEcommerce.Controllers
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = $"Đã cập nhật sản phẩm \"{product.Name}\" thành công!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Details", new { id = product.ProductID });
             }
             catch (Exception ex)
             {

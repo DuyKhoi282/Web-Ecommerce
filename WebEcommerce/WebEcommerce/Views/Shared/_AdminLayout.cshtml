@@ -55,13 +55,28 @@
             border: 1px solid #cbd5e1;
             box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
         }
+        /* Scrollbar ngang mượt mà cho các bảng admin khi zoom to hoặc màn hình hẹp */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 7px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 <body class="bg-[#e9eff6] text-[#1a1a2e] font-body min-h-screen antialiased">
 
     <!-- ========================================== -->
     <!-- SIDEBAR NAVIGATION (Deep Blue #d70018)    -->
     <!-- ========================================== -->
-    <aside class="fixed top-0 left-0 h-screen w-64 z-30 bg-[#d70018] text-white shadow-2xl flex flex-col justify-between py-6 px-0 select-none">
+    <aside id="adminSidebar" class="fixed top-0 left-0 h-screen w-64 z-40 bg-[#d70018] text-white shadow-2xl flex flex-col justify-between py-6 px-0 select-none transition-transform duration-300 -translate-x-full lg:translate-x-0">
         <div>
             <!-- Logo Section -->
             <div class="px-6 mb-8 flex items-center gap-3">
@@ -172,44 +187,53 @@
         </div>
     </aside>
 
+    <!-- Backdrop khi mở sidebar trên màn hình hẹp/zoom to -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/40 z-30 hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
+
     <!-- ========================================== -->
     <!-- MAIN CONTENT AREA                          -->
     <!-- ========================================== -->
-    <div class="ml-64 flex flex-col min-h-screen min-w-0 max-w-full overflow-x-hidden">
+    <div id="adminMainContent" class="w-full lg:ml-64 lg:w-[calc(100%-16rem)] flex flex-col min-h-screen min-w-0 max-w-full transition-all duration-300">
 
         <!-- Top Header Bar -->
-        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b-2 border-slate-300 px-8 py-4 flex items-center justify-between shadow-sm">
-            <!-- Breadcrumbs / Section Title -->
-            <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#d70018] font-bold">@(User.IsInRole("Administrator") ? "Quản trị" : "Kênh người bán")</a>
-                <span>/</span>
-                <span class="text-slate-900 font-bold">@(ViewBag.Title ?? "Dashboard")</span>
+        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b-2 border-slate-300 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm gap-3">
+            <div class="flex items-center gap-3">
+                <!-- Nút toggle sidebar cho màn hình hẹp & zoom to -->
+                <button type="button" onclick="toggleSidebar()" class="p-2 text-slate-700 hover:text-[#d70018] hover:bg-slate-100 rounded-xl transition-colors border border-slate-300 flex items-center justify-center shadow-sm" title="Đóng/Mở menu điều hướng">
+                    <span class="material-symbols-outlined text-xl">menu</span>
+                </button>
+                <!-- Breadcrumbs / Section Title -->
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <a href="@Url.Action("Index", "AdminDashboard")" class="hover:text-[#d70018] font-bold">@(User.IsInRole("Administrator") ? "Quản trị" : "Kênh người bán")</a>
+                    <span>/</span>
+                    <span class="text-slate-900 font-bold">@(ViewBag.Title ?? "Dashboard")</span>
+                </div>
             </div>
 
             <!-- Topbar Search & Notification -->
-            <div class="flex items-center gap-4">
-                <div class="relative w-64">
-                    <input type="text" placeholder="Tìm kiếm nhanh..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border-2 border-slate-300 rounded-xl focus:bg-white focus:border-[#d70018] outline-none transition-all text-slate-800" />
-                    <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-base">search</span>
+            <div class="flex items-center gap-3">
+                <div class="relative w-36 sm:w-60">
+                    <input type="text" placeholder="Tìm kiếm..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border-2 border-slate-300 rounded-xl focus:bg-white focus:border-[#d70018] outline-none transition-all text-slate-800" />
+                    <span class="material-symbols-outlined absolute left-2 top-2 text-slate-400 text-sm">search</span>
                 </div>
 
-                <div class="flex items-center gap-3 border-l-2 border-slate-300 pl-4">
-                    <button class="relative p-2 text-slate-600 hover:text-[#d70018] bg-slate-50 hover:bg-white border-2 border-slate-300 rounded-xl transition-colors shadow-sm" title="Thông báo">
-                        <span class="material-symbols-outlined text-xl">notifications</span>
-                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                <div class="flex items-center gap-2 border-l-2 border-slate-200 pl-3">
+                    <button class="relative p-1.5 text-slate-600 hover:text-[#d70018] bg-slate-50 hover:bg-white border-2 border-slate-300 rounded-xl transition-colors shadow-sm" title="Thông báo">
+                        <span class="material-symbols-outlined text-lg">notifications</span>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
-                    <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-300">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                    <span class="hidden sm:inline-block text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-300">@DateTime.Now.ToString("dd/MM/yyyy")</span>
                 </div>
             </div>
         </header>
 
         <!-- Dynamic Body Page Content (Nền #e9eff6 tách biệt sắc nét với các Card màu trắng) -->
-        <main class="flex-1 p-6 sm:p-8 bg-[#e9eff6] admin-canvas min-w-0 max-w-full overflow-x-hidden">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 bg-[#e9eff6] admin-canvas min-w-0 max-w-full">
             @RenderBody()
         </main>
 
         <!-- Admin Footer -->
-        <footer class="bg-white border-t-2 border-slate-300 px-8 py-4 text-xs text-slate-600 flex items-center justify-between">
+        <footer class="bg-white border-t-2 border-slate-300 px-6 py-4 text-xs text-slate-600 flex items-center justify-between">
             <span class="font-medium">&copy; @DateTime.Now.Year ShopeChill Ecommerce • Hệ thống hoạt động ổn định</span>
             <span class="font-semibold text-[#d70018]">Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
         </footer>
@@ -218,6 +242,37 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('adminSidebar');
+            var mainContent = document.getElementById('adminMainContent');
+            var backdrop = document.getElementById('sidebarBackdrop');
+
+            if (window.innerWidth < 1024) {
+                // Mobile or high zoom mode: overlay drawer
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.remove('-translate-x-full');
+                    backdrop.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    backdrop.classList.add('hidden');
+                }
+            } else {
+                // Desktop mode: collapse / expand
+                if (sidebar.classList.contains('lg:-translate-x-full')) {
+                    sidebar.classList.remove('lg:-translate-x-full');
+                    mainContent.classList.add('lg:ml-64');
+                    mainContent.classList.remove('lg:ml-0', 'lg:w-full');
+                    mainContent.classList.add('lg:w-[calc(100%-16rem)]');
+                } else {
+                    sidebar.classList.add('lg:-translate-x-full');
+                    mainContent.classList.remove('lg:ml-64', 'lg:w-[calc(100%-16rem)]');
+                    mainContent.classList.add('lg:ml-0', 'lg:w-full');
+                }
+            }
+        }
+    </script>
 </body>
 </html>
 

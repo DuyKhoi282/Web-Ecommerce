@@ -1,189 +1,526 @@
 @model WebEcommerce.Models.Product
 @{
+    ViewBag.Title = Model.Name + " - ShopeChill";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var relatedProducts = ViewBag.RelatedProducts as List<WebEcommerce.Models.Product>;
     var mainImage = Model.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL 
                     ?? Model.ProductImages.FirstOrDefault()?.ImageURL 
-                    ?? "https://placehold.co/800x800/f8faff/0d47a1?text=TheChillShop";
+                    ?? "https://placehold.co/800x800/f8faff/d70018?text=ShopeChill";
     
     int discountPercent = 0;
+    decimal savedAmount = 0;
     if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0 && Model.DiscountPrice.Value < Model.Price && Model.Price > 0)
     {
         discountPercent = (int)Math.Round((Model.Price - Model.DiscountPrice.Value) / Model.Price * 100);
+        savedAmount = Model.Price - Model.DiscountPrice.Value;
     }
 }
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <!-- Breadcrumb -->
-    <nav class="flex text-sm text-slate-500 mb-8" aria-label="Breadcrumb">
+    <nav class="flex text-xs sm:text-sm text-slate-500 mb-6 overflow-x-auto whitespace-nowrap py-1" aria-label="Breadcrumb">
         <ol class="flex items-center gap-2">
-            <li><a href="@Url.Action("Index", "Home")" class="hover:text-[#0d47a1] transition-colors">Trang chủ</a></li>
-            <li><span class="material-symbols-outlined text-sm">chevron_right</span></li>
-            <li><a href="@Url.Action("Index", "Shop")" class="hover:text-[#0d47a1] transition-colors">Sản phẩm</a></li>
+            <li>
+                <a href="@Url.Action("Index", "Home")" class="hover:text-primary transition-colors flex items-center gap-1 font-medium">
+                    <span class="material-symbols-outlined text-[18px]">home</span>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+            <li><span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span></li>
+            <li><a href="@Url.Action("Index", "Shop")" class="hover:text-primary transition-colors font-medium">Sản phẩm</a></li>
             @if (Model.Category != null)
             {
-                <li><span class="material-symbols-outlined text-sm">chevron_right</span></li>
-                <li><a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" class="hover:text-[#0d47a1] transition-colors">@Model.Category.Name</a></li>
+                <li><span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span></li>
+                <li><a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" class="hover:text-primary transition-colors font-medium">@Model.Category.Name</a></li>
             }
-            <li><span class="material-symbols-outlined text-sm">chevron_right</span></li>
-            <li class="font-semibold text-slate-800 line-clamp-1">@Model.Name</li>
+            <li><span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span></li>
+            <li class="font-bold text-slate-800 line-clamp-1 max-w-[280px] sm:max-w-md">@Model.Name</li>
         </ol>
     </nav>
 
-    <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 md:p-8 lg:p-10 mb-12 shadow-sm">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-            <!-- Cột trái: Hình ảnh -->
-            <div class="flex flex-col gap-4">
-                <div class="relative w-full aspect-square rounded-2xl border-2 border-slate-100 bg-slate-50 overflow-hidden flex items-center justify-center p-4">
+    <!-- MAIN PRODUCT SHOWCASE BOX -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-8 lg:p-10 mb-10 shadow-[0_4px_25px_rgba(0,0,0,0.04)]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            <!-- CỘT TRÁI: GALLERY HÌNH ẢNH (5 / 12 Cột) -->
+            <div class="lg:col-span-5 flex flex-col gap-4">
+                <!-- Khung ảnh chính -->
+                <div class="relative w-full aspect-square rounded-2xl border border-slate-200/90 bg-slate-50/60 overflow-hidden flex items-center justify-center p-6 group">
                     @if (discountPercent > 0)
                     {
-                        <span class="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-red-600 text-white shadow-lg tracking-wider">
-                            Giảm @discountPercent%
-                        </span>
+                        <div class="absolute top-3 left-3 z-10 flex flex-col gap-1">
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-black uppercase bg-primary text-white shadow-md tracking-wider">
+                                GIẢM @discountPercent%
+                            </span>
+                        </div>
                     }
-                    <img id="mainProductImage" src="@mainImage" alt="@Model.Name" class="w-full h-full object-contain mix-blend-multiply" />
+
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/90 backdrop-blur-md text-slate-700 border border-slate-200 shadow-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-emerald-600 text-[15px]">verified</span>
+                            Chính hãng 100%
+                        </span>
+                    </div>
+
+                    <img id="mainProductImage" src="@mainImage" alt="@Model.Name" 
+                         class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300 ease-out" 
+                         onerror="this.onerror=null; this.src='https://placehold.co/800x800/f8faff/d70018?text=ShopeChill';" />
                 </div>
                 
-                @if (Model.ProductImages.Count > 1)
+                <!-- Thumbnails Carousel -->
+                @if (Model.ProductImages != null && Model.ProductImages.Count > 1)
                 {
                     <div class="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
                         @foreach (var img in Model.ProductImages.OrderBy(i => i.DisplayOrder))
                         {
-                            <button onclick="changeMainImage('@img.ImageURL', this)" class="thumbnail-btn w-20 h-20 flex-shrink-0 rounded-xl border-2 @(img.ImageURL == mainImage ? "border-[#0d47a1] ring-2 ring-[#00b4d8]/30" : "border-slate-200 hover:border-[#0d47a1]/50") bg-slate-50 overflow-hidden p-1 transition-all">
+                            <button type="button" onclick="changeMainImage('@img.ImageURL', this)" 
+                                    class="thumbnail-btn w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl border-2 @(img.ImageURL == mainImage ? "border-primary ring-2 ring-primary/20" : "border-slate-200 hover:border-slate-400") bg-slate-50 overflow-hidden p-1.5 transition-all">
                                 <img src="@img.ImageURL" class="w-full h-full object-contain mix-blend-multiply pointer-events-none" />
                             </button>
                         }
                     </div>
                 }
+
+                <!-- Mini Trust Badges Dưới Ảnh -->
+                <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">verified</span>
+                        <span class="text-[11px] font-bold text-slate-700 leading-tight">100% Chính hãng</span>
+                        <span class="text-[10px] text-slate-400">Đầy đủ VAT</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">published_with_changes</span>
+                        <span class="text-[11px] font-bold text-slate-700 leading-tight">1 Đổi 1 trong 30 ngày</span>
+                        <span class="text-[10px] text-slate-400">Lỗi nhà sản xuất</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">local_shipping</span>
+                        <span class="text-[11px] font-bold text-slate-700 leading-tight">Giao nhanh 2H</span>
+                        <span class="text-[10px] text-slate-400">Đơn từ 300.000₫</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Cột phải: Thông tin -->
-            <div class="flex flex-col">
-                @if (Model.Category != null)
-                {
-                    <a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" class="text-sm font-black uppercase tracking-wider text-[#00b4d8] mb-2 hover:text-[#0d47a1] transition-colors inline-block w-fit">
-                        @Model.Category.Name
-                    </a>
-                }
+            <!-- CỘT PHẢI: THÔNG TIN SẢN PHẨM & MUA SẮM (7 / 12 Cột) -->
+            <div class="lg:col-span-7 flex flex-col">
+                <!-- Tag danh mục & Trạng thái -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    @if (Model.Category != null)
+                    {
+                        <a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" 
+                           class="text-xs font-extrabold uppercase tracking-wider text-primary bg-red-50 border border-red-100 px-3 py-1 rounded-full hover:bg-primary hover:text-white transition-all">
+                            @Model.Category.Name
+                        </a>
+                    }
+                    <div class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">visibility</span>
+                        <span>@Model.ViewCount lượt xem</span>
+                    </div>
+                </div>
                 
-                <h1 class="font-headline font-extrabold text-2xl sm:text-3xl lg:text-4xl text-slate-900 leading-tight mb-4">
+                <!-- Tiêu đề sản phẩm -->
+                <h1 class="font-headline font-extrabold text-2xl sm:text-3xl lg:text-3xl text-slate-900 leading-snug mb-3">
                     @Model.Name
                 </h1>
 
-                <div class="flex items-center gap-4 mb-6 pb-6 border-b-2 border-slate-100">
+                <!-- Đánh giá, lượt bán & mã SKU -->
+                <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-5 pb-5 border-b border-slate-100 text-xs sm:text-sm text-slate-500">
                     <div class="flex items-center gap-1.5">
-                        <div class="flex items-center text-amber-500 text-sm">
+                        <div class="flex items-center text-amber-500">
                             <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
                             <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
                             <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
                             <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
                             <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
                         </div>
-                        <span class="text-sm text-slate-600 font-bold">5.0 <span class="font-normal text-slate-400">(@Model.Reviews.Count đánh giá)</span></span>
+                        <span class="font-bold text-slate-800">5.0</span>
+                        <span class="text-slate-400">(@(Model.Reviews?.Count ?? 0) đánh giá)</span>
                     </div>
                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                    <span class="text-sm text-slate-500 font-medium">Đã bán: <span class="text-slate-800 font-bold">120+</span></span>
+                    <span>Đã bán: <strong class="text-slate-800">120+</strong></span>
                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                    <span class="text-sm text-slate-500 font-medium">Kho: <span class="text-slate-800 font-bold">@Model.StockQuantity</span></span>
+                    <span>Mã SP: <strong class="text-slate-800">SP-@Model.ProductID.ToString("D5")</strong></span>
                 </div>
 
-                <div class="mb-8">
-                    @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0)
-                    {
-                        <div class="flex items-end gap-3">
-                            <span class="font-headline font-black text-3xl sm:text-4xl text-[#0d47a1]">
+                <!-- KHU VỰC GIÁ BÁN & TIẾT KIỆM -->
+                <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-red-50/60 via-slate-50/80 to-transparent border border-red-100/70">
+                    <div class="flex flex-wrap items-baseline gap-3">
+                        @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0)
+                        {
+                            <span class="font-headline font-black text-3xl sm:text-4xl text-primary tracking-tight">
                                 @Model.DiscountPrice.Value.ToString("N0")₫
                             </span>
-                            <span class="text-lg text-slate-400 line-through font-bold pb-1">
+                            <span class="text-base sm:text-lg text-slate-400 line-through font-semibold">
                                 @Model.Price.ToString("N0")₫
                             </span>
-                        </div>
-                    }
-                    else
-                    {
-                        <span class="font-headline font-black text-3xl sm:text-4xl text-[#0d47a1]">
-                            @Model.Price.ToString("N0")₫
-                        </span>
-                    }
+                            if (savedAmount > 0)
+                            {
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                                    Tiết kiệm @savedAmount.ToString("N0")₫ (-@discountPercent%)
+                                </span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="font-headline font-black text-3xl sm:text-4xl text-primary tracking-tight">
+                                @Model.Price.ToString("N0")₫
+                            </span>
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-emerald-600 text-sm">check</span>
+                        <span>Giá đã bao gồm thuế VAT (10%) &amp; Miễn phí vận chuyển toàn quốc</span>
+                    </p>
                 </div>
 
-                <!-- Tình trạng / CTA -->
-                <div class="mt-auto pt-6 border-t-2 border-slate-100">
+                <!-- KHỐI KHUYẾN MẠI ĐẶC QUYỀN (SPECIAL PROMOS) -->
+                <div class="mb-6 rounded-2xl border border-red-200 bg-red-50/30 p-4 relative overflow-hidden">
+                    <div class="flex items-center gap-2 mb-3 text-primary font-bold text-xs sm:text-sm uppercase tracking-wide">
+                        <span class="material-symbols-outlined text-[18px]">featured_seasonal_and_gifts</span>
+                        <span>Khuyến mại đặc quyền ShopeChill</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                            <span>Tặng ngay voucher <strong>50.000₫</strong> khi thanh toán qua ví VNPay-QR hoặc MoMo.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                            <span>Hội viên <strong>ChillMember</strong> tích lũy ngay 1% điểm thưởng và nhận quà sinh nhật.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                            <span>Hỗ trợ <strong>Trả góp 0% lãi suất</strong> qua thẻ tín dụng và đối tác Kredivo (Duyệt trong 5 phút).</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
+                            <span>Thu cũ đổi mới trợ giá lên đến <strong>1.000.000₫</strong> khi nâng cấp thiết bị.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- TÌNH TRẠNG KHO & SỐ LƯỢNG MUA -->
+                <div class="mt-auto">
                     @if (Model.StockQuantity > 0)
                     {
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600">
-                                <span class="material-symbols-outlined text-sm font-bold">check</span>
-                            </span>
-                            <span class="font-bold text-emerald-600">Còn hàng</span>
-                            @if (Model.StockQuantity < 5)
-                            {
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-lg font-bold ml-2">Chỉ còn @Model.StockQuantity SP</span>
-                            }
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 text-xs sm:text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600">
+                                    <span class="material-symbols-outlined text-xs font-bold">check</span>
+                                </span>
+                                <span class="font-bold text-emerald-700">Còn hàng trong kho</span>
+                                @if (Model.StockQuantity <= 5)
+                                {
+                                    <span class="text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold ml-1">
+                                        Chỉ còn @Model.StockQuantity sản phẩm
+                                    </span>
+                                }
+                            </div>
+                            <span class="text-slate-400">Kho sẵn: <strong>@Model.StockQuantity</strong></span>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <!-- Input Số lượng -->
-                            <div class="flex items-center border-2 border-slate-200 rounded-xl overflow-hidden h-12 w-full sm:w-32 flex-shrink-0">
-                                <button type="button" onclick="updateQty(-1)" class="w-10 h-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors"><span class="material-symbols-outlined text-sm">remove</span></button>
-                                <input type="number" id="qtyInput" value="1" min="1" max="@Model.StockQuantity" class="w-full h-full text-center font-bold text-slate-800 outline-none p-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
-                                <button type="button" onclick="updateQty(1)" class="w-10 h-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors"><span class="material-symbols-outlined text-sm">add</span></button>
+                        <!-- Cụm chọn số lượng -->
+                        <div class="flex items-center gap-3 mb-5">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Số lượng:</label>
+                            <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden h-10 w-32 bg-white shadow-sm">
+                                <button type="button" onclick="updateQty(-1)" class="w-10 h-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer">
+                                    <span class="material-symbols-outlined text-xs">remove</span>
+                                </button>
+                                <input type="number" id="qtyInput" value="1" min="1" max="@Model.StockQuantity" 
+                                       class="w-full h-full text-center font-bold text-slate-800 outline-none p-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                <button type="button" onclick="updateQty(1)" class="w-10 h-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer">
+                                    <span class="material-symbols-outlined text-xs">add</span>
+                                </button>
                             </div>
+                        </div>
 
-                            <!-- Buttons -->
-                            <button type="button" onclick="if(window.addToCart){addToCart(@Model.ProductID, document.getElementById('qtyInput').value);}else{alert('Vui lòng tải lại trang để thêm giỏ hàng.');}" 
-                                    class="flex-1 h-12 flex items-center justify-center gap-2 bg-[#0d47a1] hover:bg-[#0a3880] text-white rounded-xl font-bold transition-all shadow-lg shadow-[#0d47a1]/20 group">
-                                <span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">shopping_cart</span>
-                                Thêm vào giỏ hàng
+                        <!-- HỆ THỐNG NÚT BẤM MUA SẮM (CTA BUTTONS) -->
+                        <div class="space-y-3">
+                            <!-- NÚT MUA NGAY (TO & NỔI BẬT NHẤT) -->
+                            <button type="button" onclick="buyNow(@Model.ProductID)" 
+                                    class="w-full py-3.5 px-6 rounded-2xl bg-primary hover:bg-brand-red-vibrant text-white font-extrabold flex flex-col items-center justify-center shadow-lg shadow-primary/25 transition-all transform active:scale-[0.99] cursor-pointer group">
+                                <span class="text-base sm:text-lg tracking-wider flex items-center gap-1.5 leading-tight">
+                                    <span class="material-symbols-outlined text-[20px] group-hover:animate-bounce">flash_on</span>
+                                    MUA NGAY
+                                </span>
+                                <span class="text-[11px] font-normal text-red-100 opacity-90 mt-0.5">Giao tận nơi 2H hoặc nhận tại cửa hàng gần nhất</span>
                             </button>
-                            <button type="button" class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl border-2 border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-500 bg-white transition-all" title="Yêu thích">
-                                <span class="material-symbols-outlined text-xl">favorite</span>
-                            </button>
+
+                            <!-- HÀNG 2: THÊM GIỎ HÀNG & TRẢ GÓP & YÊU THÍCH -->
+                            <div class="grid grid-cols-12 gap-3">
+                                <!-- Thêm vào giỏ -->
+                                <button type="button" onclick="if(window.addToCart){addToCart(@Model.ProductID, document.getElementById('qtyInput').value);}" 
+                                        class="col-span-6 sm:col-span-7 h-12 flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-red-50 bg-white rounded-xl font-bold transition-all shadow-sm cursor-pointer group">
+                                    <span class="material-symbols-outlined text-[19px] group-hover:scale-110 transition-transform">add_shopping_cart</span>
+                                    <span class="text-xs sm:text-sm">Thêm vào giỏ hàng</span>
+                                </button>
+
+                                <!-- Trả góp 0% -->
+                                <a href="javascript:void(0)" onclick="buyNow(@Model.ProductID)" 
+                                   class="col-span-4 sm:col-span-4 h-12 flex flex-col items-center justify-center bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all shadow-sm text-center">
+                                    <span class="text-xs font-bold leading-tight">TRẢ GÓP 0%</span>
+                                    <span class="text-[10px] text-slate-300">Duyệt nhanh 5p</span>
+                                </a>
+
+                                <!-- Wishlist -->
+                                <button type="button" onclick="toggleWishlist(this)" 
+                                        class="col-span-2 sm:col-span-1 h-12 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/40 bg-white transition-all cursor-pointer" 
+                                        title="Thêm vào yêu thích">
+                                    <span class="material-symbols-outlined text-xl">favorite</span>
+                                </button>
+                            </div>
                         </div>
                     }
                     else
                     {
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500">
-                                <span class="material-symbols-outlined text-sm font-bold">close</span>
-                            </span>
-                            <span class="font-bold text-slate-500">Đã hết hàng</span>
+                        <div class="p-5 rounded-2xl bg-slate-100 border border-slate-200 text-center">
+                            <span class="material-symbols-outlined text-slate-400 text-3xl mb-1">production_quantity_limits</span>
+                            <h4 class="font-bold text-slate-700 text-base">Sản phẩm hiện đang tạm hết hàng</h4>
+                            <p class="text-xs text-slate-500 mt-1 mb-4">Vui lòng quay lại sau hoặc liên hệ tổng đài để được giữ hàng đợt tới.</p>
+                            <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-brand-red-vibrant transition-colors">
+                                <span>Khám phá sản phẩm khác</span>
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </a>
                         </div>
-                        <button type="button" disabled class="w-full h-12 flex items-center justify-center bg-slate-200 text-slate-500 rounded-xl font-bold cursor-not-allowed">
-                            Không thể đặt mua
-                        </button>
                     }
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Chi tiết mô tả -->
-    <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 md:p-8 lg:p-10 mb-12 shadow-sm">
-        <h2 class="font-headline font-bold text-xl md:text-2xl text-slate-900 mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-[#0d47a1]">description</span>
-            Đặc điểm nổi bật
-        </h2>
-        <div class="prose prose-slate max-w-none text-slate-600 prose-headings:text-slate-900 prose-a:text-[#0d47a1] hover:prose-a:text-[#00b4d8]">
-            @if (!string.IsNullOrEmpty(Model.Description))
-            {
-                @Html.Raw(Model.Description)
-            }
-            else
-            {
-                <p class="text-slate-400 italic">Đang cập nhật mô tả chi tiết cho sản phẩm này.</p>
-            }
+    <!-- KHU VỰC CHI TIẾT BÊN DƯỚI: 2 CỘT (MÔ TẢ CHI TIẾT & BẢNG THÔNG SỐ) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        <!-- CỘT TRÁI (8 / 12): BÀI VIẾT MÔ TẢ ĐẶC ĐIỂM NỔI BẬT -->
+        <div class="lg:col-span-8 flex flex-col gap-8">
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                    <h2 class="font-headline font-bold text-xl sm:text-2xl text-slate-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-red-100 text-primary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[19px]">description</span>
+                        </span>
+                        <span>Đặc điểm nổi bật &amp; Mô tả chi tiết</span>
+                    </h2>
+                </div>
+
+                <div id="productDescriptionContainer" class="relative max-h-[500px] overflow-hidden transition-all duration-300">
+                    <div class="prose prose-slate max-w-none text-slate-700 leading-relaxed prose-headings:font-bold prose-headings:text-slate-900 prose-img:rounded-2xl prose-img:shadow-sm">
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            @Html.Raw(Model.Description)
+                        }
+                        else
+                        {
+                            <div class="py-10 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl mb-2 text-slate-300">article</span>
+                                <p class="text-sm italic">Đang cập nhật bài viết mô tả chi tiết cho sản phẩm này.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Mờ dần đáy khi thu gọn -->
+                    <div id="descGradientOverlay" class="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+                </div>
+
+                <!-- Nút Xem Thêm / Thu Gọn -->
+                <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+                    <button type="button" id="toggleDescBtn" onclick="toggleDescription()" 
+                            class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full border border-slate-300 hover:border-primary text-slate-700 hover:text-primary font-bold text-xs transition-all shadow-sm hover:shadow cursor-pointer">
+                        <span id="toggleDescText">Xem thêm toàn bộ mô tả</span>
+                        <span id="toggleDescIcon" class="material-symbols-outlined text-base">expand_more</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KHỐI ĐÁNH GIÁ KHÁCH HÀNG (CUSTOMER REVIEWS) -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                    <h3 class="font-headline font-bold text-xl text-slate-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[19px]">reviews</span>
+                        </span>
+                        <span>Đánh giá &amp; Nhận xét của khách hàng</span>
+                    </h3>
+                </div>
+
+                <!-- Tổng quan đánh giá -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 p-5 rounded-2xl bg-slate-50 border border-slate-100 mb-6 items-center">
+                    <div class="sm:col-span-4 text-center sm:border-r border-slate-200 sm:pr-4">
+                        <div class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">5.0</div>
+                        <div class="flex items-center justify-center text-amber-500 my-2">
+                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                        </div>
+                        <p class="text-xs text-slate-500">100% khách hàng hài lòng</p>
+                    </div>
+
+                    <div class="sm:col-span-8 flex flex-col gap-1.5 text-xs text-slate-600">
+                        <div class="flex items-center gap-2">
+                            <span class="w-12 text-right">5 sao</span>
+                            <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: 95%;"></div>
+                            </div>
+                            <span class="w-8 text-slate-400 text-right">95%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-12 text-right">4 sao</span>
+                            <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: 5%;"></div>
+                            </div>
+                            <span class="w-8 text-slate-400 text-right">5%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-12 text-right">3 sao</span>
+                            <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <span class="w-8 text-slate-400 text-right">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách nhận xét mẫu chân thực -->
+                <div class="space-y-4">
+                    <div class="p-4 rounded-xl border border-slate-100 bg-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-red-100 text-primary font-bold text-xs flex items-center justify-center">T</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-800">Trần Minh Quân</h5>
+                                    <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px]">verified</span> Đã mua tại ShopeChill
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-[11px] text-slate-400">2 ngày trước</div>
+                        </div>
+                        <div class="flex text-amber-500 mb-1.5">
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Sản phẩm đóng gói rất chắc chắn, giao hàng siêu nhanh chỉ trong 2 tiếng tại TP.HCM. Hàng nguyên seal 100% cực kỳ ưng ý!</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-100 bg-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center">H</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-800">Hoàng Nam</h5>
+                                    <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px]">verified</span> Đã mua tại ShopeChill
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-[11px] text-slate-400">1 tuần trước</div>
+                        </div>
+                        <div class="flex text-amber-500 mb-1.5">
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Chất lượng tuyệt vời đúng như mô tả, được hỗ trợ hướng dẫn tận tình. Chắc chắn sẽ tiếp tục ủng hộ ShopeChill!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI (4 / 12): BẢNG THÔNG SỐ KỸ THUẬT & HỖ TRỢ KHÁCH HÀNG -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            <!-- Hộp Bảng thông số kỹ thuật tóm tắt -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
+                <h3 class="font-headline font-bold text-base sm:text-lg text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+                    <span>Thông số sản phẩm</span>
+                </h3>
+
+                <div class="divide-y divide-slate-100 text-xs">
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Mã sản phẩm</span>
+                        <span class="font-bold text-slate-800 text-right">SP-@Model.ProductID.ToString("D5")</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Danh mục</span>
+                        <span class="font-bold text-primary text-right">@(Model.Category?.Name ?? "Công nghệ")</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Tình trạng</span>
+                        <span class="font-bold text-emerald-600 text-right">Mới 100%, Nguyên Seal</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Bảo hành</span>
+                        <span class="font-bold text-slate-800 text-right">12 Tháng Chính Hãng</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Trung tâm BH</span>
+                        <span class="font-bold text-slate-800 text-right">Hệ thống ChillCare ủy quyền</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Hình thức giao</span>
+                        <span class="font-bold text-slate-800 text-right">Giao 2H / Toàn quốc</span>
+                    </div>
+                    <div class="py-2.5 flex justify-between gap-4">
+                        <span class="text-slate-500 font-medium">Hóa đơn VAT</span>
+                        <span class="font-bold text-slate-800 text-right">Có đầy đủ hóa đơn điện tử</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hộp Tổng đài hỗ trợ & Cam kết bảo hành -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 shadow-md">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold">
+                        <span class="material-symbols-outlined text-xl">support_agent</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm leading-tight text-white">Cần tư vấn thêm?</h4>
+                        <p class="text-[11px] text-slate-400">Đội ngũ chuyên viên sẵn sàng hỗ trợ bạn</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-3 border-t border-slate-700/80 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400">Gọi mua hàng:</span>
+                        <a href="tel:18002097" class="font-bold text-red-400 hover:text-red-300 transition-colors">1800.2097 (Miễn phí)</a>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400">Khiếu nại, góp ý:</span>
+                        <a href="tel:18002063" class="font-bold text-slate-200 hover:text-white transition-colors">1800.2063 (8h00 - 21h30)</a>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400">Bảo hành kỹ thuật:</span>
+                        <a href="tel:18002064" class="font-bold text-slate-200 hover:text-white transition-colors">1800.2064 (8h00 - 21h00)</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Sản phẩm liên quan -->
+    <!-- SẢN PHẨM TƯƠNG TỰ / CÓ THỂ BẠN THÍCH -->
     @if (relatedProducts != null && relatedProducts.Any())
     {
-        <div>
-            <h2 class="font-headline font-bold text-2xl text-slate-900 mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[#0d47a1]">recommend</span>
-                Có thể bạn cũng thích
-            </h2>
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-headline font-extrabold text-xl sm:text-2xl text-slate-900 flex items-center gap-2">
+                        <span class="w-2.5 h-6 rounded-full bg-primary inline-block"></span>
+                        <span>Sản phẩm tương tự có thể bạn quan tâm</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">Các sản phẩm cùng danh mục đang được ưa chuộng tại ShopeChill</p>
+                </div>
+                <a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                    <span>Xem tất cả</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 @foreach (var p in relatedProducts)
                 {
@@ -197,26 +534,121 @@
 @section scripts {
     <script>
         function changeMainImage(url, btn) {
-            document.getElementById('mainProductImage').src = url;
-            // Xóa active class từ tất cả
+            var img = document.getElementById('mainProductImage');
+            if (img) img.src = url;
+            
+            // Xóa active class từ tất cả thumbnail
             var btns = document.querySelectorAll('.thumbnail-btn');
             btns.forEach(b => {
-                b.classList.remove('border-[#0d47a1]', 'ring-2', 'ring-[#00b4d8]/30');
+                b.classList.remove('border-primary', 'ring-2', 'ring-primary/20');
                 b.classList.add('border-slate-200');
             });
-            // Thêm vào button hiện tại
+            // Thêm active vào button được click
             btn.classList.remove('border-slate-200');
-            btn.classList.add('border-[#0d47a1]', 'ring-2', 'ring-[#00b4d8]/30');
+            btn.classList.add('border-primary', 'ring-2', 'ring-primary/20');
         }
 
         function updateQty(change) {
             var input = document.getElementById('qtyInput');
+            if (!input) return;
             var current = parseInt(input.value) || 1;
             var max = parseInt(input.getAttribute('max')) || 1;
             
             var newVal = current + change;
             if (newVal >= 1 && newVal <= max) {
                 input.value = newVal;
+            }
+        }
+
+        function toggleWishlist(btn) {
+            var icon = btn.querySelector('.material-symbols-outlined');
+            if (!icon) return;
+            
+            var isLiked = icon.style.fontVariationSettings && icon.style.fontVariationSettings.includes("'FILL' 1");
+            if (isLiked) {
+                icon.style.fontVariationSettings = "'FILL' 0";
+                icon.classList.remove('text-primary');
+                if (window.showToast) {
+                    showToast({ type: 'info', message: 'Đã bỏ sản phẩm khỏi danh sách yêu thích.' });
+                }
+            } else {
+                icon.style.fontVariationSettings = "'FILL' 1";
+                icon.classList.add('text-primary');
+                if (window.showToast) {
+                    showToast({ type: 'success', title: 'Yêu thích', message: 'Đã lưu sản phẩm vào danh sách yêu thích của bạn!' });
+                }
+            }
+        }
+
+        function buyNow(productId) {
+            var input = document.getElementById('qtyInput');
+            var qty = input ? (parseInt(input.value) || 1) : 1;
+            
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new URLSearchParams();
+            formData.append('productId', productId);
+            formData.append('quantity', qty);
+            if (token) formData.append('__RequestVerificationToken', token);
+            
+            fetch('@Url.Action("AddToCart", "Cart")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(res => {
+                if (res.redirected && res.url.toLowerCase().includes('login')) {
+                    return { success: false, isAuth: true };
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Chuyển ngay đến giỏ hàng để hoàn tất thanh toán
+                    window.location.href = '@Url.Action("Index", "Cart")';
+                } else {
+                    if (data.isAuth || (data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập')))) {
+                        if (window.showToast) {
+                            showToast({
+                                type: 'warning',
+                                title: 'Yêu cầu đăng nhập',
+                                message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt mua.',
+                                actionText: 'Đăng nhập ngay',
+                                duration: 3000,
+                                onAction: function() { window.location.href = '@Url.Action("Login", "Account")'; }
+                            });
+                        }
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("Login", "Account")';
+                        }, 1800);
+                    } else {
+                        if (window.showToast) {
+                            showToast({ type: 'error', title: 'Thông báo', message: data.message || 'Không thể tiến hành đặt mua.' });
+                        }
+                    }
+                }
+            })
+            .catch(() => {
+                window.location.href = '@Url.Action("Index", "Cart")';
+            });
+        }
+
+        function toggleDescription() {
+            var container = document.getElementById('productDescriptionContainer');
+            var overlay = document.getElementById('descGradientOverlay');
+            var text = document.getElementById('toggleDescText');
+            var icon = document.getElementById('toggleDescIcon');
+            
+            if (container.classList.contains('max-h-[500px]')) {
+                container.classList.remove('max-h-[500px]');
+                overlay.classList.add('hidden');
+                text.innerText = 'Thu gọn mô tả';
+                icon.innerText = 'expand_less';
+            } else {
+                container.classList.add('max-h-[500px]');
+                overlay.classList.remove('hidden');
+                text.innerText = 'Xem thêm toàn bộ mô tả';
+                icon.innerText = 'expand_more';
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     </script>

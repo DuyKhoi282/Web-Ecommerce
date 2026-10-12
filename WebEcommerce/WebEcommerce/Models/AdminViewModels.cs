@@ -85,6 +85,9 @@ namespace WebEcommerce.Models
         public int TotalOrders { get; set; }
         public int TotalCustomers { get; set; }
         public int TotalProducts { get; set; }
+        public double RevenueGrowthPercentage { get; set; }
+        public int PendingOrdersCount { get; set; }
+        public int LowStockProductsCount { get; set; }
 
         public List<RecentOrderItemViewModel> RecentOrders { get; set; } = new List<RecentOrderItemViewModel>();
         public List<TopProductItemViewModel> TopProducts { get; set; } = new List<TopProductItemViewModel>();

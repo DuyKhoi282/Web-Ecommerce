@@ -384,7 +384,7 @@ header.is-scrolled {
     }
     else
     {
-        <a class="flex items-center gap-2 bg-on-primary/10 hover:bg-on-primary/20 text-on-primary px-3 py-2 rounded-lg text-caption-sm font-caption-sm transition-colors cursor-pointer" href="javascript:void(0)" onclick="openAuthModal('login')">
+        <a class="flex items-center gap-2 bg-on-primary/10 hover:bg-on-primary/20 text-on-primary px-3 py-2 rounded-lg text-caption-sm font-caption-sm transition-colors cursor-pointer" href="@Url.Action("Login", "Account")">
             <span class="material-symbols-outlined text-[20px]">account_circle</span>
             <span class="text-left leading-tight"><span class="block text-[10px] opacity-80">Hội viên</span>ChillMember</span>
         </a>
@@ -512,7 +512,7 @@ header.is-scrolled {
             </div>
 
             <div class="py-2">
-                <button type="button" onclick="openAuthModal('login')" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-red-50 hover:text-red-600 font-semibold transition-colors group text-left cursor-pointer">
+                <a href="@Url.Action("Login", "Account")" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-red-50 hover:text-red-600 font-semibold transition-colors group text-left">
                     <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 group-hover:scale-105 transition-transform">
                         <span class="material-symbols-outlined text-[18px]">login</span>
                     </span>
@@ -520,9 +520,9 @@ header.is-scrolled {
                         <span class="block leading-tight font-bold">Đăng nhập ngay</span>
                         <span class="text-[10px] text-slate-400 font-normal">Đã có tài khoản ShopeChill</span>
                     </div>
-                </button>
+                </a>
 
-                <button type="button" onclick="openAuthModal('register')" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-red-50 hover:text-red-600 font-semibold transition-colors group text-left cursor-pointer">
+                <a href="@Url.Action("Register", "Account")" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-red-50 hover:text-red-600 font-semibold transition-colors group text-left">
                     <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-red-100 group-hover:text-red-600 transition-colors">
                         <span class="material-symbols-outlined text-[18px]">person_add</span>
                     </span>
@@ -530,7 +530,7 @@ header.is-scrolled {
                         <span class="block leading-tight font-bold">Đăng ký tài khoản</span>
                         <span class="text-[10px] text-slate-400 font-normal">Nhận ngay ưu đãi thành viên mới</span>
                     </div>
-                </button>
+                </a>
 
                 <div class="border-t border-slate-100 my-1.5"></div>
 
@@ -576,14 +576,14 @@ header.is-scrolled {
           <circle cx="316" cy="45" r="4.5" fill="#d70018"/>
         </svg>
       </div>
-      <h3 id="authModalTitle" class="font-title-lg text-lg text-on-surface font-bold mt-3">Đăng ký tài khoản ChillMember</h3>
+      <h3 id="authModalTitle" class="font-title-lg text-lg text-on-surface font-bold mt-3">Đăng nhập tài khoản ChillMember</h3>
       <p class="text-caption-sm text-text-muted mt-1 px-4">Tích luỹ điểm thưởng và nhận ngay 500k điểm sau khi đăng ký lần đầu tiên.</p>
     </div>
 
     <!-- Tabs -->
     <div class="flex border-b border-border-subtle mb-5">
-      <button type="button" onclick="document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); this.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.classList.remove('text-text-muted', 'font-semibold'); this.nextElementSibling.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.nextElementSibling.classList.add('text-text-muted', 'font-semibold'); document.getElementById('authModalTitle').innerText = 'Đăng nhập tài khoản ChillMember';" class="flex-1 pb-2 text-text-muted font-title-sm font-semibold hover:text-on-surface transition-colors">Đăng nhập</button>
-      <button type="button" onclick="document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); this.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.classList.remove('text-text-muted', 'font-semibold'); this.previousElementSibling.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary'); this.previousElementSibling.classList.add('text-text-muted', 'font-semibold'); document.getElementById('authModalTitle').innerText = 'Đăng ký tài khoản ChillMember';" class="flex-1 pb-2 text-primary font-title-sm font-bold border-b-2 border-primary">Đăng ký</button>
+      <button id="tabLoginBtn" type="button" onclick="switchAuthTab('login')" class="flex-1 pb-2 text-primary font-title-sm font-bold border-b-2 border-primary hover:text-on-surface transition-colors">Đăng nhập</button>
+      <button id="tabRegisterBtn" type="button" onclick="switchAuthTab('register')" class="flex-1 pb-2 text-text-muted font-title-sm font-semibold hover:text-on-surface transition-colors">Đăng ký</button>
     </div>
     <form id="loginForm" class="">
       <div class="mb-3">
@@ -591,7 +591,7 @@ header.is-scrolled {
         <input type="email" id="loginEmail" placeholder="nguyenvana@gmail.com" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
       </div>
       <div class="mb-1">
-        <label class="block text-xs font-semibold text-text-muted mb-1">M?t kh?u</label>
+        <label class="block text-xs font-semibold text-text-muted mb-1">Mật khẩu</label>
         <div class="relative">
           <input type="password" id="loginPassword" placeholder="********" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
           <span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-text-muted cursor-pointer hover:text-on-surface">visibility_off</span>
@@ -612,8 +612,8 @@ header.is-scrolled {
     <form id="registerForm" class="hidden">
       <div class="flex gap-3 mb-3">
         <div class="flex-1">
-          <label class="block text-xs font-semibold text-text-muted mb-1">H? v� t�n</label>
-          <input type="text" id="regFullName" placeholder="Nguy?n Van A" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
+          <label class="block text-xs font-semibold text-text-muted mb-1">Họ và tên</label>
+          <input type="text" id="regFullName" placeholder="Nguyễn Văn A" class="w-full bg-surface-canvas border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
         </div>
         <div class="flex-1">
           <label class="block text-xs font-semibold text-text-muted mb-1">Email</label>
@@ -658,19 +658,21 @@ header.is-scrolled {
     </div>
 
     <div class="flex gap-3 mt-4">
-      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
+      <button type="button" class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google" />
       </button>
-      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
-        <img src="https://www.svgrepo.com/show/448222/apple.svg" class="w-4 h-4" alt="Apple" />
+      <button type="button" class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors" title="Apple">
+        <svg class="w-4 h-4 fill-current text-slate-800" viewBox="0 0 170 170">
+          <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.5-7.71-11.44-14.01-6.19-9.87-11.03-21.45-14.53-34.73-3.5-13.29-5.25-25.79-5.25-37.52 0-16.71 4.39-30.74 13.18-42.08 8.78-11.34 19.92-17.14 33.41-17.4 5.34 0 11.28 1.41 17.82 4.25 6.53 2.83 10.66 4.3 12.39 4.3 1.3 0 5.49-1.46 12.56-4.39 7.07-2.92 12.87-4.22 17.4-3.89 13.06.98 23.33 5.75 30.82 14.31-11.44 6.94-17.05 16.59-16.83 28.94.22 9.66 3.96 17.74 11.22 24.23 7.27 6.49 15.93 10.05 25.99 10.69-2.28 7.05-5.06 14.28-8.33 21.68zM119.22 33.09c0-7.39 2.65-14.5 7.95-21.32 5.3-6.83 11.96-11.19 19.99-13.08.33 1.09.49 2.12.49 3.09 0 7.39-2.73 14.47-8.19 21.24-5.46 6.78-12.19 11.12-20.19 13.02-.05-.98-.05-1.96-.05-2.95z"/>
+        </svg>
       </button>
-      <button class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors">
+      <button type="button" class="flex-1 flex items-center justify-center gap-2 py-2 border border-border-subtle rounded-lg hover:bg-surface-canvas transition-colors" title="Zalo">
         <div class="w-4 h-4 bg-secondary text-white rounded text-[10px] font-bold flex items-center justify-center leading-none">Z</div>
       </button>
     </div>
 
     <div class="mt-6 text-center">
-      <p class="text-xs text-text-muted">Đã có tài khoản ShopeChill? <a href="#" class="text-primary font-bold hover:underline">Đăng nhập ngay</a></p>
+      <p id="authModalFooterText" class="text-xs text-text-muted">Chưa có tài khoản ShopeChill? <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="text-primary font-bold hover:underline">Đăng ký ngay</a></p>
     </div>
   </div>
 </div>
@@ -776,9 +778,14 @@ header.is-scrolled {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                document.getElementById('authModal').classList.add('hidden');
-                // Could auto-switch to login tab here
+                showToast({
+                    type: 'success',
+                    title: 'Đăng ký thành công',
+                    message: data.message || 'Tài khoản đã tạo thành công. Vui lòng đăng nhập.'
+                });
+                switchAuthTab('login');
+                const loginEmail = document.getElementById('loginEmail');
+                if (loginEmail) loginEmail.value = em;
             } else {
                 errDiv.innerText = data.message;
                 errDiv.classList.remove('hidden');
@@ -806,6 +813,123 @@ header.is-scrolled {
         fetchCartCount();
     });
 
+    // Global Modern Toast Notification System
+    window.showToast = function (opts) {
+        if (typeof opts === 'string') {
+            opts = { message: opts, type: 'info' };
+        }
+        var type = opts.type || 'info';
+        var title = opts.title || (type === 'success' ? 'Thành công' : (type === 'error' ? 'Có lỗi xảy ra' : (type === 'warning' ? 'Chú ý' : 'Thông báo')));
+        var message = opts.message || '';
+        var duration = opts.duration !== undefined ? opts.duration : 4000;
+        var actionText = opts.actionText || null;
+        var onAction = opts.onAction || null;
+
+        var container = document.getElementById('toastNotificationContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastNotificationContainer';
+            container.className = 'fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0';
+            document.body.appendChild(container);
+        }
+
+        var config = {
+            success: {
+                icon: 'check_circle',
+                border: 'border-l-emerald-500',
+                iconBg: 'bg-emerald-100 text-emerald-600',
+                bar: 'bg-emerald-500'
+            },
+            error: {
+                icon: 'error',
+                border: 'border-l-red-500',
+                iconBg: 'bg-red-100 text-red-600',
+                bar: 'bg-red-500'
+            },
+            warning: {
+                icon: 'lock',
+                border: 'border-l-amber-500',
+                iconBg: 'bg-amber-100 text-amber-600',
+                bar: 'bg-amber-500'
+            },
+            info: {
+                icon: 'info',
+                border: 'border-l-blue-500',
+                iconBg: 'bg-blue-100 text-blue-600',
+                bar: 'bg-blue-500'
+            }
+        }[type] || {
+            icon: 'info',
+            border: 'border-l-blue-500',
+            iconBg: 'bg-blue-100 text-blue-600',
+            bar: 'bg-blue-500'
+        };
+
+        var toast = document.createElement('div');
+        toast.className = 'pointer-events-auto bg-white/95 backdrop-blur-md rounded-xl p-3.5 shadow-[0_10px_25px_rgba(0,0,0,0.12)] border border-slate-200/90 border-l-4 ' + config.border + ' flex items-start gap-3 transition-all duration-300 transform translate-y-[-10px] opacity-0 relative overflow-hidden text-left';
+        
+        var actionHtml = actionText ? '<button type="button" class="toast-action-btn mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-brand-red-vibrant transition-colors cursor-pointer">' + actionText + ' <span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>' : '';
+
+        toast.innerHTML = 
+            '<div class="w-8 h-8 rounded-lg ' + config.iconBg + ' flex items-center justify-center shrink-0 mt-0.5">' +
+                '<span class="material-symbols-outlined text-[19px]">' + config.icon + '</span>' +
+            '</div>' +
+            '<div class="flex-1 min-w-0 pr-4">' +
+                '<h5 class="text-xs font-bold text-slate-800 leading-tight">' + title + '</h5>' +
+                '<p class="text-[12px] text-slate-600 leading-snug mt-1 break-words">' + message + '</p>' +
+                actionHtml +
+            '</div>' +
+            '<button type="button" class="toast-close-btn absolute top-2.5 right-2.5 text-slate-400 hover:text-slate-700 transition-colors p-1" title="Đóng">' +
+                '<span class="material-symbols-outlined text-[15px]">close</span>' +
+            '</button>' +
+            (duration > 0 ? '<div class="toast-progress-bar absolute bottom-0 left-0 h-[2.5px] ' + config.bar + ' transition-all linear" style="width: 100%;"></div>' : '');
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(function () {
+            toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            if (duration > 0) {
+                var bar = toast.querySelector('.toast-progress-bar');
+                if (bar) {
+                    bar.style.transitionDuration = duration + 'ms';
+                    requestAnimationFrame(function () {
+                        bar.style.width = '0%';
+                    });
+                }
+            }
+        });
+
+        function removeToast() {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-8px]', 'opacity-0');
+            setTimeout(function () {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        var closeBtn = toast.querySelector('.toast-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', removeToast);
+        }
+
+        if (actionText && onAction) {
+            var actionBtn = toast.querySelector('.toast-action-btn');
+            if (actionBtn) {
+                actionBtn.addEventListener('click', function () {
+                    onAction();
+                    removeToast();
+                });
+            }
+        }
+
+        if (duration > 0) {
+            setTimeout(removeToast, duration);
+        }
+    };
+
     window.addToCart = function(productId, qty = 1) {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
         const formData = new URLSearchParams();
@@ -824,7 +948,7 @@ header.is-scrolled {
         })
         .then(res => {
             if (res.redirected && res.url.toLowerCase().includes('login')) {
-                return { success: false, message: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.' };
+                return { success: false, isAuth: true, message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.' };
             }
             if (!res.ok) {
                 throw new Error('HTTP ' + res.status);
@@ -835,17 +959,43 @@ header.is-scrolled {
             if(data.success) {
                 const badge = document.getElementById('cartBadgeCount');
                 if(badge) badge.innerText = data.cartItemCount;
-                alert(data.message);
+                showToast({
+                    type: 'success',
+                    title: 'Đã thêm vào giỏ hàng',
+                    message: data.message || 'Sản phẩm đã được thêm vào giỏ hàng thành công.',
+                    actionText: 'Xem giỏ hàng',
+                    onAction: function() { window.location.href = '@Url.Action("Index", "Cart")'; }
+                });
             } else {
-                alert(data.message || 'Không thể thêm vào giỏ hàng.');
-                if(data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập'))) {
-                    document.getElementById('authModal').classList.remove('hidden');
+                var isAuthExpired = data.isAuth || (data.message && (data.message.includes('Phiên đăng nhập') || data.message.includes('đăng nhập')));
+                if (isAuthExpired) {
+                    showToast({
+                        type: 'warning',
+                        title: 'Yêu cầu đăng nhập',
+                        message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Đang chuyển hướng...',
+                        actionText: 'Đăng nhập ngay',
+                        duration: 3500,
+                        onAction: function() { window.location.href = '@Url.Action("Login", "Account")'; }
+                    });
+                    setTimeout(function() {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    }, 1800);
+                } else {
+                    showToast({
+                        type: 'error',
+                        title: 'Không thể thêm giỏ hàng',
+                        message: data.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'
+                    });
                 }
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Đã xảy ra lỗi khi thêm vào giỏ hàng.');
+            showToast({
+                type: 'error',
+                title: 'Lỗi hệ thống',
+                message: 'Đã xảy ra lỗi khi thêm vào giỏ hàng. Vui lòng thử lại.'
+            });
         });
     };
 
@@ -858,6 +1008,52 @@ header.is-scrolled {
         }
     }
 
+    function switchAuthTab(tab) {
+        var loginForm = document.getElementById('loginForm');
+        var registerForm = document.getElementById('registerForm');
+        var modalTitle = document.getElementById('authModalTitle');
+        var tabLoginBtn = document.getElementById('tabLoginBtn');
+        var tabRegisterBtn = document.getElementById('tabRegisterBtn');
+        var authFooterText = document.getElementById('authModalFooterText');
+
+        var activeClasses = ['text-primary', 'font-bold', 'border-b-2', 'border-primary'];
+        var inactiveClasses = ['text-text-muted', 'font-semibold'];
+
+        if (tab === 'register') {
+            if (loginForm) loginForm.classList.add('hidden');
+            if (registerForm) registerForm.classList.remove('hidden');
+            if (modalTitle) modalTitle.innerText = 'Đăng ký tài khoản ChillMember';
+
+            if (tabRegisterBtn) {
+                tabRegisterBtn.classList.add(...activeClasses);
+                tabRegisterBtn.classList.remove(...inactiveClasses);
+            }
+            if (tabLoginBtn) {
+                tabLoginBtn.classList.remove(...activeClasses);
+                tabLoginBtn.classList.add(...inactiveClasses);
+            }
+            if (authFooterText) {
+                authFooterText.innerHTML = 'Đã có tài khoản ShopeChill? <a href="javascript:void(0)" onclick="switchAuthTab(\'login\')" class="text-primary font-bold hover:underline">Đăng nhập ngay</a>';
+            }
+        } else {
+            if (loginForm) loginForm.classList.remove('hidden');
+            if (registerForm) registerForm.classList.add('hidden');
+            if (modalTitle) modalTitle.innerText = 'Đăng nhập tài khoản ChillMember';
+
+            if (tabLoginBtn) {
+                tabLoginBtn.classList.add(...activeClasses);
+                tabLoginBtn.classList.remove(...inactiveClasses);
+            }
+            if (tabRegisterBtn) {
+                tabRegisterBtn.classList.remove(...activeClasses);
+                tabRegisterBtn.classList.add(...inactiveClasses);
+            }
+            if (authFooterText) {
+                authFooterText.innerHTML = 'Chưa có tài khoản ShopeChill? <a href="javascript:void(0)" onclick="switchAuthTab(\'register\')" class="text-primary font-bold hover:underline">Đăng ký ngay</a>';
+            }
+        }
+    }
+
     function openAuthModal(tab) {
         var modal = document.getElementById('authModal');
         if (!modal) return;
@@ -865,19 +1061,7 @@ header.is-scrolled {
         var menu = document.getElementById('headerUserDropdownMenu');
         if (menu) menu.classList.add('hidden');
         
-        var loginForm = document.getElementById('loginForm');
-        var registerForm = document.getElementById('registerForm');
-        var modalTitle = document.getElementById('authModalTitle');
-        
-        if (tab === 'login') {
-            if (loginForm) loginForm.classList.remove('hidden');
-            if (registerForm) registerForm.classList.add('hidden');
-            if (modalTitle) modalTitle.innerText = 'Đăng nhập tài khoản ChillMember';
-        } else {
-            if (registerForm) registerForm.classList.remove('hidden');
-            if (loginForm) loginForm.classList.add('hidden');
-            if (modalTitle) modalTitle.innerText = 'Đăng ký tài khoản ChillMember';
-        }
+        switchAuthTab(tab || 'login');
     }
 
     document.addEventListener('click', function (e) {
@@ -888,6 +1072,9 @@ header.is-scrolled {
         }
     });
 </script>
+
+<!-- Modern Toast Notification Container -->
+<div id="toastNotificationContainer" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
 <!-- Floating Back to Top Button -->
 <button id="backToTopBtn" type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" 

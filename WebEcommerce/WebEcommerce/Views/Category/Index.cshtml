@@ -51,35 +51,37 @@
 </div>
 
 <!-- Bảng danh mục dạng cây -->
-<div class="admin-card rounded-2xl overflow-hidden">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="bg-slate-50 border-b-2 border-slate-200">
-                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục</th>
-                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục cha</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Sản phẩm</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">DM con</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Thứ tự</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Trạng thái</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Categories.Any())
-            {
-                @RenderCategoryRows(Model.Categories)
-            }
-            else
-            {
-                <tr>
-                    <td colspan="7" class="text-center py-12 text-slate-400">
-                        <span class="material-symbols-outlined text-5xl mb-2 block">folder_off</span>
-                        <span class="text-base font-medium">Chưa có danh mục nào</span>
-                    </td>
+<div class="admin-card rounded-2xl overflow-hidden mb-6">
+    <div class="overflow-x-auto w-full">
+        <table class="w-full text-sm min-w-[850px]">
+            <thead>
+                <tr class="bg-slate-50 border-b-2 border-slate-200">
+                    <th class="text-left px-5 py-3.5 font-bold text-slate-700 min-w-[220px] whitespace-nowrap">Danh mục</th>
+                    <th class="text-left px-5 py-3.5 font-bold text-slate-700 min-w-[150px] whitespace-nowrap">Danh mục cha</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[90px] whitespace-nowrap">Sản phẩm</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[90px] whitespace-nowrap">DM con</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[80px] whitespace-nowrap">Thứ tự</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[110px] whitespace-nowrap">Trạng thái</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[120px] whitespace-nowrap sticky right-0 bg-slate-50 z-20 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.08)]">Hành động</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @if (Model.Categories.Any())
+                {
+                    @RenderCategoryRows(Model.Categories)
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-12 text-slate-400">
+                            <span class="material-symbols-outlined text-5xl mb-2 block">folder_off</span>
+                            <span class="text-base font-medium">Chưa có danh mục nào</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal xác nhận xóa -->
@@ -140,7 +142,7 @@
                     <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Ẩn</span>
                 }
             </td>
-            <td class="px-5 py-3.5 text-center">
+            <td class="px-5 py-3.5 text-center sticky right-0 bg-white z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.06)]">
                 <div class="flex items-center justify-center gap-1">
                     <a href="@Url.Action("Edit", "Category", new { id = cat.CategoryID })"
                        class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Sửa">
