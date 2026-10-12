@@ -153,7 +153,7 @@
                             <span class="text-base sm:text-lg text-slate-400 line-through font-semibold">
                                 @Model.Price.ToString("N0")₫
                             </span>
-                            @if (savedAmount > 0)
+                            if (savedAmount > 0)
                             {
                                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
                                     Tiết kiệm @savedAmount.ToString("N0")₫ (-@discountPercent%)
