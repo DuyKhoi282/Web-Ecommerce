@@ -4,67 +4,124 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!-- Page Header -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+<!-- Pre-Task Audit & Plan: Đã tối ưu hóa controller, truy vấn dữ liệu 1 lần AsNoTracking, bổ sung KPI tỷ lệ tăng trưởng thực tế, sản phẩm bán chạy và cảnh báo tồn kho -->
+
+<!-- Header & Quick Navigation -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
     <div>
-        <h1 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">Bảng điều khiển tổng quan</h1>
+        <div class="flex items-center gap-2.5">
+            <h1 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">Bảng điều khiển tổng quan</h1>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-red-100 text-[#d70018] border border-red-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#d70018] animate-pulse"></span> Trực tiếp
+            </span>
+        </div>
         @if (User.IsInRole("Administrator"))
         {
-            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào Quản trị viên! Dưới đây là tình hình hoạt động tổng thể hệ thống và người dùng ShopeChill.</p>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Hệ sinh thái thương mại điện tử ShopeChill — Giám sát hoạt động, người dùng và doanh thu toàn sàn.</p>
         }
         else
         {
-            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Xin chào Người bán! Dưới đây là tình hình kinh doanh, doanh thu, đơn hàng và hàng hóa của bạn.</p>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Báo cáo hiệu suất kinh doanh, đơn hàng, khách hàng và tồn kho gian hàng ShopeChill.</p>
         }
     </div>
-    @if (User.IsInRole("Administrator"))
-    {
-        <div class="flex items-center gap-3">
-            <a href="@Url.Action("Index", "Product")" class="px-5 py-2.5 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#d70018]">
+
+    <!-- Quick Action Buttons -->
+    <div class="flex flex-wrap items-center gap-2.5">
+        @if (Model.PendingOrdersCount > 0)
+        {
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold rounded-xl border border-amber-300 transition-all flex items-center gap-1.5 shadow-xs">
+                <span class="material-symbols-outlined text-base text-amber-600">pending_actions</span>
+                <span>Duyệt đơn (@Model.PendingOrdersCount)</span>
+            </a>
+        }
+        @if (User.IsInRole("Administrator"))
+        {
+            <a href="@Url.Action("Index", "Product")" class="px-4 py-2 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border border-[#d70018]">
                 <span class="material-symbols-outlined text-base">inventory_2</span>
-                <span>Quản lý sản phẩm</span>
+                <span>Sản phẩm</span>
             </a>
-            <a href="@Url.Action("Index", "AdminUser")" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm border border-slate-300 transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-base text-slate-500">person_search</span>
-                <span>Quản lý người dùng</span>
+            <a href="@Url.Action("Index", "AdminUser")" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-xs border border-slate-300 transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-slate-500">group</span>
+                <span>Người dùng</span>
             </a>
-        </div>
-    }
-    else if (User.IsInRole("StoreManager"))
-    {
-        <div class="flex items-center gap-3">
-            <a href="@Url.Action("Create", "Product")" class="px-5 py-2.5 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border-2 border-[#d70018]">
-                <span class="material-symbols-outlined text-base">add_circle</span>
+        }
+        else if (User.IsInRole("StoreManager"))
+        {
+            <a href="@Url.Action("Create", "Product")" class="px-4 py-2 bg-[#d70018] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 border border-[#d70018]">
+                <span class="material-symbols-outlined text-base">add_box</span>
                 <span>Thêm sản phẩm</span>
             </a>
-            <a href="@Url.Action("Index", "AdminOrder")" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm border border-slate-300 transition-all flex items-center gap-2">
+            <a href="@Url.Action("Index", "AdminOrder")" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-xs border border-slate-300 transition-all flex items-center gap-1.5">
                 <span class="material-symbols-outlined text-base text-slate-500">receipt_long</span>
-                <span>Xem đơn hàng</span>
+                <span>Đơn hàng</span>
             </a>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 @if (ViewBag.ErrorMessage != null)
 {
     <div class="mb-6 rounded-2xl bg-amber-50 text-amber-900 border-2 border-amber-300 p-4 text-xs sm:text-sm flex items-center gap-2.5 shadow-sm">
-        <span class="material-symbols-outlined text-amber-600 text-xl font-bold">info</span>
+        <span class="material-symbols-outlined text-amber-600 text-xl font-bold">warning</span>
         <span class="font-semibold">@ViewBag.ErrorMessage</span>
     </div>
 }
 
-<!-- 4 KPI Metric Cards (Viền rõ nét, Tách nền tuyệt đối trên #e9eff6) -->
+<!-- Top KPI Summary Alerts (Nếu có đơn cần xử lý hoặc kho sắp cạn) -->
+@if (Model.PendingOrdersCount > 0 || Model.LowStockProductsCount > 0)
+{
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+        @if (Model.PendingOrdersCount > 0)
+        {
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900">
+                <div class="flex items-center gap-2.5 text-xs font-medium">
+                    <span class="material-symbols-outlined text-amber-600 text-lg font-bold">notification_important</span>
+                    <span>Bạn có <strong>@Model.PendingOrdersCount đơn hàng mới</strong> đang chờ xác nhận xử lý.</span>
+                </div>
+                <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="text-xs font-bold text-amber-800 hover:text-amber-950 underline shrink-0 ml-2">Xử lý ngay &rarr;</a>
+            </div>
+        }
+        @if (Model.LowStockProductsCount > 0)
+        {
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200 text-rose-900">
+                <div class="flex items-center gap-2.5 text-xs font-medium">
+                    <span class="material-symbols-outlined text-rose-600 text-lg font-bold">production_quantity_limits</span>
+                    <span>Có <strong>@Model.LowStockProductsCount mặt hàng</strong> trong kho số lượng dưới 5 chiếc.</span>
+                </div>
+                <a href="@Url.Action("Index", "Product")" class="text-xs font-bold text-rose-800 hover:text-rose-950 underline shrink-0 ml-2">Kiểm kho &rarr;</a>
+            </div>
+        }
+    </div>
+}
+
+<!-- 4 KPI Metric Cards (Độ tương phản cao, số liệu động từ Database) -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
     <!-- Card 1: Revenue -->
     <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-emerald-500 hover:border-emerald-500 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all duration-200 flex items-center justify-between">
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng doanh thu</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalRevenue.ToString("N0") ₫</span>
-            <span class="block text-[11px] text-emerald-600 font-bold mt-1.5 flex items-center gap-0.5">
-                <span class="material-symbols-outlined text-sm font-bold">trending_up</span> +18.2% so với tháng trước
-            </span>
+            
+            @if (Model.RevenueGrowthPercentage > 0)
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-emerald-200">
+                    <span class="material-symbols-outlined text-xs font-bold">trending_up</span> +@Model.RevenueGrowthPercentage% so với tháng trước
+                </span>
+            }
+            else if (Model.RevenueGrowthPercentage < 0)
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-rose-200">
+                    <span class="material-symbols-outlined text-xs font-bold">trending_down</span> @Model.RevenueGrowthPercentage% so với tháng trước
+                </span>
+            }
+            else
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md font-bold mt-2 border border-slate-200">
+                    <span class="material-symbols-outlined text-xs font-bold">trending_flat</span> Ổn định theo tháng
+                </span>
+            }
         </div>
-        <div class="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center p-3 shadow-xs">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center p-2.5 shadow-xs shrink-0">
             <span class="material-symbols-outlined text-2xl font-bold">payments</span>
         </div>
     </div>
@@ -74,11 +131,20 @@
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng đơn hàng</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalOrders.ToString("N0")</span>
-            <span class="block text-[11px] text-[#ff4d4d] font-bold mt-1.5 flex items-center gap-0.5 group-hover:underline">
-                <span class="material-symbols-outlined text-sm font-bold">shopping_cart</span> Đơn mua hàng &rarr;
-            </span>
+            @if (Model.PendingOrdersCount > 0)
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-amber-200 group-hover:underline">
+                    <span class="material-symbols-outlined text-xs font-bold">hourglass_top</span> @Model.PendingOrdersCount đơn chờ duyệt
+                </span>
+            }
+            else
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md font-bold mt-2 border border-slate-200 group-hover:underline">
+                    <span class="material-symbols-outlined text-xs font-bold">shopping_cart</span> Đã xử lý tất cả
+                </span>
+            }
         </div>
-        <div class="w-13 h-13 rounded-2xl bg-rose-50 text-[#ff4d4d] border border-rose-200 flex items-center justify-center p-3 shadow-xs group-hover:scale-105 transition-transform">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-[#ff4d4d] border border-rose-200 flex items-center justify-center p-2.5 shadow-xs group-hover:scale-105 transition-transform shrink-0">
             <span class="material-symbols-outlined text-2xl font-bold">receipt_long</span>
         </div>
     </a>
@@ -88,13 +154,13 @@
     {
         <a href="@Url.Action("Index", "AdminUser")" class="block bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#d70018] hover:border-[#d70018] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all duration-200 flex items-center justify-between group cursor-pointer">
             <div>
-                <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng</span>
+                <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng & User</span>
                 <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
-                <span class="block text-[11px] text-[#d70018] font-bold mt-1.5 flex items-center gap-0.5 group-hover:underline">
-                    <span class="material-symbols-outlined text-sm font-bold">group</span> Thành viên đăng ký &rarr;
+                <span class="inline-flex items-center gap-1 text-[11px] text-[#d70018] bg-red-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-red-200 group-hover:underline">
+                    <span class="material-symbols-outlined text-xs font-bold">group</span> Thành viên đăng ký &rarr;
                 </span>
             </div>
-            <div class="w-13 h-13 rounded-2xl bg-red-50 text-[#d70018] border border-red-200 flex items-center justify-center p-3 shadow-xs group-hover:scale-105 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d70018] border border-red-200 flex items-center justify-center p-2.5 shadow-xs group-hover:scale-105 transition-transform shrink-0">
                 <span class="material-symbols-outlined text-2xl font-bold">person</span>
             </div>
         </a>
@@ -103,13 +169,13 @@
     {
         <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#d70018] hover:border-[#d70018] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all duration-200 flex items-center justify-between">
             <div>
-                <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng</span>
+                <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng & User</span>
                 <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
-                <span class="block text-[11px] text-[#d70018] font-bold mt-1.5 flex items-center gap-0.5">
-                    <span class="material-symbols-outlined text-sm font-bold">group</span> Thành viên đăng ký
+                <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md font-bold mt-2 border border-slate-200">
+                    <span class="material-symbols-outlined text-xs font-bold">group</span> Thành viên đăng ký
                 </span>
             </div>
-            <div class="w-13 h-13 rounded-2xl bg-red-50 text-[#d70018] border border-red-200 flex items-center justify-center p-3 shadow-xs">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#d70018] border border-red-200 flex items-center justify-center p-2.5 shadow-xs shrink-0">
                 <span class="material-symbols-outlined text-2xl font-bold">person</span>
             </div>
         </div>
@@ -118,41 +184,52 @@
     <!-- Card 4: Products -->
     <a href="@Url.Action("Index", "Product")" class="block bg-white rounded-2xl border border-slate-300 border-t-4 border-t-purple-600 hover:border-purple-600 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all duration-200 flex items-center justify-between group cursor-pointer">
         <div>
-            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Sản phẩm trong kho</span>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Kho sản phẩm</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalProducts.ToString("N0")</span>
-            <span class="block text-[11px] text-purple-600 font-bold mt-1.5 flex items-center gap-0.5 group-hover:underline">
-                <span class="material-symbols-outlined text-sm font-bold">inventory_2</span> Danh mục hàng hóa &rarr;
-            </span>
+            @if (Model.LowStockProductsCount > 0)
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-purple-200 group-hover:underline">
+                    <span class="material-symbols-outlined text-xs font-bold">inventory</span> @Model.LowStockProductsCount sản phẩm sắp hết
+                </span>
+            }
+            else
+            {
+                <span class="inline-flex items-center gap-1 text-[11px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md font-bold mt-2 border border-purple-200 group-hover:underline">
+                    <span class="material-symbols-outlined text-xs font-bold">check_circle</span> Tồn kho dồi dào
+                </span>
+            }
         </div>
-        <div class="w-13 h-13 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center p-3 shadow-xs group-hover:scale-105 transition-transform">
+        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center p-2.5 shadow-xs group-hover:scale-105 transition-transform shrink-0">
             <span class="material-symbols-outlined text-2xl font-bold">category</span>
         </div>
     </a>
 </div>
 
 <!-- Revenue & Order Status Charts Section -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)]">
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+    <!-- Left: Revenue Bar Chart (7 cols) -->
+    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-300 p-6 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 pb-3 border-b border-slate-200">
             <div>
-                <h2 class="font-headline font-black text-lg text-slate-900">Biểu đồ doanh thu</h2>
-                <p class="text-xs text-slate-500 font-medium">Doanh thu kinh doanh 6 tháng gần nhất</p>
+                <h2 class="font-headline font-black text-lg text-slate-900">Biểu đồ doanh thu kinh doanh</h2>
+                <p class="text-xs text-slate-500 font-medium">Xu hướng doanh thu thực tế 6 tháng gần nhất</p>
             </div>
-            <span class="text-xs font-black text-[#d70018] bg-red-50 px-3.5 py-1.5 rounded-full border border-red-200">
+            <span class="self-start sm:self-auto text-xs font-black text-[#d70018] bg-red-50 px-3 py-1 rounded-full border border-red-200">
                 Năm @DateTime.Now.Year
             </span>
         </div>
-        <div class="w-full h-72">
+        <div class="w-full h-72 relative">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
     
-    <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)]">
+    <!-- Right: Order Status Doughnut Chart (5 cols) -->
+    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-300 p-6 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] flex flex-col justify-between">
         <div class="mb-4 pb-3 border-b border-slate-200">
-            <h2 class="font-headline font-black text-lg text-slate-900">Trạng thái đơn hàng</h2>
-            <p class="text-xs text-slate-500 font-medium">Tỷ lệ các trạng thái đơn hàng hiện tại</p>
+            <h2 class="font-headline font-black text-lg text-slate-900">Phân bố trạng thái đơn hàng</h2>
+            <p class="text-xs text-slate-500 font-medium">Tỷ lệ các giai đoạn xử lý đơn hàng</p>
         </div>
-        <div class="w-full h-72 flex justify-center">
+        <div class="w-full h-72 flex items-center justify-center relative">
             <canvas id="orderStatusChart"></canvas>
         </div>
     </div>
@@ -161,22 +238,18 @@
 <!-- 2-Column: Recent Orders & Top Selling Products -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
     <!-- Left: Recent Orders (7 cols) -->
-    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden">
+    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] overflow-hidden flex flex-col">
         <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
-            <h3 class="font-headline font-black text-base text-slate-900">Đơn hàng mới nhất</h3>
-            @if (User.IsInRole("StoreManager"))
-            {
-                <a href="@Url.Action("Index", "AdminOrder")" class="text-xs font-bold text-[#d70018] hover:underline flex items-center gap-1">
-                    Xem tất cả <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                </a>
-            }
-            else
-            {
-                <span class="text-xs font-bold text-[#d70018] bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">Gần đây</span>
-            }
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#d70018]">receipt_long</span>
+                <h3 class="font-headline font-black text-base text-slate-900">Đơn hàng mới nhất</h3>
+            </div>
+            <a href="@Url.Action("Index", "AdminOrder")" class="text-xs font-bold text-[#d70018] hover:underline flex items-center gap-1">
+                Xem tất cả đơn hàng <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </a>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-left border-collapse text-xs min-w-[540px]">
                 <thead>
                     <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[11px] font-black border-b border-slate-200">
                         <th class="py-3.5 px-4">Mã đơn</th>
@@ -184,28 +257,77 @@
                         <th class="py-3.5 px-4">Ngày đặt</th>
                         <th class="py-3.5 px-4">Tổng tiền</th>
                         <th class="py-3.5 px-4">Trạng thái</th>
+                        <th class="py-3.5 px-4 text-center">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y-2 divide-slate-100">
+                <tbody class="divide-y divide-slate-100">
                     @if (Model.RecentOrders == null || !Model.RecentOrders.Any())
                     {
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-slate-500 font-medium">Chưa có đơn hàng nào trong hệ thống.</td>
+                            <td colspan="6" class="py-10 text-center text-slate-500 font-medium">
+                                <span class="material-symbols-outlined text-3xl text-slate-300 block mb-1">inbox</span>
+                                Chưa có đơn hàng nào được ghi nhận.
+                            </td>
                         </tr>
                     }
                     else
                     {
                         foreach (var ord in Model.RecentOrders)
                         {
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="py-3.5 px-4 font-black text-[#d70018]">#@ord.OrderID</td>
-                                <td class="py-3.5 px-4 text-slate-900 font-bold">@ord.CustomerName</td>
-                                <td class="py-3.5 px-4 text-slate-600 font-medium">@ord.OrderDate.ToString("dd/MM/yyyy")</td>
-                                <td class="py-3.5 px-4 font-black text-slate-900">@ord.FinalAmount.ToString("N0") ₫</td>
-                                <td class="py-3.5 px-4">
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                        @ord.OrderStatus
-                                    </span>
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="py-3.5 px-4 font-black text-[#d70018]">
+                                    <a href="@Url.Action("Detail", "AdminOrder", new { id = ord.OrderID })" class="hover:underline">
+                                        #@ord.OrderID
+                                    </a>
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-900 font-bold max-w-[150px] truncate" title="@ord.CustomerName">
+                                    @ord.CustomerName
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-600 font-medium whitespace-nowrap">
+                                    @ord.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="py-3.5 px-4 font-black text-slate-900 whitespace-nowrap">
+                                    @ord.FinalAmount.ToString("N0") ₫
+                                </td>
+                                <td class="py-3.5 px-4 whitespace-nowrap">
+                                    @switch (ord.OrderStatus)
+                                    {
+                                        case "Pending":
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Chờ xử lý
+                                            </span>
+                                            break;
+                                        case "Confirmed":
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đã xác nhận
+                                            </span>
+                                            break;
+                                        case "Shipped":
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Đang giao
+                                            </span>
+                                            break;
+                                        case "Delivered":
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Hoàn tất
+                                            </span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Đã hủy
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-300">
+                                                @ord.OrderStatus
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <a href="@Url.Action("Detail", "AdminOrder", new { id = ord.OrderID })" class="p-1.5 hover:bg-slate-200 text-slate-600 hover:text-slate-900 rounded-lg inline-flex items-center transition-colors" title="Xem chi tiết đơn hàng">
+                                        <span class="material-symbols-outlined text-base">visibility</span>
+                                    </a>
                                 </td>
                             </tr>
                         }
@@ -215,38 +337,71 @@
         </div>
     </div>
 
-    <!-- Right: Top Products (5 cols) -->
-    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] p-5">
-        <div class="mb-4 pb-3 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-headline font-black text-base text-slate-900">Sản phẩm nổi bật trong kho</h3>
-            @if (User.IsInRole("StoreManager"))
-            {
+    <!-- Right: Top Selling Products (5 cols) -->
+    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-300 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.06)] p-5 flex flex-col justify-between">
+        <div>
+            <div class="mb-4 pb-3 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#d70018]">star</span>
+                    <h3 class="font-headline font-black text-base text-slate-900">Sản phẩm bán chạy & Nổi bật</h3>
+                </div>
                 <a href="@Url.Action("Index", "Product")" class="text-xs font-bold text-[#d70018] hover:underline flex items-center gap-1">
-                    Quản lý kho <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    Xem kho <span class="material-symbols-outlined text-xs">arrow_forward</span>
                 </a>
-            }
-        </div>
-        <div class="space-y-3">
-            @if (Model.TopProducts == null || !Model.TopProducts.Any())
-            {
-                <p class="text-xs text-slate-500 font-medium text-center py-6">Chưa có sản phẩm nào trong kho.</p>
-            }
-            else
-            {
-                foreach (var prod in Model.TopProducts)
+            </div>
+            <div class="space-y-3">
+                @if (Model.TopProducts == null || !Model.TopProducts.Any())
                 {
-                    <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors">
-                        <div class="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-[#d70018] shrink-0 font-bold">
-                            <span class="material-symbols-outlined text-xl">devices</span>
-                        </div>
-                        <div class="flex-1 truncate">
-                            <h4 class="text-xs font-bold text-slate-900 truncate">@prod.ProductName</h4>
-                            <span class="text-[11px] font-black text-[#d70018]">@prod.Price.ToString("N0") ₫</span>
-                        </div>
-                        <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Còn hàng</span>
-                    </div>
+                    <p class="text-xs text-slate-500 font-medium text-center py-8">
+                        <span class="material-symbols-outlined text-3xl text-slate-300 block mb-1">inventory_2</span>
+                        Chưa có sản phẩm nào trong kho.
+                    </p>
                 }
-            }
+                else
+                {
+                    foreach (var prod in Model.TopProducts)
+                    {
+                        <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-slate-200 hover:border-slate-300 transition-all group">
+                            <!-- Product Thumbnail -->
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                                @if (!string.IsNullOrEmpty(prod.ImageUrl))
+                                {
+                                    <img src="@prod.ImageUrl" alt="@prod.ProductName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<span class=\'material-symbols-outlined text-slate-400\'>devices</span>';" />
+                                }
+                                else
+                                {
+                                    <span class="material-symbols-outlined text-xl text-slate-400">devices</span>
+                                }
+                            </div>
+                            
+                            <!-- Product Info -->
+                            <div class="flex-1 min-w-0">
+                                <a href="@Url.Action("Edit", "Product", new { id = prod.ProductID })" class="text-xs font-bold text-slate-900 hover:text-[#d70018] truncate block" title="@prod.ProductName">
+                                    @prod.ProductName
+                                </a>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[11px] font-black text-[#d70018]">@prod.Price.ToString("N0") ₫</span>
+                                    @if (prod.SoldQuantity > 0)
+                                    {
+                                        <span class="text-[10px] text-slate-500 font-semibold">• Đã bán: <strong class="text-slate-800">@prod.SoldQuantity</strong></span>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Action / Status -->
+                            <a href="@Url.Action("Edit", "Product", new { id = prod.ProductID })" class="px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:text-[#d70018] bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shrink-0">
+                                Sửa
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+            <a href="@Url.Action("Create", "Product")" class="text-xs font-bold text-[#d70018] hover:text-[#b91c1c] inline-flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm font-bold">add_circle</span> Thêm mặt hàng mới vào gian hàng
+            </a>
         </div>
     </div>
 </div>
@@ -257,65 +412,173 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             $.getJSON('@Url.Action("GetRevenueData", "AdminDashboard")', function(data) {
-                // Bar Chart
-                const ctxRev = document.getElementById('revenueChart').getContext('2d');
-                new Chart(ctxRev, {
-                    type: 'bar',
-                    data: {
-                        labels: data.months,
-                        datasets: [{
-                            label: 'Doanh thu (VNĐ)',
-                            data: data.revenues,
-                            backgroundColor: 'rgba(215, 0, 24, 0.8)',
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(val) {
-                                        return (val / 1000000).toLocaleString() + ' Tr';
+                // 1. Bar Chart (Doanh thu 6 tháng)
+                const revCanvas = document.getElementById('revenueChart');
+                if (revCanvas) {
+                    const ctxRev = revCanvas.getContext('2d');
+                    
+                    // Create subtle red gradient
+                    const gradient = ctxRev.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(215, 0, 24, 0.9)');
+                    gradient.addColorStop(1, 'rgba(215, 0, 24, 0.35)');
+
+                    new Chart(ctxRev, {
+                        type: 'bar',
+                        data: {
+                            labels: data.months,
+                            datasets: [{
+                                label: 'Doanh thu (VNĐ)',
+                                data: data.revenues,
+                                backgroundColor: gradient,
+                                hoverBackgroundColor: '#b91c1c',
+                                borderRadius: 8,
+                                borderSkipped: false,
+                                barPercentage: 0.55
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: '#0f172a',
+                                    titleFont: { size: 12, weight: 'bold' },
+                                    bodyFont: { size: 12 },
+                                    padding: 10,
+                                    cornerRadius: 8,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const val = context.raw || 0;
+                                            return 'Doanh thu: ' + val.toLocaleString('vi-VN') + ' ₫';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: {
+                                        font: { weight: '600', size: 11 },
+                                        color: '#64748b'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                                    ticks: {
+                                        font: { size: 11 },
+                                        color: '#64748b',
+                                        callback: function(val) {
+                                            if (val >= 1000000000) return (val / 1000000000).toFixed(1) + ' Tỷ';
+                                            if (val >= 1000000) return (val / 1000000).toFixed(0) + ' Tr';
+                                            return val.toLocaleString('vi-VN');
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
 
-                // Doughnut Chart
-                const ctxStatus = document.getElementById('orderStatusChart').getContext('2d');
-                new Chart(ctxStatus, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.statusLabels,
-                        datasets: [{
-                            data: data.statusData,
-                            backgroundColor: [
-                                '#d70018',
-                                '#ff4d4d',
-                                '#fca5a5',
-                                '#f87171',
-                                '#b91c1c'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'right' }
-                        }
+                // 2. Doughnut Chart (Phân bố trạng thái đơn hàng)
+                const statusCanvas = document.getElementById('orderStatusChart');
+                if (statusCanvas) {
+                    const ctxStatus = statusCanvas.getContext('2d');
+                    
+                    // Map status color codes
+                    const colorMap = {
+                        'Pending': '#f59e0b',     // Amber
+                        'Confirmed': '#3b82f6',   // Blue
+                        'Shipped': '#8b5cf6',     // Purple
+                        'Delivered': '#10b981',   // Emerald
+                        'Cancelled': '#ef4444'    // Rose
+                    };
+
+                    const backgroundColors = data.statusLabels.map(function(label) {
+                        return colorMap[label] || '#94a3b8';
+                    });
+
+                    // Check if total data is 0
+                    const totalCount = data.statusData.reduce(function(a, b) { return a + b; }, 0);
+
+                    if (totalCount === 0) {
+                        // Empty state chart
+                        new Chart(ctxStatus, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['Chưa có đơn'],
+                                datasets: [{
+                                    data: [1],
+                                    backgroundColor: ['#e2e8f0']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { enabled: false }
+                                }
+                            }
+                        });
+                    } else {
+                        new Chart(ctxStatus, {
+                            type: 'doughnut',
+                            data: {
+                                labels: data.statusLabels.map(function(l) {
+                                    switch(l) {
+                                        case 'Pending': return 'Chờ xử lý';
+                                        case 'Confirmed': return 'Đã xác nhận';
+                                        case 'Shipped': return 'Đang giao';
+                                        case 'Delivered': return 'Đã giao';
+                                        case 'Cancelled': return 'Đã hủy';
+                                        default: return l;
+                                    }
+                                }),
+                                datasets: [{
+                                    data: data.statusData,
+                                    backgroundColor: backgroundColors,
+                                    borderWidth: 2,
+                                    borderColor: '#ffffff',
+                                    hoverOffset: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '68%',
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 12,
+                                            boxHeight: 12,
+                                            padding: 12,
+                                            font: { size: 11, weight: '600' },
+                                            color: '#334155'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#0f172a',
+                                        padding: 10,
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const val = context.raw || 0;
+                                                const pct = totalCount > 0 ? ((val / totalCount) * 100).toFixed(1) : 0;
+                                                return ' ' + context.label + ': ' + val + ' đơn (' + pct + '%)';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     }
-                });
+                }
             }).fail(function() {
-                console.error("Lỗi tải data chart");
+                console.error("Lỗi tải dữ liệu biểu đồ Dashboard");
             });
         });
     </script>
 }
-
