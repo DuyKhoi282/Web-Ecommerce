@@ -78,90 +78,92 @@
 </div>
 
 <!-- Bảng tồn kho -->
-<div class="admin-card rounded-2xl overflow-hidden">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="bg-slate-50 border-b-2 border-slate-200">
-                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Sản phẩm</th>
-                <th class="text-left px-5 py-3.5 font-bold text-slate-700">Danh mục</th>
-                <th class="text-right px-5 py-3.5 font-bold text-slate-700">Giá</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Tồn kho</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Mức cảnh báo</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Trạng thái</th>
-                <th class="text-center px-5 py-3.5 font-bold text-slate-700">Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Items.Any())
-            {
-                foreach (var item in Model.Items)
+<div class="admin-card rounded-2xl overflow-hidden mb-6">
+    <div class="overflow-x-auto w-full">
+        <table class="w-full text-sm min-w-[950px]">
+            <thead>
+                <tr class="bg-slate-50 border-b-2 border-slate-200">
+                    <th class="text-left px-5 py-3.5 font-bold text-slate-700 min-w-[220px] whitespace-nowrap">Sản phẩm</th>
+                    <th class="text-left px-5 py-3.5 font-bold text-slate-700 min-w-[130px] whitespace-nowrap">Danh mục</th>
+                    <th class="text-right px-5 py-3.5 font-bold text-slate-700 min-w-[110px] whitespace-nowrap">Giá</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[90px] whitespace-nowrap">Tồn kho</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[130px] whitespace-nowrap">Mức cảnh báo</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[120px] whitespace-nowrap">Trạng thái</th>
+                    <th class="text-center px-5 py-3.5 font-bold text-slate-700 min-w-[120px] whitespace-nowrap sticky right-0 bg-slate-50 z-20 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.08)]">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Any())
                 {
-                    var rowBg = item.StockLevel == "danger" ? "bg-red-50/60" : (item.StockLevel == "warning" ? "bg-amber-50/60" : "");
-                    <tr class="border-b border-slate-100 hover:bg-blue-50/50 transition-colors @rowBg">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                @if (!string.IsNullOrEmpty(item.MainImageUrl))
+                    foreach (var item in Model.Items)
+                    {
+                        var rowBg = item.StockLevel == "danger" ? "bg-red-50/60" : (item.StockLevel == "warning" ? "bg-amber-50/60" : "");
+                        <tr class="border-b border-slate-100 hover:bg-blue-50/50 transition-colors @rowBg">
+                            <td class="px-5 py-3">
+                                <div class="flex items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(item.MainImageUrl))
+                                    {
+                                        <img src="@item.MainImageUrl" alt="@item.ProductName" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm shrink-0" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-slate-400 text-sm">image</span>
+                                        </div>
+                                    }
+                                    <span class="font-semibold text-slate-800">@item.ProductName</span>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap text-slate-600">@item.CategoryName</td>
+                            <td class="px-5 py-3 whitespace-nowrap text-right font-bold text-slate-800">@item.Price.ToString("N0")₫</td>
+                            <td class="px-5 py-3 whitespace-nowrap text-center">
+                                @{
+                                    var stockColor = item.StockLevel == "danger" ? "bg-red-100 text-red-700" : (item.StockLevel == "warning" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700");
+                                }
+                                <span class="@stockColor px-3 py-1 rounded-lg text-sm font-extrabold inline-block">@item.StockQuantity</span>
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap text-center">
+                                @if (item.StockLevel == "danger")
                                 {
-                                    <img src="@item.MainImageUrl" alt="@item.ProductName" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse inline-block">🔴 HẾT HÀNG</span>
+                                }
+                                else if (item.StockLevel == "warning")
+                                {
+                                    <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold inline-block">⚠ SẮP HẾT</span>
                                 }
                                 else
                                 {
-                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-slate-400 text-sm">image</span>
-                                    </div>
+                                    <span class="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold inline-block">✅ ĐỦ HÀNG</span>
                                 }
-                                <span class="font-semibold text-slate-800">@item.ProductName</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-slate-600">@item.CategoryName</td>
-                        <td class="px-5 py-3 text-right font-bold text-slate-800">@item.Price.ToString("N0")₫</td>
-                        <td class="px-5 py-3 text-center">
-                            @{
-                                var stockColor = item.StockLevel == "danger" ? "bg-red-100 text-red-700" : (item.StockLevel == "warning" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700");
-                            }
-                            <span class="@stockColor px-3 py-1 rounded-lg text-sm font-extrabold">@item.StockQuantity</span>
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if (item.StockLevel == "danger")
-                            {
-                                <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">🔴 HẾT HÀNG</span>
-                            }
-                            else if (item.StockLevel == "warning")
-                            {
-                                <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">⚠ SẮP HẾT</span>
-                            }
-                            else
-                            {
-                                <span class="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">✅ ĐỦ HÀNG</span>
-                            }
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @{
-                                var statusClass = item.Status == 1 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600";
-                            }
-                            <span class="@statusClass px-3 py-1 rounded-full text-xs font-bold">@item.StatusText</span>
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            <a href="@Url.Action("UpdateStock", "Inventory", new { id = item.ProductID })"
-                               class="inline-flex items-center gap-1 bg-chill-primary hover:bg-chill-primaryDark text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
-                                <span class="material-symbols-outlined text-sm">sync_alt</span>
-                                Nhập/Xuất
-                            </a>
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap text-center">
+                                @{
+                                    var statusClass = item.Status == 1 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600";
+                                }
+                                <span class="@statusClass px-3 py-1 rounded-full text-xs font-bold inline-block">@item.StatusText</span>
+                            </td>
+                            <td class="px-5 py-3 whitespace-nowrap text-center sticky right-0 bg-white z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.06)]">
+                                <a href="@Url.Action("UpdateStock", "Inventory", new { id = item.ProductID })"
+                                   class="inline-flex items-center gap-1 bg-chill-primary hover:bg-chill-primaryDark text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                                    <span class="material-symbols-outlined text-sm">sync_alt</span>
+                                    Nhập/Xuất
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-12 text-slate-400">
+                            <span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span>
+                            <span class="text-base font-medium">Không có sản phẩm nào</span>
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="7" class="text-center py-12 text-slate-400">
-                        <span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span>
-                        <span class="text-base font-medium">Không có sản phẩm nào</span>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Phân trang -->
