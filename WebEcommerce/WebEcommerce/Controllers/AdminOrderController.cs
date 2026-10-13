@@ -113,6 +113,13 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
+                // Chặn hoàn thành đơn hàng chuyển khoản khi chưa thanh toán
+                if (newStatus == "Delivered" && order.PaymentMethod == "BankTransfer" && order.PaymentStatus != "Paid")
+                {
+                    TempData["ErrorMessage"] = "Không thể hoàn thành đơn hàng chuyển khoản khi chưa nhận thanh toán! Vui lòng bấm \"Xác nhận đã nhận thanh toán\" trước khi chuyển sang Delivered.";
+                    return RedirectToAction("Detail", new { id = orderId });
+                }
+
                 // Kiểm tra lý do khi Manager hủy đơn
                 if (newStatus == "Cancelled")
                 {
