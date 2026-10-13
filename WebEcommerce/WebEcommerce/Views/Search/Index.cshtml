@@ -14,11 +14,9 @@
             <text>Tìm kiếm & Lọc Sản phẩm</text>
         }
     </h1>
-    <p style="color: #5c6370; font-size: 0.875rem; margin-bottom: 24px;">Tìm thấy <strong style="color: #0d47a1;">@Model.TotalCount</strong> sản phẩm</p>
-
-    <!-- Bộ lọc -->
+    <p style="color: #5c6370; font-size: 0.875rem; margin-bottom: 24px;">Tìm thấy <strong style="color: #0d47a1;">@Model.TotalCount</stron    <!-- Bộ lọc -->
     <div style="background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        @using (Html.BeginForm("Index", "Search", FormMethod.Get))
+        @using (Html.BeginForm("Index", "Search", FormMethod.Get, new { id = "searchFilterForm" }))
         {
             <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
                 <!-- Từ khóa -->
@@ -26,10 +24,10 @@
                     <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Từ khóa</label>
                     <div style="position: relative;">
                         <input type="text" name="keyword" id="searchKeyword" value="@Model.Keyword" placeholder="Nhập tên sản phẩm..."
-                               style="width: 100%; padding: 10px 10px 10px 36px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
-                               onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
-                               onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
-                               autocomplete="off" />
+                                style="width: 100%; padding: 10px 10px 10px 36px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
+                                onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
+                                onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                                autocomplete="off" />
                         <span class="material-symbols-outlined" style="position: absolute; left: 10px; top: 10px; color: #94a3b8; font-size: 18px;">search</span>
                     </div>
                     <!-- Autocomplete dropdown -->
@@ -39,35 +37,48 @@
                 <div style="width: 180px;">
                     <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Danh mục</label>
                     @Html.DropDownList("categoryId", Model.CategoryList, new {
+                        id = "categorySelect",
                         style = "width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;"
                     })
                 </div>
                 <!-- Giá tối thiểu -->
-                <div style="width: 140px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Giá từ (₫)</label>
-                    <input type="number" name="minPrice" value="@Model.MinPrice" placeholder="0" min="0"
-                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;" />
+                <div style="width: 145px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569;">Giá từ (₫)</label>
+                        <span id="minPricePreview" style="font-size: 0.7rem; color: #0d47a1; font-weight: 600;">@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString("N0") + "₫" : "")</span>
+                    </div>
+                    <input type="number" name="minPrice" id="minPriceInput" value="@Model.MinPrice" placeholder="0" min="0" step="100000"
+                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
+                           onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                           oninput="updatePricePreview('minPriceInput', 'minPricePreview')" />
                 </div>
                 <!-- Giá tối đa -->
-                <div style="width: 140px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Giá đến (₫)</label>
-                    <input type="number" name="maxPrice" value="@Model.MaxPrice" placeholder="∞" min="0"
-                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;" />
+                <div style="width: 145px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569;">Giá đến (₫)</label>
+                        <span id="maxPricePreview" style="font-size: 0.7rem; color: #0d47a1; font-weight: 600;">@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString("N0") + "₫" : "")</span>
+                    </div>
+                    <input type="number" name="maxPrice" id="maxPriceInput" value="@Model.MaxPrice" placeholder="Tối đa" min="0" step="100000"
+                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
+                           onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                           oninput="updatePricePreview('maxPriceInput', 'maxPricePreview')" />
                 </div>
                 <!-- Xếp hạng sao -->
-                <div style="width: 120px;">
+                <div style="width: 155px;">
                     <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sao tối thiểu</label>
                     <select name="minRating" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
-                        <option value="">Tất cả</option>
-                        <option value="1" @(Model.MinRating == 1 ? "selected" : "")>≥ 1 ⭐</option>
-                        <option value="2" @(Model.MinRating == 2 ? "selected" : "")>≥ 2 ⭐</option>
-                        <option value="3" @(Model.MinRating == 3 ? "selected" : "")>≥ 3 ⭐</option>
-                        <option value="4" @(Model.MinRating == 4 ? "selected" : "")>≥ 4 ⭐</option>
-                        <option value="5" @(Model.MinRating == 5 ? "selected" : "")>5 ⭐</option>
+                        <option value="">Tất cả đánh giá</option>
+                        <option value="5" @(Model.MinRating == 5 ? "selected" : "")>⭐⭐⭐⭐⭐ (5 sao)</option>
+                        <option value="4" @(Model.MinRating == 4 ? "selected" : "")>⭐⭐⭐⭐ (Từ 4 sao)</option>
+                        <option value="3" @(Model.MinRating == 3 ? "selected" : "")>⭐⭐⭐ (Từ 3 sao)</option>
+                        <option value="2" @(Model.MinRating == 2 ? "selected" : "")>⭐⭐ (Từ 2 sao)</option>
+                        <option value="1" @(Model.MinRating == 1 ? "selected" : "")>⭐ (Từ 1 sao)</option>
                     </select>
                 </div>
                 <!-- Sắp xếp -->
-                <div style="width: 160px;">
+                <div style="width: 150px;">
                     <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sắp xếp</label>
                     <select name="sortBy" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
                         <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
@@ -78,11 +89,35 @@
                         <option value="popular" @(Model.SortBy == "popular" ? "selected" : "")>Phổ biến</option>
                     </select>
                 </div>
-                <!-- Nút lọc -->
-                <button type="submit" style="padding: 10px 24px; background: #0d47a1; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: background 0.2s;"
-                        onmouseover="this.style.background='#0a3880'" onmouseout="this.style.background='#0d47a1'">
-                    Tìm kiếm
-                </button>
+                <!-- Nút lọc & Đặt lại -->
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" style="padding: 10px 20px; background: #0d47a1; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 6px;"
+                            onmouseover="this.style.background='#0a3880'" onmouseout="this.style.background='#0d47a1'">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">filter_alt</span>
+                        <span>Tìm kiếm</span>
+                    </button>
+                    @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.CategoryID.HasValue || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || Model.MinRating.HasValue)
+                    {
+                        <a href="@Url.Action("Index", "Search")" style="padding: 10px 14px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 12px; font-weight: 700; font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"
+                           onmouseover="this.style.background='#fee2e2'; this.style.color='#dc2626'; this.style.borderColor='#fca5a5';"
+                           onmouseout="this.style.background='#f1f5f9'; this.style.color='#475569'; this.style.borderColor='#e2e8f0';"
+                           title="Xóa tất cả bộ lọc">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">restart_alt</span>
+                            <span>Đặt lại</span>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Dãy chọn nhanh khoảng giá (Quick Price Chips) -->
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-right: 4px;">Chọn nhanh mức giá:</span>
+                <button type="button" onclick="setQuickPrice(null, null)" class="quick-price-chip @(!Model.MinPrice.HasValue && !Model.MaxPrice.HasValue ? "active" : "")">Tất cả mức giá</button>
+                <button type="button" onclick="setQuickPrice(0, 1000000)" class="quick-price-chip @(Model.MinPrice == 0 && Model.MaxPrice == 1000000 ? "active" : "")">Dưới 1 triệu</button>
+                <button type="button" onclick="setQuickPrice(1000000, 5000000)" class="quick-price-chip @(Model.MinPrice == 1000000 && Model.MaxPrice == 5000000 ? "active" : "")">1 - 5 triệu</button>
+                <button type="button" onclick="setQuickPrice(5000000, 15000000)" class="quick-price-chip @(Model.MinPrice == 5000000 && Model.MaxPrice == 15000000 ? "active" : "")">5 - 15 triệu</button>
+                <button type="button" onclick="setQuickPrice(15000000, 30000000)" class="quick-price-chip @(Model.MinPrice == 15000000 && Model.MaxPrice == 30000000 ? "active" : "")">15 - 30 triệu</button>
+                <button type="button" onclick="setQuickPrice(30000000, null)" class="quick-price-chip @(Model.MinPrice == 30000000 && !Model.MaxPrice.HasValue ? "active" : "")">Trên 30 triệu</button>
             </div>
         }
     </div>
@@ -129,16 +164,25 @@
                                 </a>
                             </h3>
                             <!-- Rating -->
-                            @if (p.ReviewCount > 0)
-                            {
-                                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
-                                    @for (int i = 1; i <= 5; i++)
+                            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px; min-height: 20px;">
+                                @if (p.ReviewCount > 0)
+                                {
+                                    <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; margin-right: 2px;">@p.AverageRating.ToString("0.0")</span>
+                                    for (int i = 1; i <= 5; i++)
                                     {
                                         <span class="material-symbols-outlined" style="font-size: 14px; color: @(i <= Math.Round(p.AverageRating) ? "#f59e0b" : "#cbd5e1"); font-variation-settings: 'FILL' 1;">star</span>
                                     }
                                     <span style="font-size: 0.7rem; color: #64748b;">(@p.ReviewCount)</span>
-                                </div>
-                            }
+                                }
+                                else
+                                {
+                                    for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="material-symbols-outlined" style="font-size: 14px; color: #e2e8f0; font-variation-settings: 'FILL' 1;">star</span>
+                                    }
+                                    <span style="font-size: 0.7rem; color: #94a3b8;">Chưa có đánh giá</span>
+                                }
+                            </div>
                         </div>
                         <div>
                             <!-- Price -->
@@ -239,5 +283,60 @@
                 }
             });
         }
+
+        // Đặt khoảng giá nhanh
+        function setQuickPrice(min, max) {
+            var minInput = document.getElementById('minPriceInput');
+            var maxInput = document.getElementById('maxPriceInput');
+            if (minInput) minInput.value = min !== null ? min : '';
+            if (maxInput) maxInput.value = max !== null ? max : '';
+            updatePricePreview('minPriceInput', 'minPricePreview');
+            updatePricePreview('maxPriceInput', 'maxPricePreview');
+            var form = document.getElementById('searchFilterForm');
+            if (form) form.submit();
+        }
+
+        // Cập nhật nhãn tiền tệ xem trước
+        function updatePricePreview(inputId, previewId) {
+            var input = document.getElementById(inputId);
+            var preview = document.getElementById(previewId);
+            if (!input || !preview) return;
+            var val = parseFloat(input.value);
+            if (!isNaN(val) && val > 0) {
+                preview.textContent = val.toLocaleString('vi-VN') + '₫';
+            } else {
+                preview.textContent = '';
+            }
+        }
     </script>
+
+    <style>
+        .quick-price-chip {
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .quick-price-chip:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #0d47a1;
+            transform: translateY(-1px);
+        }
+        .quick-price-chip.active {
+            background: #0d47a1;
+            border-color: #0d47a1;
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(13, 71, 161, 0.25);
+        }
+    </style>
 }

@@ -74,11 +74,13 @@ namespace WebEcommerce.Controllers
                     query = query.Where(p => (p.DiscountPrice ?? p.Price) <= maxPrice.Value);
                 }
 
-                // 4. Lọc theo xếp hạng sao trung bình
+                // 4. Lọc theo xếp hạng sao trung bình (chỉ tính đánh giá đã duyệt IsApproved)
                 if (minRating.HasValue && minRating.Value > 0)
                 {
-                    query = query.Where(p => p.Reviews.Any() &&
-                                             p.Reviews.Average(r => r.Rating) >= minRating.Value);
+                    double threshold = minRating.Value;
+                    if (threshold >= 5) threshold = 4.8;
+                    query = query.Where(p => p.Reviews.Any(r => r.IsApproved) &&
+                                             p.Reviews.Where(r => r.IsApproved).Average(r => (double)r.Rating) >= threshold);
                 }
 
                 // === SẮP XẾP ===
@@ -97,7 +99,7 @@ namespace WebEcommerce.Controllers
                         query = query.OrderByDescending(p => p.Name);
                         break;
                     case "rating":
-                        query = query.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0);
+                        query = query.OrderByDescending(p => p.Reviews.Any(r => r.IsApproved) ? p.Reviews.Where(r => r.IsApproved).Average(r => (double)r.Rating) : 0);
                         break;
                     case "popular":
                         query = query.OrderByDescending(p => p.ViewCount);

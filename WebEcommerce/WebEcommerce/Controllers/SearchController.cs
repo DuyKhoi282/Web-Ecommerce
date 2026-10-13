@@ -61,11 +61,14 @@ namespace WebEcommerce.Controllers
                     query = query.Where(p => (p.DiscountPrice ?? p.Price) <= maxPrice.Value);
                 }
 
-                // Lọc theo xếp hạng sao trung bình
+                // Lọc theo xếp hạng sao trung bình (chỉ tính đánh giá đã duyệt IsApproved)
                 if (minRating.HasValue && minRating.Value > 0)
                 {
-                    query = query.Where(p => p.Reviews.Any() &&
-                                             p.Reviews.Average(r => r.Rating) >= minRating.Value);
+                    double threshold = minRating.Value;
+                    // Với mốc 5 sao, lấy các sản phẩm có điểm TB >= 4.8 (làm tròn hiển thị 5 sao)
+                    if (threshold >= 5) threshold = 4.8;
+                    query = query.Where(p => p.Reviews.Any(r => r.IsApproved) &&
+                                             p.Reviews.Where(r => r.IsApproved).Average(r => (double)r.Rating) >= threshold);
                 }
 
                 // Sắp xếp
@@ -84,7 +87,7 @@ namespace WebEcommerce.Controllers
                         query = query.OrderByDescending(p => p.Name);
                         break;
                     case "rating_desc":
-                        query = query.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0);
+                        query = query.OrderByDescending(p => p.Reviews.Any(r => r.IsApproved) ? p.Reviews.Where(r => r.IsApproved).Average(r => (double)r.Rating) : 0);
                         break;
                     case "newest":
                         query = query.OrderByDescending(p => p.CreatedAt);
@@ -125,8 +128,8 @@ namespace WebEcommerce.Controllers
                             ? p.ProductImages.FirstOrDefault(i => i.IsMain).ImageURL
                             : (p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().ImageURL : null),
                         ImageCount = p.ProductImages.Count,
-                        AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
-                        ReviewCount = p.Reviews.Count
+                        AverageRating = p.Reviews.Any(r => r.IsApproved) ? p.Reviews.Where(r => r.IsApproved).Average(r => (double)r.Rating) : 0,
+                        ReviewCount = p.Reviews.Count(r => r.IsApproved)
                     }).ToList(),
                     Keyword = keyword,
                     CategoryID = categoryId,
