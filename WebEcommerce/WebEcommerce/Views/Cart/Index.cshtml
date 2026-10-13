@@ -4,88 +4,110 @@
     ViewBag.Title = "Giỏ hàng";
 }
 
+<!-- Anti-forgery Token for Cart Ajax Actions -->
+@Html.AntiForgeryToken()
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
     <!-- Page Header -->
-    <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">
-                shopping_cart
-            </span>
-
-            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">
-                Giỏ hàng
-            </h1>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#0d47a1] flex items-center justify-center shadow-xs">
+                    <span class="material-symbols-outlined text-2xl">
+                        shopping_cart
+                    </span>
+                </div>
+                <h1 class="font-headline font-extrabold text-2xl sm:text-3xl text-[#1a1a2e]">
+                    Giỏ hàng của bạn
+                </h1>
+            </div>
+            <p class="text-sm text-slate-500">
+                Kiểm tra sản phẩm và số lượng trước khi tiến hành thanh toán.
+            </p>
         </div>
 
-        <p class="text-sm text-slate-500">
-            Kiểm tra sản phẩm và số lượng trước khi thanh toán.
-        </p>
+        @if (Model != null && Model.Items != null && Model.Items.Any())
+        {
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold self-start sm:self-auto">
+                <span class="material-symbols-outlined text-base text-[#0d47a1]">inventory_2</span>
+                <span><strong class="text-slate-900" id="cart-item-count-badge">@Model.Items.Sum(i => i.Quantity)</strong> sản phẩm</span>
+            </div>
+        }
     </div>
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
-            @TempData["ErrorMessage"]
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">error</span>
+            <span>@TempData["ErrorMessage"]</span>
         </div>
     }
 
     @if (Model == null || Model.Items == null || !Model.Items.Any())
     {
-        <!-- Empty Cart -->
-        <div class="bg-white border-2 border-slate-200 rounded-2xl p-10 text-center shadow-sm">
-
-            <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
-                <span class="material-symbols-outlined text-4xl text-[#0d47a1]">
-                    shopping_cart
+        <!-- Empty Cart State -->
+        <div class="bg-white border-2 border-slate-200/80 rounded-3xl p-10 sm:p-14 text-center shadow-sm max-w-2xl mx-auto">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-center text-[#0d47a1]">
+                <span class="material-symbols-outlined text-5xl">
+                    remove_shopping_cart
                 </span>
             </div>
 
-            <h2 class="font-headline font-bold text-xl text-slate-900 mb-2">
-                Giỏ hàng đang trống
+            <h2 class="font-headline font-extrabold text-2xl text-slate-900 mb-2">
+                Giỏ hàng của bạn đang trống
             </h2>
 
-            <p class="text-sm text-slate-500 mb-6">
-                Bạn chưa có sản phẩm nào trong giỏ hàng.
+            <p class="text-sm text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">
+                Bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy khám phá ngay các sản phẩm hot đang có ưu đãi lớn hôm nay!
             </p>
 
-            <a href="@Url.Action("Index", "Home")"
-               class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                      bg-[#0d47a1] hover:bg-[#0a3880]
-                      text-white font-bold text-sm transition-colors">
-                <span class="material-symbols-outlined text-lg">
-                    shopping_bag
-                </span>
-                Tiếp tục mua sắm
-            </a>
-
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="@Url.Action("Index", "Shop")"
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+                          bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
+                          text-white font-bold text-sm shadow-md shadow-blue-900/10 transition-all">
+                    <span class="material-symbols-outlined text-lg">
+                        storefront
+                    </span>
+                    Khám phá cửa hàng
+                </a>
+                <a href="@Url.Action("Index", "Home")"
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+                          border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50
+                          text-slate-700 font-bold text-sm transition-all">
+                    <span class="material-symbols-outlined text-lg">
+                        home
+                    </span>
+                    Trang chủ
+                </a>
+            </div>
         </div>
     }
     else
     {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-            <!-- Cart Items -->
+            <!-- Left: Cart Items List -->
             <div class="lg:col-span-2 space-y-4">
-
                 @foreach (var item in Model.Items)
                 {
-                    <div class="cart-item bg-white border-2 border-slate-200
-                                rounded-2xl p-4 sm:p-5 shadow-sm"
+                    <div class="cart-item bg-white border border-slate-200/90 hover:border-slate-300
+                                rounded-2xl p-4 sm:p-6 shadow-xs hover:shadow-sm transition-all duration-200"
                          data-product-id="@item.ProductID">
 
-                        <div class="flex flex-col sm:flex-row gap-5">
+                        <div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
 
-                            <!-- Product Image -->
-                            <div class="w-full sm:w-28 h-28 flex-shrink-0
-                                        rounded-xl bg-slate-50 border border-slate-200
-                                        flex items-center justify-center overflow-hidden">
-
+                            <!-- Product Image (Clickable) -->
+                            <a href="@Url.Action("Details", "Shop", new { id = item.ProductID })"
+                               class="w-full sm:w-28 h-28 flex-shrink-0
+                                      rounded-xl bg-slate-50 border border-slate-200/80
+                                      flex items-center justify-center overflow-hidden group">
                                 @if (!string.IsNullOrEmpty(item.ImageURL))
                                 {
                                     <img src="@item.ImageURL"
                                          alt="@item.ProductName"
-                                         class="w-full h-full object-contain p-2"
+                                         class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200"
                                          onerror="this.onerror=null; this.src='https://placehold.co/200x200/f8faff/0d47a1?text=TheChillShop';" />
                                 }
                                 else
@@ -94,109 +116,113 @@
                                         image
                                     </span>
                                 }
-                            </div>
+                            </a>
 
                             <!-- Product Information -->
-                            <div class="flex-1 min-w-0">
-
+                            <div class="flex-1 min-w-0 w-full">
                                 <div class="flex items-start justify-between gap-3">
-
-                                    <div>
-                                        <h2 class="font-headline font-bold text-base text-slate-900">
+                                    <div class="min-w-0">
+                                        <a href="@Url.Action("Details", "Shop", new { id = item.ProductID })"
+                                           class="font-headline font-bold text-base text-slate-900 hover:text-[#0d47a1] transition-colors line-clamp-2">
                                             @item.ProductName
-                                        </h2>
+                                        </a>
 
-                                        <p class="text-xs text-slate-500 mt-1">
-                                            Mã sản phẩm: @item.ProductID
-                                        </p>
+                                        <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
+                                            <span>Mã SP: #@item.ProductID</span>
+                                            <span>•</span>
+                                            @if (item.StockQuantity > 0)
+                                            {
+                                                <span class="text-emerald-600 font-semibold flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Còn hàng
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-rose-600 font-semibold flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Hết hàng
+                                                </span>
+                                            }
+                                        </div>
                                     </div>
 
-                                    <!-- Remove -->
+                                    <!-- Remove Button (Touch Target >= 44x44px) -->
                                     <button type="button"
                                             class="btn-remove-cart-item flex-shrink-0
-                                                   w-9 h-9 rounded-lg
+                                                   w-11 h-11 rounded-xl
                                                    border border-slate-200
                                                    text-slate-400
                                                    hover:text-red-600
                                                    hover:border-red-300
                                                    hover:bg-red-50
+                                                   active:scale-95
                                                    flex items-center justify-center
-                                                   transition-colors"
+                                                   transition-all"
                                             data-product-id="@item.ProductID"
+                                            data-product-name="@item.ProductName"
+                                            aria-label="Xóa sản phẩm @item.ProductName"
                                             title="Xóa sản phẩm">
-
-                                        <span class="material-symbols-outlined text-lg">
-                                            delete
+                                        <span class="material-symbols-outlined text-xl">
+                                            delete_outline
                                         </span>
                                     </button>
-
                                 </div>
 
-                                <!-- Price -->
-                                <div class="mt-3">
-                                    <span class="text-sm font-bold text-[#0d47a1]">
-                                        @string.Format("{0:N0}đ", item.UnitPrice)
-                                    </span>
-                                </div>
-
-                                <!-- Quantity -->
-                                <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
-
-                                    <div class="flex items-center">
-
-                                        <button type="button"
-                                                class="btn-decrease-cart
-                                                       w-9 h-9 rounded-l-lg
-                                                       border border-slate-300
-                                                       bg-slate-50
-                                                       hover:bg-slate-100
-                                                       text-slate-700
-                                                       flex items-center justify-center"
-                                                data-product-id="@item.ProductID">
-
-                                            <span class="material-symbols-outlined text-lg">
-                                                remove
-                                            </span>
-                                        </button>
-
-                                        <span class="cart-item-quantity
-                                                     w-12 h-9
-                                                     border-y border-slate-300
-                                                     flex items-center justify-center
-                                                     text-sm font-bold text-slate-900">
-                                            @item.Quantity
+                                <!-- Price and Controls Row -->
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                                    <div>
+                                        <span class="text-xs text-slate-400 block mb-0.5">Đơn giá</span>
+                                        <span class="text-sm font-bold text-slate-800">
+                                            @string.Format("{0:N0}đ", item.UnitPrice)
                                         </span>
+                                    </div>
 
-                                        <button type="button"
-                                                class="btn-increase-cart
-                                                       w-9 h-9 rounded-r-lg
-                                                       border border-slate-300
-                                                       bg-slate-50
-                                                       hover:bg-slate-100
-                                                       text-slate-700
-                                                       flex items-center justify-center"
-                                                data-product-id="@item.ProductID">
+                                    <!-- Quantity Selector (Touch Target >= 44x44px) -->
+                                    <div class="flex items-center">
+                                        <div class="inline-flex items-center rounded-xl border border-slate-300 bg-slate-50 p-0.5 shadow-2xs">
+                                            <button type="button"
+                                                    class="btn-decrease-cart
+                                                           w-10 h-10 sm:w-11 sm:h-11 rounded-lg
+                                                           bg-white hover:bg-slate-100 active:scale-95
+                                                           text-slate-700 disabled:opacity-40
+                                                           flex items-center justify-center transition-all"
+                                                    data-product-id="@item.ProductID"
+                                                    aria-label="Giảm số lượng">
+                                                <span class="material-symbols-outlined text-lg">
+                                                    remove
+                                                </span>
+                                            </button>
 
-                                            <span class="material-symbols-outlined text-lg">
-                                                add
+                                            <span class="cart-item-quantity
+                                                         min-w-[44px] h-10 sm:h-11
+                                                         flex items-center justify-center
+                                                         text-sm font-bold text-slate-900 px-2 select-none">
+                                                @item.Quantity
                                             </span>
-                                        </button>
 
+                                            <button type="button"
+                                                    class="btn-increase-cart
+                                                           w-10 h-10 sm:w-11 sm:h-11 rounded-lg
+                                                           bg-white hover:bg-slate-100 active:scale-95
+                                                           text-slate-700 disabled:opacity-40
+                                                           flex items-center justify-center transition-all"
+                                                    data-product-id="@item.ProductID"
+                                                    aria-label="Tăng số lượng">
+                                                <span class="material-symbols-outlined text-lg">
+                                                    add
+                                                </span>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <!-- Item Total -->
                                     <div class="text-right">
-                                        <p class="text-xs text-slate-400">
-                                            Thành tiền
-                                        </p>
-
-                                        <p class="cart-item-total
-                                                  font-headline font-extrabold
-                                                  text-lg text-[#0d47a1]">
+                                        <span class="text-xs text-slate-400 block mb-0.5">Thành tiền</span>
+                                        <span class="cart-item-total
+                                                     font-headline font-extrabold
+                                                     text-base sm:text-lg text-[#0d47a1]">
                                             @string.Format("{0:N0}đ", item.ItemTotal)
-                                        </p>
+                                        </span>
                                     </div>
-
                                 </div>
 
                             </div>
@@ -204,87 +230,103 @@
                     </div>
                 }
 
+                <!-- Bulk Shopping Action Bar -->
+                <div class="flex items-center justify-between pt-2">
+                    <a href="@Url.Action("Index", "Shop")"
+                       class="inline-flex items-center gap-2 text-sm font-bold text-[#0d47a1] hover:text-[#0a3880] transition-colors">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span>
+                        Tiếp tục lựa chọn sản phẩm khác
+                    </a>
+                </div>
             </div>
 
-            <!-- Cart Summary -->
+            <!-- Right: Order Summary Sidebar (Sticky) -->
             <div class="lg:col-span-1">
+                <div class="bg-white border-2 border-slate-200/90
+                            rounded-3xl p-6 sm:p-7 shadow-xs
+                            lg:sticky lg:top-28 space-y-6">
 
-                <div class="bg-white border-2 border-slate-200
-                            rounded-2xl p-6 shadow-sm
-                            lg:sticky lg:top-28">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <h2 class="font-headline font-extrabold text-lg text-slate-900 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#0d47a1]">receipt_long</span>
+                            Tóm tắt đơn hàng
+                        </h2>
+                        <span class="text-xs text-slate-400 font-medium">Bảo mật SSL</span>
+                    </div>
 
-                    <h2 class="font-headline font-extrabold text-lg text-slate-900 mb-5">
-                        Tóm tắt đơn hàng
-                    </h2>
-
-                    <div class="space-y-3 text-sm">
-
+                    <!-- Price Calculations -->
+                    <div class="space-y-3.5 text-sm">
                         <div class="flex items-center justify-between text-slate-600">
                             <span>Tạm tính</span>
-
                             <span id="cart-subtotal"
-                                  class="font-bold text-slate-900">
+                                  class="font-bold text-slate-900 text-base">
                                 @string.Format("{0:N0}đ", Model.CartTotal)
                             </span>
                         </div>
 
                         <div class="flex items-center justify-between text-slate-600">
-                            <span>Phí vận chuyển</span>
-
-                            <span class="font-bold text-slate-900">
-                                Tính khi thanh toán
+                            <span>Phí giao hàng</span>
+                            <span class="font-semibold text-emerald-600 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-base">local_shipping</span>
+                                Tính khi đặt hàng
                             </span>
                         </div>
 
+                        <div class="flex items-center justify-between text-slate-600">
+                            <span>Mã giảm giá</span>
+                            <span class="text-slate-400 text-xs">Áp dụng ở bước tiếp theo</span>
+                        </div>
                     </div>
 
-                    <div class="border-t border-slate-200 my-5"></div>
+                    <!-- Divider -->
+                    <div class="border-t border-dashed border-slate-200"></div>
 
-                    <div class="flex items-center justify-between mb-6">
-
-                        <span class="font-headline font-bold text-slate-900">
-                            Tổng cộng
-                        </span>
+                    <!-- Total Amount -->
+                    <div class="flex items-baseline justify-between">
+                        <div>
+                            <span class="font-headline font-bold text-slate-900 block">
+                                Tổng cộng
+                            </span>
+                            <span class="text-xs text-slate-400">(Đã bao gồm VAT)</span>
+                        </div>
 
                         <span id="cart-total"
-                              class="font-headline font-extrabold text-xl text-[#0d47a1]">
+                              class="font-headline font-black text-2xl text-[#0d47a1]">
                             @string.Format("{0:N0}đ", Model.CartTotal)
                         </span>
-
                     </div>
 
+                    <!-- Checkout Button -->
                     <a href="@Url.Action("Checkout", "Order")"
-                       class="w-full py-3.5 rounded-xl
-                              bg-[#0d47a1] hover:bg-[#0a3880]
-                              text-white font-bold text-sm
+                       class="w-full py-4 rounded-xl
+                              bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
+                              text-white font-bold text-base
                               flex items-center justify-center gap-2
-                              transition-colors">
-
-                        <span class="material-symbols-outlined text-lg">
-                            payments
+                              shadow-lg shadow-blue-900/15 hover:shadow-xl hover:shadow-blue-900/25
+                              transition-all">
+                        <span class="material-symbols-outlined text-xl">
+                            credit_card
                         </span>
-
                         Tiến hành thanh toán
                     </a>
 
-                    <a href="@Url.Action("Index", "Home")"
-                       class="mt-3 w-full py-3 rounded-xl
-                              border-2 border-slate-200
-                              hover:border-[#0d47a1]
-                              hover:text-[#0d47a1]
-                              text-slate-600 font-bold text-sm
-                              flex items-center justify-center gap-2
-                              transition-colors">
-
-                        <span class="material-symbols-outlined text-lg">
-                            arrow_back
-                        </span>
-
-                        Tiếp tục mua sắm
-                    </a>
+                    <!-- Value Props / Guarantees -->
+                    <div class="pt-4 border-t border-slate-100 space-y-2.5">
+                        <div class="flex items-center gap-2.5 text-xs text-slate-500">
+                            <span class="material-symbols-outlined text-base text-emerald-600">verified_user</span>
+                            <span>Thanh toán an toàn 100% qua COD hoặc VietQR</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 text-xs text-slate-500">
+                            <span class="material-symbols-outlined text-base text-blue-600">autorenew</span>
+                            <span>Hỗ trợ đổi trả miễn phí trong vòng 7 ngày</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 text-xs text-slate-500">
+                            <span class="material-symbols-outlined text-base text-amber-600">support_agent</span>
+                            <span>Tổng đài CSKH đồng hành 24/7</span>
+                        </div>
+                    </div>
 
                 </div>
-
             </div>
 
         </div>
@@ -296,15 +338,33 @@
     document.addEventListener("DOMContentLoaded", function () {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
+        function notify(type, title, message) {
+            if (window.showToast) {
+                window.showToast({
+                    type: type,
+                    title: title,
+                    message: message,
+                    duration: 3200
+                });
+            } else {
+                alert(message);
+            }
+        }
+
         function updateCartUI(productId, data, action) {
             if (data.removed || action === 'RemoveItem') {
                 const itemEl = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
-                if (itemEl) itemEl.remove();
-                
-                // If cart is empty, reload to show empty state
-                if (data.cartItemCount === 0 || document.querySelectorAll('.cart-item').length === 0) {
-                    window.location.reload();
-                    return;
+                if (itemEl) {
+                    itemEl.style.transition = 'all 0.3s ease-out';
+                    itemEl.style.opacity = '0';
+                    itemEl.style.transform = 'translateY(-10px)';
+                    setTimeout(function () {
+                        itemEl.remove();
+                        // If cart empty, reload to show empty state
+                        if (data.cartItemCount === 0 || document.querySelectorAll('.cart-item').length === 0) {
+                            window.location.reload();
+                        }
+                    }, 300);
                 }
             } else {
                 const itemEl = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
@@ -312,28 +372,40 @@
                     const qtyEl = itemEl.querySelector('.cart-item-quantity');
                     const itemTotalEl = itemEl.querySelector('.cart-item-total');
                     if (qtyEl && data.quantity !== undefined) qtyEl.innerText = data.quantity;
-                    if (itemTotalEl && data.itemTotal !== undefined) itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
+                    if (itemTotalEl && data.itemTotal !== undefined) {
+                        itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
+                    }
                 }
             }
 
             const subtotalEl = document.getElementById('cart-subtotal');
             const totalEl = document.getElementById('cart-total');
             const badge = document.getElementById('cartBadgeCount');
+            const countHeader = document.getElementById('cart-item-count-badge');
             
-            if (subtotalEl && data.cartTotal !== undefined) subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
-            if (totalEl && data.cartTotal !== undefined) totalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
-            if (badge && data.cartItemCount !== undefined) badge.innerText = data.cartItemCount;
+            if (subtotalEl && data.cartTotal !== undefined) {
+                subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            }
+            if (totalEl && data.cartTotal !== undefined) {
+                totalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
+            }
+            if (badge && data.cartItemCount !== undefined) {
+                badge.innerText = data.cartItemCount;
+            }
+            if (countHeader && data.cartItemCount !== undefined) {
+                countHeader.innerText = data.cartItemCount;
+            }
         }
 
         function sendCartAction(action, productId, triggerBtn) {
             if (!productId) {
-                alert('Mã sản phẩm không hợp lệ.');
+                notify('warning', 'Lỗi sản phẩm', 'Mã sản phẩm không hợp lệ.');
                 return;
             }
 
             if (triggerBtn) {
                 triggerBtn.disabled = true;
-                triggerBtn.style.opacity = '0.6';
+                triggerBtn.style.opacity = '0.5';
             }
 
             const formData = new URLSearchParams();
@@ -346,6 +418,9 @@
                 body: formData.toString()
             })
             .then(res => {
+                if (res.redirected && res.url.toLowerCase().includes('login')) {
+                    return { success: false, isAuth: true, message: 'Vui lòng đăng nhập lại để tiếp tục.' };
+                }
                 if (!res.ok) {
                     throw new Error('HTTP ' + res.status);
                 }
@@ -354,13 +429,23 @@
             .then(data => {
                 if (data.success) {
                     updateCartUI(productId, data, action);
+                    if (action === 'RemoveItem') {
+                        notify('info', 'Đã xóa', data.message || 'Đã xóa sản phẩm khỏi giỏ hàng.');
+                    }
                 } else {
-                    alert(data.message || 'Thao tác không thành công.');
+                    if (data.isAuth) {
+                        notify('warning', 'Yêu cầu đăng nhập', data.message || 'Phiên đăng nhập đã hết hạn.');
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("Login", "Account")';
+                        }, 1800);
+                    } else {
+                        notify('warning', 'Thông báo', data.message || 'Thao tác không thành công.');
+                    }
                 }
             })
             .catch(err => {
                 console.error('[CartAction Error]', err);
-                alert('Đã xảy ra lỗi khi cập nhật giỏ hàng. Vui lòng thử lại.');
+                notify('error', 'Lỗi hệ thống', 'Đã xảy ra lỗi khi cập nhật giỏ hàng. Vui lòng thử lại.');
             })
             .finally(() => {
                 if (triggerBtn) {
@@ -386,8 +471,9 @@
 
         document.querySelectorAll('.btn-remove-cart-item').forEach(btn => {
             btn.addEventListener('click', function () {
-                if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-                    const id = this.getAttribute('data-product-id');
+                const id = this.getAttribute('data-product-id');
+                const name = this.getAttribute('data-product-name') || 'sản phẩm này';
+                if (confirm(`Bạn có chắc chắn muốn xóa "${name}" khỏi giỏ hàng?`)) {
                     sendCartAction('RemoveItem', id, this);
                 }
             });

@@ -42,6 +42,12 @@ namespace WebEcommerce.Controllers
             get { return HttpContext.GetOwinContext().Authentication; }
         }
 
+        // GET: /Manage (Mặc định chuyển hướng về trang Hồ sơ cá nhân)
+        public ActionResult Index()
+        {
+            return RedirectToAction("Profile");
+        }
+
         // ═══════════════════════════════════════════════════════
         //  T05 — ĐỔI MẬT KHẨU
         // ═══════════════════════════════════════════════════════

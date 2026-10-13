@@ -6,139 +6,304 @@
 }
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Page Header -->
     <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">payments</span>
-            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">Thanh toán</h1>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-2">
+            <a href="@Url.Action("Index", "Cart")" class="hover:text-[#0d47a1] flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">shopping_cart</span> Giỏ hàng
+            </a>
+            <span>/</span>
+            <span class="text-[#0d47a1]">Thanh toán đơn hàng</span>
         </div>
-        <p class="text-sm text-slate-500">Kiểm tra thông tin và hoàn tất đơn hàng.</p>
+
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#0d47a1] flex items-center justify-center shadow-xs">
+                <span class="material-symbols-outlined text-2xl">payments</span>
+            </div>
+            <div>
+                <h1 class="font-headline font-extrabold text-2xl sm:text-3xl text-[#1a1a2e]">
+                    Xác nhận thanh toán
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                    Vui lòng kiểm tra địa chỉ nhận hàng và lựa chọn phương thức thanh toán thuận tiện nhất.
+                </p>
+            </div>
+        </div>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
-            @TempData["ErrorMessage"]
+        <div class="mb-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2.5 shadow-2xs">
+            <span class="material-symbols-outlined text-xl text-red-600">error</span>
+            <span>@TempData["ErrorMessage"]</span>
         </div>
     }
 
-    @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { @class = "grid grid-cols-1 lg:grid-cols-3 gap-6" }))
+    @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkout-form", @class = "grid grid-cols-1 lg:grid-cols-3 gap-8 items-start" }))
     {
         @Html.AntiForgeryToken()
 
-        <!-- Left: Form -->
+        <!-- Left Column: Order Forms -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Shipping Info -->
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[#0d47a1]">location_on</span>
-                    Thông tin giao hàng
-                </h2>
+
+            <!-- 1. Shipping Info Card -->
+            <div class="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                    <h2 class="font-headline font-bold text-lg text-slate-900 flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[#0d47a1]">location_on</span>
+                        1. Thông tin giao hàng
+                    </h2>
+                    <span class="text-xs text-slate-400">* Bắt buộc</span>
+                </div>
+
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Địa chỉ giao hàng *</label>
-                        @Html.TextBoxFor(m => m.ShippingAddress, new { @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none text-sm", placeholder = "Nhập địa chỉ giao hàng đầy đủ" })
-                        @Html.ValidationMessageFor(m => m.ShippingAddress, "", new { @class = "text-red-500 text-xs mt-1" })
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="ShippingAddress">
+                            Địa chỉ nhận hàng đầy đủ <span class="text-red-500">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ShippingAddress, new {
+                            @class = "w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-4 focus:ring-blue-100 outline-none text-sm transition-all placeholder:text-slate-400",
+                            placeholder = "Ví dụ: Số 123 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. HCM",
+                            required = "required"
+                        })
+                        @Html.ValidationMessageFor(m => m.ShippingAddress, "", new { @class = "text-red-500 text-xs mt-1 block font-medium" })
                     </div>
+
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại người nhận *</label>
-                        @Html.TextBoxFor(m => m.ReceiverPhone, new { @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none text-sm", placeholder = "0901234567" })
-                        @Html.ValidationMessageFor(m => m.ReceiverPhone, "", new { @class = "text-red-500 text-xs mt-1" })
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="ReceiverPhone">
+                            Số điện thoại người nhận <span class="text-red-500">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ReceiverPhone, new {
+                            @class = "w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-4 focus:ring-blue-100 outline-none text-sm transition-all placeholder:text-slate-400",
+                            placeholder = "Ví dụ: 0901234567",
+                            type = "tel",
+                            required = "required"
+                        })
+                        @Html.ValidationMessageFor(m => m.ReceiverPhone, "", new { @class = "text-red-500 text-xs mt-1 block font-medium" })
                     </div>
+
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Ghi chú</label>
-                        @Html.TextAreaFor(m => m.Notes, new { @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none text-sm", rows = 3, placeholder = "Ghi chú cho đơn hàng (không bắt buộc)" })
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="Notes">
+                            Ghi chú đơn hàng (Tùy chọn)
+                        </label>
+                        @Html.TextAreaFor(m => m.Notes, new {
+                            @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-4 focus:ring-blue-100 outline-none text-sm transition-all resize-y placeholder:text-slate-400",
+                            rows = 3,
+                            placeholder = "Ví dụ: Giao vào giờ hành chính, gọi trước khi đến..."
+                        })
                     </div>
                 </div>
             </div>
 
-            <!-- Payment Method -->
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[#0d47a1]">credit_card</span>
-                    Phương thức thanh toán
-                </h2>
-                <div class="space-y-3">
-                    <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-[#0d47a1] cursor-pointer transition-colors">
-                        <input type="radio" name="PaymentMethod" value="COD" checked="@(Model.PaymentMethod == "COD" ? "checked" : null)" class="w-4 h-4 text-[#0d47a1]" />
-                        <div>
-                            <span class="font-bold text-sm text-slate-900">Thanh toán khi nhận hàng (COD)</span>
-                            <p class="text-xs text-slate-500 mt-0.5">Thanh toán bằng tiền mặt khi nhận hàng</p>
+            <!-- 2. Payment Method Selector Card -->
+            <div class="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                    <h2 class="font-headline font-bold text-lg text-slate-900 flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[#0d47a1]">account_balance_wallet</span>
+                        2. Phương thức thanh toán
+                    </h2>
+                </div>
+
+                <div class="space-y-3.5">
+                    <!-- Option COD -->
+                    <label class="payment-card-label relative flex items-start gap-4 p-4.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 @(Model.PaymentMethod != "BankTransfer" ? "border-[#0d47a1] bg-blue-50/30 shadow-2xs" : "border-slate-200 hover:border-slate-300 bg-white")"
+                           id="label-payment-cod">
+                        <input type="radio" name="PaymentMethod" value="COD"
+                               checked="@(Model.PaymentMethod != "BankTransfer" ? "checked" : null)"
+                               class="mt-1 w-5 h-5 text-[#0d47a1] focus:ring-[#0d47a1]" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-700 text-xl">local_shipping</span>
+                                <span class="font-bold text-sm sm:text-base text-slate-900">
+                                    Thanh toán khi nhận hàng (COD)
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">
+                                Bạn thanh toán bằng tiền mặt trực tiếp cho nhân viên giao hàng khi nhận và kiểm tra kiện hàng.
+                            </p>
                         </div>
                     </label>
-                    <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-[#0d47a1] cursor-pointer transition-colors">
-                        <input type="radio" name="PaymentMethod" value="BankTransfer" checked="@(Model.PaymentMethod == "BankTransfer" ? "checked" : null)" class="w-4 h-4 text-[#0d47a1]" />
-                        <div>
-                            <span class="font-bold text-sm text-slate-900">Chuyển khoản ngân hàng</span>
-                            <p class="text-xs text-slate-500 mt-0.5">Chuyển khoản qua tài khoản ngân hàng</p>
+
+                    <!-- Option Bank Transfer -->
+                    <label class="payment-card-label relative flex items-start gap-4 p-4.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 @(Model.PaymentMethod == "BankTransfer" ? "border-[#0d47a1] bg-blue-50/30 shadow-2xs" : "border-slate-200 hover:border-slate-300 bg-white")"
+                           id="label-payment-bank">
+                        <input type="radio" name="PaymentMethod" value="BankTransfer"
+                               checked="@(Model.PaymentMethod == "BankTransfer" ? "checked" : null)"
+                               class="mt-1 w-5 h-5 text-[#0d47a1] focus:ring-[#0d47a1]" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[#0d47a1] text-xl">qr_code_scanner</span>
+                                <span class="font-bold text-sm sm:text-base text-slate-900">
+                                    Chuyển khoản ngân hàng (VietQR / Napas 24/7)
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-bold">Khuyên dùng</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">
+                                Chuyển khoản nhanh qua quét mã VietQR tự động điền sẵn số tiền và mã đơn hàng.
+                            </p>
                         </div>
                     </label>
                 </div>
+
+                <!-- Collapsible Bank Transfer Info Card -->
+                <div id="bank-transfer-info-box" class="mt-4 p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-blue-200/80 transition-all @(Model.PaymentMethod == "BankTransfer" ? "" : "hidden")">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-blue-200 flex items-center justify-center text-[#0d47a1] flex-shrink-0 shadow-2xs">
+                            <span class="material-symbols-outlined text-2xl">account_balance</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-700 flex-1">
+                            <p class="font-bold text-sm text-slate-900">Thông tin tài khoản nhận chuyển khoản:</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-slate-800">
+                                <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-slate-400 block text-2xs uppercase tracking-wider">Ngân hàng thụ hưởng</span>
+                                    <strong class="text-slate-900">Vietcombank (VCB)</strong>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-slate-400 block text-2xs uppercase tracking-wider">Số tài khoản</span>
+                                    <strong class="text-[#0d47a1] font-mono text-sm">1029384756</strong>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-slate-200 sm:col-span-2">
+                                    <span class="text-slate-400 block text-2xs uppercase tracking-wider">Tên chủ tài khoản</span>
+                                    <strong class="text-slate-900">THE CHILL SHOP - CÔNG TY TNHH THƯƠNG MẠI</strong>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 pt-1 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-base text-blue-600">info</span>
+                                Mã QR thanh toán VietQR kèm mã đơn hàng sẽ được hiển thị ngay tại trang kết quả sau khi bạn bấm Đặt hàng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Promo Code -->
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+            <!-- 3. Promotional Code Card -->
+            <div class="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4 flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[#0d47a1]">confirmation_number</span>
-                    Mã giảm giá
+                    3. Mã giảm giá / Voucher
                 </h2>
-                <div class="flex gap-2">
-                    @Html.TextBoxFor(m => m.PromoCode, new { @class = "flex-1 px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] outline-none text-sm uppercase", placeholder = "Nhập mã giảm giá", id = "promo-code-input" })
-                    <button type="button" id="btn-apply-promo" class="px-6 py-3 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-sm transition-colors">Áp dụng</button>
+                <div class="flex gap-2.5">
+                    <div class="relative flex-1">
+                        @Html.TextBoxFor(m => m.PromoCode, new {
+                            @class = "w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-slate-300 focus:border-[#0d47a1] focus:ring-4 focus:ring-blue-100 outline-none text-sm uppercase tracking-wider font-semibold transition-all",
+                            placeholder = "NHẬP MÃ GIẢM GIÁ (VD: SALE10)",
+                            id = "promo-code-input"
+                        })
+                        <span class="material-symbols-outlined absolute left-3 top-3.5 text-slate-400 text-lg">
+                            sell
+                        </span>
+                    </div>
+                    <button type="button"
+                            id="btn-apply-promo"
+                            class="px-6 py-3.5 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] active:scale-95 text-white font-bold text-sm shadow-md shadow-blue-900/10 transition-all flex items-center gap-1.5 flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">check</span>
+                        Áp dụng
+                    </button>
                 </div>
-                <div id="promo-message" class="mt-2 text-sm hidden"></div>
+                <div id="promo-message" class="mt-3 text-xs sm:text-sm font-semibold hidden px-3.5 py-2.5 rounded-xl"></div>
             </div>
+
         </div>
 
-        <!-- Right: Summary -->
+        <!-- Right Column: Order Summary Sidebar -->
         <div class="lg:col-span-1">
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm lg:sticky lg:top-28">
-                <h2 class="font-headline font-extrabold text-lg text-slate-900 mb-5">Tóm tắt đơn hàng</h2>
+            <div class="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xs lg:sticky lg:top-28 space-y-6">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h2 class="font-headline font-extrabold text-lg text-slate-900 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[#0d47a1]">receipt_long</span>
+                        Tóm tắt đơn hàng
+                    </h2>
+                    @if (cart != null && cart.Items != null)
+                    {
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700">
+                            @cart.Items.Sum(i => i.Quantity) món
+                        </span>
+                    }
+                </div>
 
+                <!-- Products list in cart -->
                 @if (cart != null && cart.Items != null)
                 {
-                    <div class="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                    <div class="space-y-3.5 max-h-72 overflow-y-auto pr-1">
                         @foreach (var item in cart.Items)
                         {
-                            <div class="flex items-center gap-3 text-sm">
-                                <span class="text-slate-500">x@(item.Quantity)</span>
-                                <span class="flex-1 text-slate-900 font-medium truncate">@item.ProductName</span>
-                                <span class="font-bold text-slate-900">@string.Format("{0:N0}đ", item.ItemTotal)</span>
+                            <div class="flex items-center gap-3 text-sm py-1">
+                                <div class="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                    @if (!string.IsNullOrEmpty(item.ImageURL))
+                                    {
+                                        <img src="@item.ImageURL" alt="@item.ProductName" class="w-full h-full object-contain p-1" onerror="this.src='https://placehold.co/60x60/f8faff/0d47a1?text=SP';" />
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined text-xl text-slate-300">image</span>
+                                    }
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-slate-900 font-bold text-xs truncate leading-snug">@item.ProductName</h3>
+                                    <div class="flex items-center justify-between text-2xs text-slate-500 mt-1">
+                                        <span>x@item.Quantity</span>
+                                        <span class="font-bold text-slate-800 text-xs">@string.Format("{0:N0}đ", item.ItemTotal)</span>
+                                    </div>
+                                </div>
                             </div>
                         }
                     </div>
                 }
 
-                <div class="border-t border-slate-200 pt-4 space-y-3 text-sm">
+                <!-- Pricing calculations -->
+                <div class="border-t border-slate-100 pt-4 space-y-3 text-sm">
                     <div class="flex justify-between text-slate-600">
                         <span>Tạm tính</span>
-                        <span id="checkout-subtotal" class="font-bold">@string.Format("{0:N0}đ", cartTotal)</span>
+                        <span id="checkout-subtotal" class="font-bold text-slate-900">@string.Format("{0:N0}đ", cartTotal)</span>
                     </div>
-                    <div class="flex justify-between text-slate-600">
-                        <span>Giảm giá</span>
-                        <span id="checkout-discount" class="font-bold text-green-600">0đ</span>
+
+                    <div id="checkout-discount-row" class="flex justify-between text-emerald-600 hidden">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">loyalty</span> Giảm giá
+                        </span>
+                        <span id="checkout-discount" class="font-bold">-0đ</span>
                     </div>
+
                     <div class="flex justify-between text-slate-600">
                         <span>Phí vận chuyển</span>
-                        <span class="font-bold">Miễn phí</span>
+                        <span class="font-bold text-emerald-600">Miễn phí giao hàng</span>
                     </div>
                 </div>
 
-                <div class="border-t border-slate-200 mt-4 pt-4">
-                    <div class="flex justify-between items-center">
-                        <span class="font-headline font-bold text-slate-900">Tổng cộng</span>
-                        <span id="checkout-total" class="font-headline font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", cartTotal)</span>
+                <div class="border-t border-dashed border-slate-200 pt-4">
+                    <div class="flex justify-between items-baseline">
+                        <div>
+                            <span class="font-headline font-bold text-slate-900 block">Tổng thanh toán</span>
+                            <span class="text-xs text-slate-400">(Bao gồm thuế phí)</span>
+                        </div>
+                        <span id="checkout-total" class="font-headline font-black text-2xl text-[#0d47a1]">
+                            @string.Format("{0:N0}đ", cartTotal)
+                        </span>
                     </div>
                 </div>
 
-                <button type="submit" class="mt-6 w-full py-3.5 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                    <span class="material-symbols-outlined text-lg">lock</span>
-                    Đặt hàng
+                <!-- Submit Button -->
+                <button type="submit"
+                        id="btn-submit-order"
+                        class="w-full py-4 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98 text-white font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-900/15 hover:shadow-xl hover:shadow-blue-900/25 transition-all">
+                    <span class="material-symbols-outlined text-xl">lock</span>
+                    Xác nhận đặt hàng
                 </button>
 
-                <a href="@Url.Action("Index", "Cart")" class="mt-3 w-full py-3 rounded-xl border-2 border-slate-200 hover:border-[#0d47a1] text-slate-600 hover:text-[#0d47a1] font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+                <a href="@Url.Action("Index", "Cart")"
+                   class="w-full py-3 rounded-xl border-2 border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-900 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
                     Quay lại giỏ hàng
                 </a>
+
+                <!-- Security Assurance -->
+                <div class="pt-2 text-center">
+                    <p class="text-2xs text-slate-400 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm text-emerald-600">verified_user</span>
+                        Thông tin của bạn luôn được mã hóa và bảo mật an toàn
+                    </p>
+                </div>
             </div>
         </div>
     }
@@ -148,61 +313,119 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var cartTotal = @((int)cartTotal);
-            var btnApplyPromo = document.getElementById("btn-apply-promo");
-            if (!btnApplyPromo) return;
 
-            btnApplyPromo.addEventListener("click", function () {
-                var codeInput = document.getElementById("promo-code-input");
-                var code = codeInput ? codeInput.value.trim() : "";
-                if (!code) {
-                    alert("Vui lòng nhập mã giảm giá.");
-                    return;
+            function notify(type, title, message) {
+                if (window.showToast) {
+                    window.showToast({
+                        type: type,
+                        title: title,
+                        message: message,
+                        duration: 3200
+                    });
+                } else {
+                    alert(message);
                 }
+            }
 
-                var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-                var formData = new URLSearchParams();
-                formData.append('code', code);
-                formData.append('cartTotal', cartTotal);
-                if (token) formData.append('__RequestVerificationToken', token);
+            // Payment radio cards interaction
+            var codRadio = document.querySelector('input[name="PaymentMethod"][value="COD"]');
+            var bankRadio = document.querySelector('input[name="PaymentMethod"][value="BankTransfer"]');
+            var codLabel = document.getElementById("label-payment-cod");
+            var bankLabel = document.getElementById("label-payment-bank");
+            var bankInfoBox = document.getElementById("bank-transfer-info-box");
 
-                btnApplyPromo.disabled = true;
-                btnApplyPromo.style.opacity = '0.6';
+            function updatePaymentStyle() {
+                if (bankRadio && bankRadio.checked) {
+                    bankLabel?.classList.add("border-[#0d47a1]", "bg-blue-50/30", "shadow-2xs");
+                    bankLabel?.classList.remove("border-slate-200", "bg-white");
+                    codLabel?.classList.remove("border-[#0d47a1]", "bg-blue-50/30", "shadow-2xs");
+                    codLabel?.classList.add("border-slate-200", "bg-white");
+                    bankInfoBox?.classList.remove("hidden");
+                } else {
+                    codLabel?.classList.add("border-[#0d47a1]", "bg-blue-50/30", "shadow-2xs");
+                    codLabel?.classList.remove("border-slate-200", "bg-white");
+                    bankLabel?.classList.remove("border-[#0d47a1]", "bg-blue-50/30", "shadow-2xs");
+                    bankLabel?.classList.add("border-slate-200", "bg-white");
+                    bankInfoBox?.classList.add("hidden");
+                }
+            }
 
-                fetch('@Url.Action("ApplyPromoCode", "Order")', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData.toString()
-                })
-                .then(function (res) {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.json();
-                })
-                .then(function (r) {
-                    var msg = document.getElementById("promo-message");
-                    if (msg) {
-                        msg.classList.remove("hidden", "text-green-600", "text-red-600");
-                        if (r.success) {
-                            msg.classList.add("text-green-600");
-                            msg.innerText = r.message;
-                            var discEl = document.getElementById("checkout-discount");
-                            var totalEl = document.getElementById("checkout-total");
-                            if (discEl) discEl.innerText = "-" + parseInt(r.discount).toLocaleString("vi-VN") + "đ";
-                            if (totalEl) totalEl.innerText = parseInt(r.finalAmount).toLocaleString("vi-VN") + "đ";
-                        } else {
-                            msg.classList.add("text-red-600");
-                            msg.innerText = r.message;
-                        }
+            if (codRadio) codRadio.addEventListener("change", updatePaymentStyle);
+            if (bankRadio) bankRadio.addEventListener("change", updatePaymentStyle);
+
+            // Promo Code Apply
+            var btnApplyPromo = document.getElementById("btn-apply-promo");
+            if (btnApplyPromo) {
+                btnApplyPromo.addEventListener("click", function () {
+                    var codeInput = document.getElementById("promo-code-input");
+                    var code = codeInput ? codeInput.value.trim() : "";
+                    if (!code) {
+                        notify("warning", "Mã giảm giá", "Vui lòng nhập mã giảm giá trước khi áp dụng.");
+                        return;
                     }
-                })
-                .catch(function (err) {
-                    console.error('[ApplyPromo Error]', err);
-                    alert("Lỗi khi áp dụng mã giảm giá.");
-                })
-                .finally(function () {
-                    btnApplyPromo.disabled = false;
-                    btnApplyPromo.style.opacity = '1';
+
+                    var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    var formData = new URLSearchParams();
+                    formData.append('code', code);
+                    formData.append('cartTotal', cartTotal);
+                    if (token) formData.append('__RequestVerificationToken', token);
+
+                    btnApplyPromo.disabled = true;
+                    btnApplyPromo.style.opacity = '0.6';
+
+                    fetch('@Url.Action("ApplyPromoCode", "Order")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData.toString()
+                    })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(function (r) {
+                        var msg = document.getElementById("promo-message");
+                        var discRow = document.getElementById("checkout-discount-row");
+                        var discEl = document.getElementById("checkout-discount");
+                        var totalEl = document.getElementById("checkout-total");
+
+                        if (msg) {
+                            msg.classList.remove("hidden", "bg-emerald-50", "text-emerald-700", "border", "border-emerald-200", "bg-red-50", "text-red-700", "border-red-200");
+                            if (r.success) {
+                                msg.classList.add("bg-emerald-50", "text-emerald-700", "border", "border-emerald-200");
+                                msg.innerText = "✓ " + r.message;
+                                if (discRow) discRow.classList.remove("hidden");
+                                if (discEl) discEl.innerText = "-" + parseInt(r.discount).toLocaleString("vi-VN") + "đ";
+                                if (totalEl) totalEl.innerText = parseInt(r.finalAmount).toLocaleString("vi-VN") + "đ";
+                                notify("success", "Áp dụng thành công", r.message);
+                            } else {
+                                msg.classList.add("bg-red-50", "text-red-700", "border", "border-red-200");
+                                msg.innerText = "✕ " + r.message;
+                                if (discRow) discRow.classList.add("hidden");
+                                if (totalEl) totalEl.innerText = parseInt(cartTotal).toLocaleString("vi-VN") + "đ";
+                                notify("warning", "Mã không hợp lệ", r.message);
+                            }
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error('[ApplyPromo Error]', err);
+                        notify("error", "Lỗi xử lý", "Không thể áp dụng mã giảm giá lúc này. Vui lòng thử lại.");
+                    })
+                    .finally(function () {
+                        btnApplyPromo.disabled = false;
+                        btnApplyPromo.style.opacity = '1';
+                    });
                 });
-            });
+            }
+
+            // Form Submit Protection
+            var form = document.getElementById("checkout-form");
+            var btnSubmit = document.getElementById("btn-submit-order");
+            if (form && btnSubmit) {
+                form.addEventListener("submit", function () {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">refresh</span> Đang khởi tạo đơn hàng...';
+                });
+            }
         });
     </script>
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,6 +12,18 @@ namespace WebEcommerce
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            routes.MapRoute(
+                name: "Checkout",
+                url: "Checkout",
+                defaults: new { controller = "Order", action = "Checkout" }
+            );
+
+            routes.MapRoute(
+                name: "Cart",
+                url: "Cart",
+                defaults: new { controller = "Cart", action = "Index" }
+            );
 
             routes.MapRoute(
                 name: "Default",

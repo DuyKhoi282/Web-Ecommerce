@@ -118,7 +118,8 @@ namespace WebEcommerce.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại."
+                        isAuth = true,
+                        message = "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng."
                     });
                 }
 
