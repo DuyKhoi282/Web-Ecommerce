@@ -113,10 +113,10 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
-                // Chặn hoàn thành đơn hàng chuyển khoản khi chưa thanh toán
-                if (newStatus == "Delivered" && order.PaymentMethod == "BankTransfer" && order.PaymentStatus != "Paid")
+                // Chặn xuất kho/giao hàng (Shipped) và hoàn thành (Delivered) cho đơn chuyển khoản khi chưa thanh toán
+                if ((newStatus == "Shipped" || newStatus == "Delivered") && order.PaymentMethod == "BankTransfer" && order.PaymentStatus != "Paid")
                 {
-                    TempData["ErrorMessage"] = "Không thể hoàn thành đơn hàng chuyển khoản khi chưa nhận thanh toán! Vui lòng bấm \"Xác nhận đã nhận thanh toán\" trước khi chuyển sang Delivered.";
+                    TempData["ErrorMessage"] = $"Không thể chuyển đơn hàng chuyển khoản sang \"{newStatus}\" khi chưa nhận thanh toán! Đơn hàng chuyển khoản bắt buộc phải được xác nhận thanh toán trước khi xuất kho / giao hàng.";
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
@@ -641,6 +641,13 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
+                // Không cho phép hoàn tác về Unpaid khi đơn hàng đã xuất kho hoặc đã hoàn thành
+                if (paymentStatus == "Unpaid" && (order.Status == "Shipped" || order.Status == "Delivered"))
+                {
+                    TempData["ErrorMessage"] = $"Không thể chuyển trạng thái thanh toán về \"Chưa thanh toán\" khi đơn hàng đang ở trạng thái \"{order.Status}\".";
+                    return RedirectToAction("Detail", new { id = orderId });
+                }
+
                 order.PaymentStatus = paymentStatus;
                 order.PaymentDate = paymentStatus == "Paid" ? DateTime.UtcNow : (DateTime?)null;
 
@@ -662,7 +669,7 @@ namespace WebEcommerce.Controllers
         /// <summary>
         /// Kiểm tra transition hợp lệ
         /// Pending -> Confirmed -> Shipped -> Delivered
-        /// Pending/Confirmed -> Cancelled
+        /// Pending/Confirmed/Shipped -> Cancelled
         /// </summary>
         private bool IsValidTransition(string currentStatus, string newStatus)
         {
@@ -673,7 +680,7 @@ namespace WebEcommerce.Controllers
                 case "Confirmed":
                     return newStatus == "Shipped" || newStatus == "Cancelled";
                 case "Shipped":
-                    return newStatus == "Delivered";
+                    return newStatus == "Delivered" || newStatus == "Cancelled";
                 default:
                     return false;
             }

@@ -19,7 +19,7 @@
     {
         case "Pending": nextStatuses.AddRange(new[] { "Confirmed", "Cancelled" }); break;
         case "Confirmed": nextStatuses.AddRange(new[] { "Shipped", "Cancelled" }); break;
-        case "Shipped": nextStatuses.Add("Delivered"); break;
+        case "Shipped": nextStatuses.AddRange(new[] { "Delivered", "Cancelled" }); break;
     }
 }
 
@@ -178,44 +178,77 @@
                     @* Action xác nhận thanh toán (Mark as Paid) *@
                     @if (Model.Status != "Cancelled")
                     {
-                        if (Model.PaymentStatus == "Unpaid")
+                        if (Model.PaymentMethod == "BankTransfer")
                         {
-                            <div class="pt-3 border-t border-slate-200">
-                                @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
-                                {
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="orderId" value="@Model.OrderID" />
-                                    <input type="hidden" name="paymentStatus" value="Paid" />
-                                    <button type="submit"
-                                            onclick="return confirm('Xác nhận đã nhận đủ tiền thanh toán cho đơn hàng #@Model.OrderID?');"
-                                            class="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs tracking-wide transition-all shadow-sm shadow-emerald-600/20">
-                                        <span class="material-symbols-outlined text-base">verified</span>
-                                        Xác nhận đã nhận thanh toán
-                                    </button>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="pt-3 border-t border-slate-200">
-                                <div class="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50/90 border border-emerald-200 rounded-xl px-3 py-2">
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
-                                        Đã nhận thanh toán
-                                    </span>
-                                    @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post, new { @class = "inline" }))
+                            if (Model.PaymentStatus == "Unpaid")
+                            {
+                                <div class="pt-3 border-t border-slate-200">
+                                    @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
                                     {
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="orderId" value="@Model.OrderID" />
-                                        <input type="hidden" name="paymentStatus" value="Unpaid" />
+                                        <input type="hidden" name="paymentStatus" value="Paid" />
                                         <button type="submit"
-                                                onclick="return confirm('Bạn có chắc muốn hoàn tác về Chưa thanh toán?');"
-                                                class="text-slate-400 hover:text-rose-600 transition-colors text-2xs underline ml-2">
-                                            Hoàn tác
+                                                onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng #@Model.OrderID?');"
+                                                class="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs tracking-wide transition-all shadow-sm shadow-emerald-600/20">
+                                            <span class="material-symbols-outlined text-base">verified</span>
+                                            Xác nhận đã nhận chuyển khoản
                                         </button>
                                     }
                                 </div>
-                            </div>
+                            }
+                            else
+                            {
+                                <div class="pt-3 border-t border-slate-200">
+                                    <div class="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50/90 border border-emerald-200 rounded-xl px-3 py-2">
+                                        <span class="flex items-center gap-1.5 font-medium">
+                                            <span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+                                            Đã nhận chuyển khoản
+                                        </span>
+                                        @if (Model.Status != "Shipped" && Model.Status != "Delivered")
+                                        {
+                                            using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post, new { @class = "inline" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="orderId" value="@Model.OrderID" />
+                                                <input type="hidden" name="paymentStatus" value="Unpaid" />
+                                                <button type="submit"
+                                                        onclick="return confirm('Bạn có chắc muốn hoàn tác về Chưa thanh toán?');"
+                                                        class="text-slate-400 hover:text-rose-600 transition-colors text-2xs underline ml-2">
+                                                    Hoàn tác
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @* COD Flow *@
+                            if (Model.PaymentStatus == "Unpaid")
+                            {
+                                <div class="pt-3 border-t border-slate-200">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-2">
+                                        <span class="material-symbols-outlined text-base text-[#0d47a1] flex-shrink-0 mt-0.5">local_shipping</span>
+                                        <div>
+                                            <p class="font-semibold text-slate-800">Tiền mặt khi giao hàng (COD)</p>
+                                            <p class="text-2xs text-slate-500 mt-0.5 leading-relaxed">
+                                                Hệ thống sẽ tự động chuyển thành "Đã thanh toán" khi đơn hàng được giao thành công (Delivered).
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="pt-3 border-t border-slate-200">
+                                    <div class="flex items-center gap-1.5 text-xs text-emerald-800 bg-emerald-50/90 border border-emerald-200 rounded-xl px-3 py-2 font-medium">
+                                        <span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+                                        Đã thu tiền mặt khi giao hàng (COD)
+                                    </div>
+                                </div>
+                            }
                         }
                     }
                 </div>
@@ -228,7 +261,7 @@
                     <div class="space-y-2">
                         @foreach (var ns in nextStatuses)
                         {
-                            var isBlockedByPayment = ns == "Delivered" && Model.PaymentMethod == "BankTransfer" && Model.PaymentStatus != "Paid";
+                            var isBlockedByPayment = (ns == "Shipped" || ns == "Delivered") && Model.PaymentMethod == "BankTransfer" && Model.PaymentStatus != "Paid";
                             var btnClass = ns == "Cancelled"
                                 ? "border-red-300 text-red-600 hover:bg-red-50"
                                 : "border-[#0d47a1] text-[#0d47a1] hover:bg-[#0d47a1] hover:text-white";
@@ -238,10 +271,10 @@
                                 <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
                                     <div class="flex items-center gap-1.5 font-bold mb-1 text-amber-800">
                                         <span class="material-symbols-outlined text-base text-amber-600">lock</span>
-                                        Khóa hoàn tất đơn (@ns)
+                                        Khóa chuyển sang @ns
                                     </div>
                                     <p class="text-2xs text-amber-700 leading-relaxed">
-                                        Đơn hàng chuyển khoản cần được bấm <strong>"Xác nhận đã nhận thanh toán"</strong> ở thẻ bên trên trước khi hoàn thành giao hàng.
+                                        Đơn hàng chuyển khoản bắt buộc phải được <strong>"Xác nhận đã nhận chuyển khoản"</strong> ở thẻ bên trên trước khi xuất kho / giao hàng (@ns).
                                     </p>
                                 </div>
                             }
