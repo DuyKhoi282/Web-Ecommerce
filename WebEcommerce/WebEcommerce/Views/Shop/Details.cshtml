@@ -14,6 +14,15 @@
         discountPercent = (int)Math.Round((Model.Price - Model.DiscountPrice.Value) / Model.Price * 100);
         savedAmount = Model.Price - Model.DiscountPrice.Value;
     }
+
+    var approvedReviews = Model.Reviews?.Where(r => r.IsApproved).OrderByDescending(r => r.CreatedAt).ToList() ?? new List<WebEcommerce.Models.Review>();
+    var totalReviews = approvedReviews.Count;
+    var avgRating = totalReviews > 0 ? approvedReviews.Average(r => r.Rating) : 5.0;
+    var star5Count = approvedReviews.Count(r => r.Rating == 5);
+    var star4Count = approvedReviews.Count(r => r.Rating == 4);
+    var star3Count = approvedReviews.Count(r => r.Rating == 3);
+    var star2Count = approvedReviews.Count(r => r.Rating == 2);
+    var star1Count = approvedReviews.Count(r => r.Rating == 1);
 }
 
 <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -127,14 +136,20 @@
                 <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-5 pb-5 border-b border-slate-100 text-xs sm:text-sm text-slate-500">
                     <div class="flex items-center gap-1.5">
                         <div class="flex items-center text-amber-500">
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= (int)Math.Round(avgRating))
+                                {
+                                    <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+                                }
+                                else
+                                {
+                                    <span class="material-symbols-outlined text-base text-slate-300">star</span>
+                                }
+                            }
                         </div>
-                        <span class="font-bold text-slate-800">5.0</span>
-                        <span class="text-slate-400">(@(Model.Reviews?.Count ?? 0) đánh giá)</span>
+                        <span class="font-bold text-slate-800">@avgRating.ToString("0.0")</span>
+                        <span class="text-slate-400">(@totalReviews đánh giá)</span>
                     </div>
                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
                     <span>Đã bán: <strong class="text-slate-800">120+</strong></span>
@@ -345,90 +360,118 @@
                 <!-- Tổng quan đánh giá -->
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 p-5 rounded-2xl bg-slate-50 border border-slate-100 mb-6 items-center">
                     <div class="sm:col-span-4 text-center sm:border-r border-slate-200 sm:pr-4">
-                        <div class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">5.0</div>
+                        <div class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">@avgRating.ToString("0.0")</div>
                         <div class="flex items-center justify-center text-amber-500 my-2">
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= (int)Math.Round(avgRating))
+                                {
+                                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">star</span>
+                                }
+                                else
+                                {
+                                    <span class="material-symbols-outlined text-lg text-slate-300">star</span>
+                                }
+                            }
                         </div>
-                        <p class="text-xs text-slate-500">100% khách hàng hài lòng</p>
+                        <p class="text-xs text-slate-500">@totalReviews lượt đánh giá xác thực</p>
                     </div>
 
                     <div class="sm:col-span-8 flex flex-col gap-1.5 text-xs text-slate-600">
+                        @{
+                            var p5 = totalReviews > 0 ? (int)Math.Round((double)star5Count / totalReviews * 100) : (totalReviews == 0 ? 100 : 0);
+                            var p4 = totalReviews > 0 ? (int)Math.Round((double)star4Count / totalReviews * 100) : 0;
+                            var p3 = totalReviews > 0 ? (int)Math.Round((double)star3Count / totalReviews * 100) : 0;
+                            var p2 = totalReviews > 0 ? (int)Math.Round((double)star2Count / totalReviews * 100) : 0;
+                            var p1 = totalReviews > 0 ? (int)Math.Round((double)star1Count / totalReviews * 100) : 0;
+                        }
                         <div class="flex items-center gap-2">
                             <span class="w-12 text-right">5 sao</span>
                             <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full bg-amber-400 rounded-full" style="width: 95%;"></div>
+                                <div class="h-full bg-amber-400 rounded-full" style="width: @(p5)%;"></div>
                             </div>
-                            <span class="w-8 text-slate-400 text-right">95%</span>
+                            <span class="w-8 text-slate-400 text-right">@(p5)%</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-12 text-right">4 sao</span>
                             <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full bg-amber-400 rounded-full" style="width: 5%;"></div>
+                                <div class="h-full bg-amber-400 rounded-full" style="width: @(p4)%;"></div>
                             </div>
-                            <span class="w-8 text-slate-400 text-right">5%</span>
+                            <span class="w-8 text-slate-400 text-right">@(p4)%</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-12 text-right">3 sao</span>
                             <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full bg-amber-400 rounded-full" style="width: 0%;"></div>
+                                <div class="h-full bg-amber-400 rounded-full" style="width: @(p3)%;"></div>
                             </div>
-                            <span class="w-8 text-slate-400 text-right">0%</span>
+                            <span class="w-8 text-slate-400 text-right">@(p3)%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-12 text-right">2 sao</span>
+                            <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: @(p2)%;"></div>
+                            </div>
+                            <span class="w-8 text-slate-400 text-right">@(p2)%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-12 text-right">1 sao</span>
+                            <div class="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: @(p1)%;"></div>
+                            </div>
+                            <span class="w-8 text-slate-400 text-right">@(p1)%</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Danh sách nhận xét mẫu chân thực -->
-                <div class="space-y-4">
-                    <div class="p-4 rounded-xl border border-slate-100 bg-white">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-red-100 text-primary font-bold text-xs flex items-center justify-center">T</div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-slate-800">Trần Minh Quân</h5>
-                                    <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px]">verified</span> Đã mua tại ShopeChill
-                                    </span>
+                <!-- Danh sách nhận xét -->
+                @if (approvedReviews.Any())
+                {
+                    <div class="space-y-4">
+                        @foreach (var rev in approvedReviews)
+                        {
+                            var reviewerName = rev.User?.FullName ?? rev.User?.UserName ?? "Khách hàng";
+                            var initial = !string.IsNullOrEmpty(reviewerName) ? reviewerName.Substring(0, 1).ToUpper() : "K";
+                            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-2xs">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-full bg-red-100 text-primary font-bold text-xs flex items-center justify-center">
+                                            @initial
+                                        </div>
+                                        <div>
+                                            <h5 class="text-xs font-bold text-slate-800">@reviewerName</h5>
+                                            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[12px]">verified</span> Đã mua hàng
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400">@rev.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</div>
                                 </div>
-                            </div>
-                            <div class="text-[11px] text-slate-400">2 ngày trước</div>
-                        </div>
-                        <div class="flex text-amber-500 mb-1.5">
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">Sản phẩm đóng gói rất chắc chắn, giao hàng siêu nhanh chỉ trong 2 tiếng tại TP.HCM. Hàng nguyên seal 100% cực kỳ ưng ý!</p>
-                    </div>
-
-                    <div class="p-4 rounded-xl border border-slate-100 bg-white">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center">H</div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-slate-800">Hoàng Nam</h5>
-                                    <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[12px]">verified</span> Đã mua tại ShopeChill
-                                    </span>
+                                <div class="flex text-amber-500 mb-1.5">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        if (s <= rev.Rating)
+                                        {
+                                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="material-symbols-outlined text-sm text-slate-300">star</span>
+                                        }
+                                    }
                                 </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">@(string.IsNullOrWhiteSpace(rev.Comment) ? "Khách hàng không để lại nhận xét bằng chữ." : rev.Comment)</p>
                             </div>
-                            <div class="text-[11px] text-slate-400">1 tuần trước</div>
-                        </div>
-                        <div class="flex text-amber-500 mb-1.5">
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">Chất lượng tuyệt vời đúng như mô tả, được hỗ trợ hướng dẫn tận tình. Chắc chắn sẽ tiếp tục ủng hộ ShopeChill!</p>
+                        }
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                        <span class="material-symbols-outlined text-slate-300 text-4xl mb-2">rate_review</span>
+                        <h4 class="font-bold text-slate-700 text-sm">Chưa có đánh giá nào cho sản phẩm này</h4>
+                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Hãy là người đầu tiên mua và chia sẻ trải nghiệm thực tế về sản phẩm này để giúp các khách hàng khác nhé!</p>
+                    </div>
+                }
             </div>
         </div>
 
@@ -535,17 +578,25 @@
     <script>
         function changeMainImage(url, btn) {
             var img = document.getElementById('mainProductImage');
-            if (img) img.src = url;
+            if (img) {
+                img.style.opacity = '0.3';
+                setTimeout(function () {
+                    img.src = url;
+                    img.style.opacity = '1';
+                }, 120);
+            }
             
             // Xóa active class từ tất cả thumbnail
             var btns = document.querySelectorAll('.thumbnail-btn');
-            btns.forEach(b => {
+            btns.forEach(function (b) {
                 b.classList.remove('border-primary', 'ring-2', 'ring-primary/20');
                 b.classList.add('border-slate-200');
             });
             // Thêm active vào button được click
-            btn.classList.remove('border-slate-200');
-            btn.classList.add('border-primary', 'ring-2', 'ring-primary/20');
+            if (btn) {
+                btn.classList.remove('border-slate-200');
+                btn.classList.add('border-primary', 'ring-2', 'ring-primary/20');
+            }
         }
 
         function updateQty(change) {
