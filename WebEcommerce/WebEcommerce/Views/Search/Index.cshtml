@@ -1,107 +1,135 @@
 @model WebEcommerce.Models.ProductSearchViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    // Xác định chip giá nào đang active
+    bool isAllPrice = (!Model.MinPrice.HasValue || Model.MinPrice == 0) && !Model.MaxPrice.HasValue;
+    bool isUnder1M = (!Model.MinPrice.HasValue || Model.MinPrice == 0) && Model.MaxPrice == 1000000;
+    bool is1Mto5M = Model.MinPrice == 1000000 && Model.MaxPrice == 5000000;
+    bool is5Mto15M = Model.MinPrice == 5000000 && Model.MaxPrice == 15000000;
+    bool is15Mto30M = Model.MinPrice == 15000000 && Model.MaxPrice == 30000000;
+    bool isOver30M = Model.MinPrice == 30000000 && !Model.MaxPrice.HasValue;
 }
 
-<div class="container" style="max-width: 1280px; margin: 0 auto; padding: 24px 16px;">
-    <h1 style="font-size: 1.75rem; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
-        @if (!string.IsNullOrWhiteSpace(Model.Keyword))
-        {
-            <text>Kết quả tìm kiếm: "@Model.Keyword"</text>
-        }
-        else
-        {
-            <text>Tìm kiếm & Lọc Sản phẩm</text>
-        }
-    </h1>
-    <p style="color: #5c6370; font-size: 0.875rem; margin-bottom: 24px;">Tìm thấy <strong style="color: #0d47a1;">@Model.TotalCount</stron    <!-- Bộ lọc -->
-    <div style="background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+<div class="search-catalog-page" style="max-width: 1320px; margin: 0 auto; padding: 28px 20px 48px;">
+
+    <!-- Tiêu đề & Thống kê kết quả -->
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 1.875rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em;">
+            @if (!string.IsNullOrWhiteSpace(Model.Keyword))
+            {
+                <text>Kết quả tìm kiếm cho: <span style="color: #0d47a1;">"@Model.Keyword"</span></text>
+            }
+            else
+            {
+                <text>Tìm kiếm & Lọc Sản phẩm</text>
+            }
+        </h1>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span>Tìm thấy</span>
+            <span style="display: inline-flex; align-items: center; justify-content: center; background: #eff6ff; color: #0d47a1; font-weight: 800; font-size: 0.85rem; padding: 2px 10px; border-radius: 9999px; border: 1px solid #bfdbfe;">
+                @Model.TotalCount
+            </span>
+            <span>sản phẩm phù hợp</span>
+        </p>
+    </div>
+
+    <!-- Hộp Bộ Lọc Sản Phẩm (Filter Box) -->
+    <div class="filter-card-container">
         @using (Html.BeginForm("Index", "Search", FormMethod.Get, new { id = "searchFilterForm" }))
         {
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
-                <!-- Từ khóa -->
-                <div style="flex: 1; min-width: 220px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Từ khóa</label>
+            <!-- Lưới các trường tìm kiếm & bộ lọc -->
+            <div class="filter-controls-grid">
+                
+                <!-- 1. Từ khóa tìm kiếm -->
+                <div class="filter-col-keyword">
+                    <label class="filter-label">Từ khóa</label>
                     <div style="position: relative;">
-                        <input type="text" name="keyword" id="searchKeyword" value="@Model.Keyword" placeholder="Nhập tên sản phẩm..."
-                                style="width: 100%; padding: 10px 10px 10px 36px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
-                                onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
-                                onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
-                                autocomplete="off" />
-                        <span class="material-symbols-outlined" style="position: absolute; left: 10px; top: 10px; color: #94a3b8; font-size: 18px;">search</span>
+                        <input type="text" name="keyword" id="searchKeyword" value="@Model.Keyword" placeholder="Nhập tên sản phẩm cần tìm..."
+                               class="filter-input filter-input-search"
+                               autocomplete="off" />
+                        <span class="material-symbols-outlined search-icon-adornment">search</span>
                     </div>
                     <!-- Autocomplete dropdown -->
-                    <div id="autocompleteDropdown" style="display: none; position: absolute; z-index: 100; background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 320px; overflow-y: auto; margin-top: 4px; width: calc(100% - 40px);"></div>
+                    <div id="autocompleteDropdown" class="autocomplete-popup" style="display: none;"></div>
                 </div>
-                <!-- Danh mục -->
-                <div style="width: 180px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Danh mục</label>
-                    @Html.DropDownList("categoryId", Model.CategoryList, new {
-                        id = "categorySelect",
-                        style = "width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;"
-                    })
-                </div>
-                <!-- Giá tối thiểu -->
-                <div style="width: 145px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569;">Giá từ (₫)</label>
-                        <span id="minPricePreview" style="font-size: 0.7rem; color: #0d47a1; font-weight: 600;">@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString("N0") + "₫" : "")</span>
+
+                <!-- 2. Danh mục -->
+                <div class="filter-col-category">
+                    <label class="filter-label">Danh mục</label>
+                    <div class="select-wrapper">
+                        @Html.DropDownList("categoryId", Model.CategoryList, new {
+                            id = "categorySelect",
+                            @class = "filter-select",
+                            onchange = "submitSearchFilter();"
+                        })
+                        <span class="material-symbols-outlined select-chevron">expand_more</span>
                     </div>
-                    <input type="number" name="minPrice" id="minPriceInput" value="@Model.MinPrice" placeholder="0" min="0" step="100000"
-                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
-                           onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                </div>
+
+                <!-- 3. Giá từ -->
+                <div class="filter-col-price">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="filter-label" style="margin-bottom: 0;">Giá từ (₫)</label>
+                        <span id="minPricePreview" class="price-preview-badge">@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString("N0") + "₫" : "")</span>
+                    </div>
+                    <input type="number" name="minPrice" id="minPriceInput" value="@(Model.MinPrice.HasValue && Model.MinPrice > 0 ? Model.MinPrice.Value.ToString("0") : "")" placeholder="0" min="0" step="100000"
+                           class="filter-input"
                            oninput="updatePricePreview('minPriceInput', 'minPricePreview')" />
                 </div>
-                <!-- Giá tối đa -->
-                <div style="width: 145px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <label style="font-size: 0.75rem; font-weight: 700; color: #475569;">Giá đến (₫)</label>
-                        <span id="maxPricePreview" style="font-size: 0.7rem; color: #0d47a1; font-weight: 600;">@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString("N0") + "₫" : "")</span>
+
+                <!-- 4. Giá đến -->
+                <div class="filter-col-price">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="filter-label" style="margin-bottom: 0;">Giá đến (₫)</label>
+                        <span id="maxPricePreview" class="price-preview-badge">@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString("N0") + "₫" : "")</span>
                     </div>
-                    <input type="number" name="maxPrice" id="maxPriceInput" value="@Model.MaxPrice" placeholder="Tối đa" min="0" step="100000"
-                           style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; transition: all 0.2s;"
-                           onfocus="this.style.borderColor='#0d47a1'; this.style.background='#fff';"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                    <input type="number" name="maxPrice" id="maxPriceInput" value="@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString("0") : "")" placeholder="Tối đa" min="0" step="100000"
+                           class="filter-input"
                            oninput="updatePricePreview('maxPriceInput', 'maxPricePreview')" />
                 </div>
-                <!-- Xếp hạng sao -->
-                <div style="width: 155px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sao tối thiểu</label>
-                    <select name="minRating" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
-                        <option value="">Tất cả đánh giá</option>
-                        <option value="5" @(Model.MinRating == 5 ? "selected" : "")>⭐⭐⭐⭐⭐ (5 sao)</option>
-                        <option value="4" @(Model.MinRating == 4 ? "selected" : "")>⭐⭐⭐⭐ (Từ 4 sao)</option>
-                        <option value="3" @(Model.MinRating == 3 ? "selected" : "")>⭐⭐⭐ (Từ 3 sao)</option>
-                        <option value="2" @(Model.MinRating == 2 ? "selected" : "")>⭐⭐ (Từ 2 sao)</option>
-                        <option value="1" @(Model.MinRating == 1 ? "selected" : "")>⭐ (Từ 1 sao)</option>
-                    </select>
+
+                <!-- 5. Sao tối thiểu -->
+                <div class="filter-col-rating">
+                    <label class="filter-label">Sao tối thiểu</label>
+                    <div class="select-wrapper">
+                        <select name="minRating" id="minRatingSelect" class="filter-select" onchange="submitSearchFilter();">
+                            <option value="">Tất cả đánh giá</option>
+                            <option value="5" @(Model.MinRating == 5 ? "selected" : "")>★ 5.0 sao (Tuyệt đối)</option>
+                            <option value="4" @(Model.MinRating == 4 ? "selected" : "")>★ Từ 4.0 sao trở lên</option>
+                            <option value="3" @(Model.MinRating == 3 ? "selected" : "")>★ Từ 3.0 sao trở lên</option>
+                            <option value="2" @(Model.MinRating == 2 ? "selected" : "")>★ Từ 2.0 sao trở lên</option>
+                            <option value="1" @(Model.MinRating == 1 ? "selected" : "")>★ Từ 1.0 sao trở lên</option>
+                        </select>
+                        <span class="material-symbols-outlined select-chevron">expand_more</span>
+                    </div>
                 </div>
-                <!-- Sắp xếp -->
-                <div style="width: 150px;">
-                    <label style="font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Sắp xếp</label>
-                    <select name="sortBy" style="width: 100%; padding: 10px; font-size: 0.875rem; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc;">
-                        <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
-                        <option value="price_asc" @(Model.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</option>
-                        <option value="price_desc" @(Model.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</option>
-                        <option value="name_asc" @(Model.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</option>
-                        <option value="rating_desc" @(Model.SortBy == "rating_desc" ? "selected" : "")>Đánh giá cao</option>
-                        <option value="popular" @(Model.SortBy == "popular" ? "selected" : "")>Phổ biến</option>
-                    </select>
+
+                <!-- 6. Sắp xếp -->
+                <div class="filter-col-sort">
+                    <label class="filter-label">Sắp xếp</label>
+                    <div class="select-wrapper">
+                        <select name="sortBy" id="sortBySelect" class="filter-select" onchange="submitSearchFilter();">
+                            <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
+                            <option value="price_asc" @(Model.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</option>
+                            <option value="price_desc" @(Model.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</option>
+                            <option value="name_asc" @(Model.SortBy == "name_asc" ? "selected" : "")>Tên A - Z</option>
+                            <option value="rating_desc" @(Model.SortBy == "rating_desc" ? "selected" : "")>Đánh giá cao</option>
+                            <option value="popular" @(Model.SortBy == "popular" ? "selected" : "")>Xem nhiều</option>
+                        </select>
+                        <span class="material-symbols-outlined select-chevron">expand_more</span>
+                    </div>
                 </div>
-                <!-- Nút lọc & Đặt lại -->
-                <div style="display: flex; gap: 8px;">
-                    <button type="submit" style="padding: 10px 20px; background: #0d47a1; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 6px;"
-                            onmouseover="this.style.background='#0a3880'" onmouseout="this.style.background='#0d47a1'">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">filter_alt</span>
+
+                <!-- 7. Nút hành động (Tìm kiếm & Đặt lại) -->
+                <div class="filter-col-actions">
+                    <button type="submit" class="btn-filter-apply">
+                        <span class="material-symbols-outlined" style="font-size: 19px;">filter_alt</span>
                         <span>Tìm kiếm</span>
                     </button>
                     @if (!string.IsNullOrWhiteSpace(Model.Keyword) || Model.CategoryID.HasValue || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || Model.MinRating.HasValue)
                     {
-                        <a href="@Url.Action("Index", "Search")" style="padding: 10px 14px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 12px; font-weight: 700; font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"
-                           onmouseover="this.style.background='#fee2e2'; this.style.color='#dc2626'; this.style.borderColor='#fca5a5';"
-                           onmouseout="this.style.background='#f1f5f9'; this.style.color='#475569'; this.style.borderColor='#e2e8f0';"
-                           title="Xóa tất cả bộ lọc">
+                        <a href="@Url.Action("Index", "Search")" class="btn-filter-reset" title="Xóa toàn bộ bộ lọc và xem tất cả">
                             <span class="material-symbols-outlined" style="font-size: 18px;">restart_alt</span>
                             <span>Đặt lại</span>
                         </a>
@@ -109,98 +137,109 @@
                 </div>
             </div>
 
-            <!-- Dãy chọn nhanh khoảng giá (Quick Price Chips) -->
-            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-right: 4px;">Chọn nhanh mức giá:</span>
-                <button type="button" onclick="setQuickPrice(null, null)" class="quick-price-chip @(!Model.MinPrice.HasValue && !Model.MaxPrice.HasValue ? "active" : "")">Tất cả mức giá</button>
-                <button type="button" onclick="setQuickPrice(0, 1000000)" class="quick-price-chip @(Model.MinPrice == 0 && Model.MaxPrice == 1000000 ? "active" : "")">Dưới 1 triệu</button>
-                <button type="button" onclick="setQuickPrice(1000000, 5000000)" class="quick-price-chip @(Model.MinPrice == 1000000 && Model.MaxPrice == 5000000 ? "active" : "")">1 - 5 triệu</button>
-                <button type="button" onclick="setQuickPrice(5000000, 15000000)" class="quick-price-chip @(Model.MinPrice == 5000000 && Model.MaxPrice == 15000000 ? "active" : "")">5 - 15 triệu</button>
-                <button type="button" onclick="setQuickPrice(15000000, 30000000)" class="quick-price-chip @(Model.MinPrice == 15000000 && Model.MaxPrice == 30000000 ? "active" : "")">15 - 30 triệu</button>
-                <button type="button" onclick="setQuickPrice(30000000, null)" class="quick-price-chip @(Model.MinPrice == 30000000 && !Model.MaxPrice.HasValue ? "active" : "")">Trên 30 triệu</button>
+            <!-- Dãy chọn nhanh mức giá (Quick Price Chips) -->
+            <div class="quick-price-bar">
+                <span class="quick-price-title">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #0d47a1;">sell</span>
+                    <span>Chọn nhanh mức giá:</span>
+                </span>
+                <div class="quick-price-chips-list">
+                    <button type="button" onclick="setQuickPrice(null, null, this)" class="quick-price-chip @(isAllPrice ? "active" : "")" data-min="" data-max="">Tất cả mức giá</button>
+                    <button type="button" onclick="setQuickPrice(null, 1000000, this)" class="quick-price-chip @(isUnder1M ? "active" : "")" data-min="" data-max="1000000">Dưới 1 triệu</button>
+                    <button type="button" onclick="setQuickPrice(1000000, 5000000, this)" class="quick-price-chip @(is1Mto5M ? "active" : "")" data-min="1000000" data-max="5000000">1 - 5 triệu</button>
+                    <button type="button" onclick="setQuickPrice(5000000, 15000000, this)" class="quick-price-chip @(is5Mto15M ? "active" : "")" data-min="5000000" data-max="15000000">5 - 15 triệu</button>
+                    <button type="button" onclick="setQuickPrice(15000000, 30000000, this)" class="quick-price-chip @(is15Mto30M ? "active" : "")" data-min="15000000" data-max="30000000">15 - 30 triệu</button>
+                    <button type="button" onclick="setQuickPrice(30000000, null, this)" class="quick-price-chip @(isOver30M ? "active" : "")" data-min="30000000" data-max="">Trên 30 triệu</button>
+                </div>
             </div>
         }
     </div>
 
-    <!-- Danh sách sản phẩm dạng grid -->
-    @if (Model.Products.Any())
+    <!-- Danh sách sản phẩm -->
+    @if (Model.Products != null && Model.Products.Any())
     {
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        <div class="products-catalog-grid">
             @foreach (var p in Model.Products)
             {
-                <div style="background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s; display: flex; flex-direction: column;"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)';"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
-                    <!-- Ảnh (Bấm vào để xem chi tiết) -->
-                    <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })" style="display: block; position: relative; padding-top: 100%; overflow: hidden; background: #f1f5f9; text-decoration: none; cursor: pointer;">
+                <div class="product-catalog-card">
+                    <!-- Ảnh sản phẩm -->
+                    <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })" class="product-card-image-wrap">
                         @if (!string.IsNullOrEmpty(p.MainImageUrl))
                         {
-                            <img src="@p.MainImageUrl" alt="@p.Name" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
-                                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                            <img src="@p.MainImageUrl" alt="@p.Name" class="product-card-img" loading="lazy" />
                         }
                         else
                         {
-                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                                <span class="material-symbols-outlined" style="font-size: 48px; color: #cbd5e1;">image</span>
+                            <div class="product-card-img-placeholder">
+                                <span class="material-symbols-outlined" style="font-size: 44px; color: #94a3b8;">image</span>
                             </div>
                         }
-                        @if (p.DiscountPrice.HasValue)
+                        @if (p.DiscountPrice.HasValue && p.Price > p.DiscountPrice.Value)
                         {
                             var discountPercent = Math.Round((1 - (double)p.DiscountPrice.Value / (double)p.Price) * 100);
-                            <span style="position: absolute; top: 8px; left: 8px; background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800;">-@discountPercent%</span>
+                            <span class="product-badge-discount">-@discountPercent%</span>
                         }
                         @if (p.StockQuantity == 0)
                         {
-                            <span style="position: absolute; top: 8px; right: 8px; background: #1e293b; color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">Hết hàng</span>
+                            <span class="product-badge-outofstock">Hết hàng</span>
                         }
                     </a>
-                    <!-- Info -->
-                    <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+
+                    <!-- Chi tiết sản phẩm -->
+                    <div class="product-card-body">
                         <div>
-                            <p style="font-size: 0.7rem; color: #0d47a1; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">@p.CategoryName</p>
-                            <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
-                                <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })" style="color: #1e293b; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#0d47a1'" onmouseout="this.style.color='#1e293b'">
+                            <!-- Danh mục -->
+                            <p class="product-card-category">@p.CategoryName</p>
+                            
+                            <!-- Tên sản phẩm -->
+                            <h3 class="product-card-title">
+                                <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })">
                                     @p.Name
                                 </a>
                             </h3>
-                            <!-- Rating -->
-                            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px; min-height: 20px;">
+
+                            <!-- Đánh giá sao -->
+                            <div class="product-card-rating">
                                 @if (p.ReviewCount > 0)
                                 {
-                                    <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; margin-right: 2px;">@p.AverageRating.ToString("0.0")</span>
-                                    for (int i = 1; i <= 5; i++)
-                                    {
-                                        <span class="material-symbols-outlined" style="font-size: 14px; color: @(i <= Math.Round(p.AverageRating) ? "#f59e0b" : "#cbd5e1"); font-variation-settings: 'FILL' 1;">star</span>
-                                    }
-                                    <span style="font-size: 0.7rem; color: #64748b;">(@p.ReviewCount)</span>
+                                    <span class="rating-score">@p.AverageRating.ToString("0.0")</span>
+                                    <div class="rating-stars-list">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <span class="material-symbols-outlined star-icon @(i <= Math.Round(p.AverageRating) ? "star-filled" : "star-empty")">star</span>
+                                        }
+                                    </div>
+                                    <span class="rating-count">(@p.ReviewCount)</span>
                                 }
                                 else
                                 {
-                                    for (int i = 1; i <= 5; i++)
-                                    {
-                                        <span class="material-symbols-outlined" style="font-size: 14px; color: #e2e8f0; font-variation-settings: 'FILL' 1;">star</span>
-                                    }
-                                    <span style="font-size: 0.7rem; color: #94a3b8;">Chưa có đánh giá</span>
+                                    <div class="rating-stars-list">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <span class="material-symbols-outlined star-icon star-empty">star</span>
+                                        }
+                                    </div>
+                                    <span class="rating-count" style="color: #94a3b8;">Chưa có đánh giá</span>
                                 }
                             </div>
                         </div>
-                        <div>
-                            <!-- Price -->
-                            <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+
+                        <!-- Khối giá và nút chi tiết -->
+                        <div class="product-card-footer">
+                            <div class="product-price-row">
                                 @if (p.DiscountPrice.HasValue)
                                 {
-                                    <span style="font-size: 1.1rem; font-weight: 800; color: #dc2626;">@p.DiscountPrice.Value.ToString("N0")₫</span>
-                                    <span style="font-size: 0.8rem; color: #94a3b8; text-decoration: line-through;">@p.Price.ToString("N0")₫</span>
+                                    <span class="price-current price-discounted">@p.DiscountPrice.Value.ToString("N0")₫</span>
+                                    <span class="price-original">@p.Price.ToString("N0")₫</span>
                                 }
                                 else
                                 {
-                                    <span style="font-size: 1.1rem; font-weight: 800; color: #1e293b;">@p.Price.ToString("N0")₫</span>
+                                    <span class="price-current">@p.Price.ToString("N0")₫</span>
                                 }
                             </div>
-                            <!-- Nút Xem chi tiết -->
-                            <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 8px 12px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.75rem; font-weight: 700; color: #0d47a1; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#0d47a1'; this.style.color='#fff'; this.style.borderColor='#0d47a1';" onmouseout="this.style.background='#f8fafc'; this.style.color='#0d47a1'; this.style.borderColor='#e2e8f0';">
+                            <a href="@Url.Action("Details", "Shop", new { id = p.ProductID })" class="btn-card-view">
                                 <span>Xem chi tiết</span>
-                                <span class="material-symbols-outlined" style="font-size: 14px;">arrow_forward</span>
+                                <span class="material-symbols-outlined" style="font-size: 15px;">arrow_forward</span>
                             </a>
                         </div>
                     </div>
@@ -211,92 +250,74 @@
         <!-- Phân trang -->
         if (Model.TotalPages > 1)
         {
-            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+            <div class="pagination-container">
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     var isActive = i == Model.CurrentPage;
                     <a href="@Url.Action("Index", "Search", new { keyword = Model.Keyword, categoryId = Model.CategoryID, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice, minRating = Model.MinRating, sortBy = Model.SortBy, page = i })"
-                       style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 0.875rem; font-weight: 700; text-decoration: none; transition: all 0.2s;
-                              @(isActive ? "background: #0d47a1; color: #fff; box-shadow: 0 4px 12px rgba(13,71,161,0.3);" : "background: #fff; color: #475569; border: 2px solid #e2e8f0;")"
-                       onmouseover="@(isActive ? "" : "this.style.background='#f1f5f9'")"
-                       onmouseout="@(isActive ? "" : "this.style.background='#fff'")"
-                    >@i</a>
+                       class="pagination-page-item @(isActive ? "active" : "")">
+                       @i
+                    </a>
                 }
             </div>
         }
     }
     else
     {
-        <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
-            <span class="material-symbols-outlined" style="font-size: 64px; display: block; margin-bottom: 12px;">search_off</span>
-            <p style="font-size: 1.1rem; font-weight: 600;">Không tìm thấy sản phẩm nào</p>
-            <p style="font-size: 0.875rem; margin-top: 4px;">Thử thay đổi từ khóa hoặc bộ lọc</p>
+        <!-- Empty State -->
+        <div class="search-empty-state">
+            <div class="empty-icon-wrap">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: #64748b;">search_off</span>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Không tìm thấy sản phẩm nào</h3>
+            <p style="font-size: 0.9rem; color: #64748b; margin: 0 0 20px 0; max-width: 420px; line-height: 1.5;">
+                Không có sản phẩm nào khớp với tiêu chí tìm kiếm hiện tại. Hãy thử chọn khoảng giá rộng hơn hoặc bấm Đặt lại bộ lọc.
+            </p>
+            <a href="@Url.Action("Index", "Search")" class="btn-empty-reset">
+                <span class="material-symbols-outlined" style="font-size: 18px;">refresh</span>
+                <span>Xem tất cả sản phẩm</span>
+            </a>
         </div>
     }
 </div>
 
 @section scripts {
     <script>
-        // Autocomplete
-        var searchInput = document.getElementById('searchKeyword');
-        var dropdown = document.getElementById('autocompleteDropdown');
-        var debounceTimer;
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                clearTimeout(debounceTimer);
-                var term = this.value.trim();
-                if (term.length < 2) { dropdown.style.display = 'none'; return; }
-
-                debounceTimer = setTimeout(function () {
-                    fetch('@Url.Action("Autocomplete", "Search")?term=' + encodeURIComponent(term))
-                        .then(function (r) { return r.json(); })
-                        .then(function (data) {
-                            if (!data.length) { dropdown.style.display = 'none'; return; }
-                            dropdown.innerHTML = '';
-                            data.forEach(function (item) {
-                                var div = document.createElement('div');
-                                div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;';
-                                div.onmouseover = function () { this.style.background = '#f1f5f9'; };
-                                div.onmouseout = function () { this.style.background = ''; };
-                                div.onclick = function () { 
-                                    if (item.id) {
-                                        window.location.href = '@Url.Action("Details", "Shop")/' + item.id;
-                                    } else {
-                                        searchInput.value = item.name; 
-                                        dropdown.style.display = 'none'; 
-                                        searchInput.form.submit(); 
-                                    }
-                                };
-                                var imgHtml = item.image ? '<img src="' + item.image + '" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />' : '<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#94a3b8;font-size:18px;">image</span></div>';
-                                div.innerHTML = imgHtml + '<div><div style="font-size:0.85rem;font-weight:600;color:#1e293b;">' + item.name + '</div><div style="font-size:0.7rem;color:#64748b;">' + item.category + ' • ' + Number(item.price).toLocaleString('vi-VN') + '₫</div></div>';
-                                dropdown.appendChild(div);
-                            });
-                            dropdown.style.display = 'block';
-                        });
-                }, 300);
-            });
-
-            document.addEventListener('click', function (e) {
-                if (!dropdown.contains(e.target) && e.target !== searchInput) {
-                    dropdown.style.display = 'none';
-                }
-            });
-        }
-
-        // Đặt khoảng giá nhanh
-        function setQuickPrice(min, max) {
-            var minInput = document.getElementById('minPriceInput');
-            var maxInput = document.getElementById('maxPriceInput');
-            if (minInput) minInput.value = min !== null ? min : '';
-            if (maxInput) maxInput.value = max !== null ? max : '';
-            updatePricePreview('minPriceInput', 'minPricePreview');
-            updatePricePreview('maxPriceInput', 'maxPricePreview');
+        // Tự động submit bộ lọc
+        function submitSearchFilter() {
             var form = document.getElementById('searchFilterForm');
             if (form) form.submit();
         }
 
-        // Cập nhật nhãn tiền tệ xem trước
+        // Chọn nhanh mức giá (Quick Price)
+        function setQuickPrice(min, max, buttonElement) {
+            var minInput = document.getElementById('minPriceInput');
+            var maxInput = document.getElementById('maxPriceInput');
+            if (!minInput || !maxInput) return;
+
+            // Nếu người dùng bấm lại vào chip đang active -> hủy lọc giá (về Tất cả mức giá)
+            if (buttonElement && buttonElement.classList.contains('active') && (min !== null || max !== null)) {
+                minInput.value = '';
+                maxInput.value = '';
+            } else {
+                minInput.value = min !== null ? min : '';
+                maxInput.value = max !== null ? max : '';
+            }
+
+            updatePricePreview('minPriceInput', 'minPricePreview');
+            updatePricePreview('maxPriceInput', 'maxPricePreview');
+
+            // Cập nhật class active trực tiếp cho phản hồi tức thì
+            var allChips = document.querySelectorAll('.quick-price-chip');
+            allChips.forEach(function (chip) { chip.classList.remove('active'); });
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
+
+            submitSearchFilter();
+        }
+
+        // Xem trước định dạng tiền tệ khi người dùng gõ
         function updatePricePreview(inputId, previewId) {
             var input = document.getElementById(inputId);
             var preview = document.getElementById(previewId);
@@ -308,35 +329,689 @@
                 preview.textContent = '';
             }
         }
-    </script>
 
-    <style>
-        .quick-price-chip {
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 20px;
-            border: 1.5px solid #e2e8f0;
-            background: #f8fafc;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        .quick-price-chip:hover {
-            background: #eff6ff;
-            border-color: #93c5fd;
-            color: #0d47a1;
-            transform: translateY(-1px);
-        }
-        .quick-price-chip.active {
-            background: #0d47a1;
-            border-color: #0d47a1;
-            color: #ffffff;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(13, 71, 161, 0.25);
-        }
-    </style>
+        // Autocomplete từ khóa
+        (function () {
+            var searchInput = document.getElementById('searchKeyword');
+            var dropdown = document.getElementById('autocompleteDropdown');
+            var debounceTimer;
+
+            if (!searchInput || !dropdown) return;
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                var term = this.value.trim();
+                if (term.length < 2) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                debounceTimer = setTimeout(function () {
+                    fetch('@Url.Action("Autocomplete", "Search")?term=' + encodeURIComponent(term))
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (!data || !data.length) {
+                                dropdown.style.display = 'none';
+                                return;
+                            }
+                            dropdown.innerHTML = '';
+                            data.forEach(function (item) {
+                                var div = document.createElement('div');
+                                div.className = 'autocomplete-item';
+                                div.onclick = function () {
+                                    if (item.id) {
+                                        window.location.href = '@Url.Action("Details", "Shop")/' + item.id;
+                                    } else {
+                                        searchInput.value = item.name;
+                                        dropdown.style.display = 'none';
+                                        submitSearchFilter();
+                                    }
+                                };
+                                var imgHtml = item.image
+                                    ? '<img src="' + item.image + '" class="autocomplete-thumb" />'
+                                    : '<div class="autocomplete-thumb-empty"><span class="material-symbols-outlined" style="font-size:16px;color:#94a3b8;">image</span></div>';
+                                div.innerHTML = imgHtml + '<div style="flex:1;min-width:0;"><div class="autocomplete-name">' + item.name + '</div><div class="autocomplete-sub">' + (item.category || '') + ' • ' + Number(item.price).toLocaleString('vi-VN') + '₫</div></div>';
+                                dropdown.appendChild(div);
+                            });
+                            dropdown.style.display = 'block';
+                        })
+                        .catch(function () {
+                            dropdown.style.display = 'none';
+                        });
+                }, 250);
+            });
+
+            document.addEventListener('click', function (e) {
+                if (dropdown && !dropdown.contains(e.target) && e.target !== searchInput) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        })();
+    </script>
 }
+
+<style>
+    /* Design System Tokens & Anti-Slop Layouts */
+    .filter-card-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 22px 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .filter-controls-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-end;
+    }
+
+    /* Các cột trong form lọc */
+    .filter-col-keyword {
+        flex: 2 1 240px;
+        min-width: 230px;
+        position: relative;
+    }
+
+    .filter-col-category {
+        flex: 1.4 1 210px;
+        min-width: 200px;
+    }
+
+    .filter-col-price {
+        flex: 1 1 140px;
+        min-width: 135px;
+    }
+
+    .filter-col-rating {
+        flex: 1.2 1 185px;
+        min-width: 180px;
+    }
+
+    .filter-col-sort {
+        flex: 1.1 1 160px;
+        min-width: 155px;
+    }
+
+    .filter-col-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    /* Nhãn & Input */
+    .filter-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #475569;
+        display: block;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .price-preview-badge {
+        font-size: 0.72rem;
+        color: #0d47a1;
+        font-weight: 700;
+        background: #eff6ff;
+        padding: 1px 6px;
+        border-radius: 6px;
+    }
+
+    .filter-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        outline: none;
+        box-sizing: border-box;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .filter-input:focus {
+        background: #ffffff;
+        border-color: #0d47a1;
+        box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.12);
+    }
+
+    .filter-input-search {
+        padding-left: 38px;
+    }
+
+    .search-icon-adornment {
+        position: absolute;
+        left: 11px;
+        top: 12px;
+        color: #94a3b8;
+        font-size: 20px;
+        pointer-events: none;
+    }
+
+    /* Tùy biến Custom Select với Chevron sạch, chống tràn chữ */
+    .select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 100%;
+        height: 44px;
+        padding: 0 34px 0 12px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        box-sizing: border-box;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter-select:focus {
+        background: #ffffff;
+        border-color: #0d47a1;
+        box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.12);
+    }
+
+    .select-chevron {
+        position: absolute;
+        right: 10px;
+        top: 12px;
+        color: #64748b;
+        font-size: 20px;
+        pointer-events: none;
+        transition: transform 0.2s;
+    }
+
+    /* Nút Áp dụng & Đặt lại */
+    .btn-filter-apply {
+        height: 44px;
+        padding: 0 20px;
+        background: #0d47a1;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+    }
+
+    .btn-filter-apply:hover {
+        background: #0a3880;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(13, 71, 161, 0.32);
+    }
+
+    .btn-filter-reset {
+        height: 44px;
+        padding: 0 14px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+    }
+
+    .btn-filter-reset:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+
+    /* Quick Price Chips Bar */
+    .quick-price-bar {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px dashed #e2e8f0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .quick-price-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 4px;
+    }
+
+    .quick-price-chips-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .quick-price-chip {
+        height: 34px;
+        padding: 0 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        border: 1.5px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+    }
+
+    .quick-price-chip:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #0d47a1;
+        transform: translateY(-1px);
+    }
+
+    .quick-price-chip.active {
+        background: #0d47a1 !important;
+        border-color: #0d47a1 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(13, 71, 161, 0.28);
+    }
+
+    /* Lưới hiển thị danh sách sản phẩm */
+    .products-catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 24px;
+    }
+
+    /* Thẻ sản phẩm */
+    .product-catalog-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .product-catalog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 30px -4px rgba(15, 23, 42, 0.12);
+        border-color: #cbd5e1;
+    }
+
+    .product-card-image-wrap {
+        display: block;
+        position: relative;
+        padding-top: 100%;
+        overflow: hidden;
+        background: #f8fafc;
+        text-decoration: none;
+    }
+
+    .product-card-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-catalog-card:hover .product-card-img {
+        transform: scale(1.05);
+    }
+
+    .product-card-img-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+    }
+
+    .product-badge-discount {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #dc2626;
+        color: #ffffff;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+
+    .product-badge-outofstock {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        color: #ffffff;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    /* Nội dung thân thẻ */
+    .product-card-body {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .product-card-category {
+        font-size: 0.7rem;
+        color: #0d47a1;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 6px 0;
+    }
+
+    .product-card-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.4;
+        margin: 0 0 8px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.7em;
+    }
+
+    .product-card-title a {
+        color: #0f172a;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .product-catalog-card:hover .product-card-title a {
+        color: #0d47a1;
+    }
+
+    /* Đánh giá sao */
+    .product-card-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 12px;
+        min-height: 20px;
+    }
+
+    .rating-score {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #b45309;
+    }
+
+    .rating-stars-list {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .star-icon {
+        font-size: 14px;
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .star-filled {
+        color: #f59e0b;
+    }
+
+    .star-empty {
+        color: #e2e8f0;
+    }
+
+    .rating-count {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Footer thẻ: Giá & Nút */
+    .product-card-footer {
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .product-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .price-current {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0f172a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .price-discounted {
+        color: #dc2626;
+    }
+
+    .price-original {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        text-decoration: line-through;
+    }
+
+    .btn-card-view {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        height: 38px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 11px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #0d47a1;
+        text-decoration: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+    }
+
+    .product-catalog-card:hover .btn-card-view {
+        background: #0d47a1;
+        color: #ffffff;
+        border-color: #0d47a1;
+        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2);
+    }
+
+    /* Phân trang */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 40px;
+    }
+
+    .pagination-page-item {
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+        background: #ffffff;
+        color: #475569;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+
+    .pagination-page-item:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .pagination-page-item.active {
+        background: #0d47a1;
+        color: #ffffff;
+        border-color: #0d47a1;
+        box-shadow: 0 4px 14px rgba(13, 71, 161, 0.3);
+    }
+
+    /* Empty state */
+    .search-empty-state {
+        text-align: center;
+        padding: 70px 20px;
+        background: #ffffff;
+        border: 1px dashed #cbd5e1;
+        border-radius: 20px;
+        margin-top: 20px;
+    }
+
+    .empty-icon-wrap {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .btn-empty-reset {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 22px;
+        background: #0d47a1;
+        color: #ffffff;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
+    }
+
+    .btn-empty-reset:hover {
+        background: #0a3880;
+        transform: translateY(-1px);
+    }
+
+    /* Autocomplete Popup */
+    .autocomplete-popup {
+        position: absolute;
+        z-index: 100;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .autocomplete-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: background 0.15s;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+        background: #eff6ff;
+    }
+
+    .autocomplete-thumb {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .autocomplete-thumb-empty {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .autocomplete-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .autocomplete-sub {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+</style>

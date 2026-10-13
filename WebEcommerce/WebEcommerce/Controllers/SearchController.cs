@@ -141,7 +141,7 @@ namespace WebEcommerce.Controllers
                     PageSize = pageSize,
                     TotalPages = totalPages,
                     TotalCount = totalCount,
-                    CategoryList = await GetCategorySelectListAsync()
+                    CategoryList = await GetCategorySelectListAsync(categoryId)
                 };
 
                 return View(model);
@@ -195,7 +195,7 @@ namespace WebEcommerce.Controllers
             }
         }
 
-        private async Task<IEnumerable<SelectListItem>> GetCategorySelectListAsync()
+        private async Task<IEnumerable<SelectListItem>> GetCategorySelectListAsync(int? selectedId = null)
         {
             var categories = await _context.Categories
                 .AsNoTracking()
@@ -206,13 +206,14 @@ namespace WebEcommerce.Controllers
 
             var items = new List<SelectListItem>
             {
-                new SelectListItem { Value = "", Text = "-- Tất cả danh mục --" }
+                new SelectListItem { Value = "", Text = "Tất cả danh mục", Selected = !selectedId.HasValue }
             };
 
             items.AddRange(categories.Select(c => new SelectListItem
             {
                 Value = c.CategoryID.ToString(),
-                Text = c.Name
+                Text = c.Name,
+                Selected = selectedId.HasValue && c.CategoryID == selectedId.Value
             }));
 
             return items;
