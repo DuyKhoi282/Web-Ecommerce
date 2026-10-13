@@ -7,30 +7,7 @@
     var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
     var allProducts = ViewBag.AllProducts as List<Product> ?? new List<Product>();
 
-    // Self-healing database fix for dummy or broken images
-    using (var db = new ApplicationDbContext())
-    {
-        var needsUpdate = db.ProductImages.Any(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org"));
-        if (needsUpdate)
-        {
-            var imagesToUpdate = db.ProductImages.Where(pi => pi.ImageURL.Contains("picsum.photos") || pi.ImageURL.Contains("wikimedia.org")).ToList();
-            foreach (var img in imagesToUpdate)
-            {
-                var p = db.Products.FirstOrDefault(x => x.ProductID == img.ProductID);
-                if (p != null)
-                {
-                    // Tạo placeholder hiển thị tên sản phẩm chính xác
-                    string text = Uri.EscapeDataString(p.Name);
-                    img.ImageURL = $"https://placehold.co/600x600/f4f6f8/1e293b?text={text}";
-                }
-            }
-            db.SaveChanges();
-            
-            // Cập nhật lại viewbag để hiển thị ảnh mới ngay lập tức
-            foreach (var p in featuredProducts) { foreach (var img in p.ProductImages) { if (img.ImageURL.Contains("picsum.photos") || img.ImageURL.Contains("wikimedia.org")) { var match = imagesToUpdate.FirstOrDefault(i => i.ImageID == img.ImageID); if (match != null) { img.ImageURL = match.ImageURL; } } } }
-            foreach (var p in allProducts) { foreach (var img in p.ProductImages) { if (img.ImageURL.Contains("picsum.photos") || img.ImageURL.Contains("wikimedia.org")) { var match = imagesToUpdate.FirstOrDefault(i => i.ImageID == img.ImageID); if (match != null) { img.ImageURL = match.ImageURL; } } } }
-        }
-    }
+
 }
 
 
