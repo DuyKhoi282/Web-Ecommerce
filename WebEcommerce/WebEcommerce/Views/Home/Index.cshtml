@@ -83,7 +83,7 @@
 <span class="material-symbols-outlined text-[16px] text-text-muted group-hover:translate-x-0.5 transition-transform">chevron_right</span>
 </a>
 }
-<a class="flex items-center justify-between px-3 py-2 rounded-lg text-body-medium font-body-medium text-badge-discount-text font-bold bg-badge-discount-bg/60 hover:bg-badge-discount-bg transition-colors" href="#">
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-body-medium font-body-medium text-badge-discount-text font-bold bg-badge-discount-bg/60 hover:bg-badge-discount-bg transition-colors" href="@Url.Action("Index", "Shop")">
 <div class="flex items-center gap-2.5">
 <span class="material-symbols-outlined text-[20px]">sync_alt</span>
 <span>Thu cũ đổi mới</span>
@@ -298,11 +298,11 @@
             </div>
 
             <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 text-xs font-bold">
-                <button type="button" class="px-5 py-2.5 rounded-full bg-[#0d47a1] text-white border-2 border-[#0d47a1] shadow-md shadow-[#0d47a1]/25 whitespace-nowrap">Tất cả</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Điện thoại</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Laptop</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Tai nghe</button>
-                <button type="button" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Phụ kiện</button>
+                <a href="@Url.Action("Index", "Shop")" class="px-5 py-2.5 rounded-full bg-[#0d47a1] text-white border-2 border-[#0d47a1] shadow-md shadow-[#0d47a1]/25 whitespace-nowrap">Tất cả</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Điện thoại" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Điện thoại</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Laptop" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Laptop</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Tai nghe" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Tai nghe</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Phụ kiện" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Phụ kiện</a>
             </div>
         </div>
 
@@ -327,9 +327,9 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a href="#" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300 active:scale-95">
-                <span>Xem thêm sản phẩm khác</span>
-                <span class="material-symbols-outlined text-base">expand_more</span>
+            <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300 active:scale-95">
+                <span>Xem tất cả sản phẩm</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
             </a>
         </div>
     </div>
@@ -339,27 +339,27 @@
 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 flex items-center gap-3 overflow-x-auto">
 <span class="font-title-sm text-title-sm text-on-surface text-xs font-bold uppercase tracking-wider shrink-0 text-text-muted">Thương hiệu uy tín:</span>
 <div class="flex items-center gap-3 shrink-0">
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer flex items-center gap-1.5">
+<a href="@Url.Action("Index", "Search", new { q = "Apple" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer flex items-center gap-1.5">
 <span class="material-symbols-outlined text-[16px] text-badge-discount-text">verified</span> Apple Authorised
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          Samsung Flagship
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          Xiaomi Official
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          ASUS ROG &amp; Zenbook
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          Sony Sound Studio
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          OPPO AI Camera
-        </span>
-<span class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
-          Marshall Acoustic
-        </span>
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "Samsung" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+Samsung Flagship
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "Xiaomi" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+Xiaomi Official
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "ASUS" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+ASUS ROG &amp; Zenbook
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "Sony" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+Sony Sound Studio
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "OPPO" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+OPPO AI Camera
+</a>
+<a href="@Url.Action("Index", "Search", new { q = "Marshall" })" class="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-body-medium font-body-medium text-xs font-semibold hover:bg-badge-discount-bg hover:border-red-200 hover:text-badge-discount-text transition-colors cursor-pointer">
+Marshall Acoustic
+</a>
 </div>
 </div>
 </section>
@@ -651,35 +651,35 @@
 <a class="font-caption-sm text-caption-sm text-primary-container font-semibold hover:underline flex items-center gap-1" href="@Url.Action("Index", "Search", new { q = "Phụ kiện" })">Xem tất cả phụ kiện <span class="material-symbols-outlined text-[14px]">arrow_forward</span></a>
 </div>
 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 reveal-stagger">
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Củ sạc" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">power</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Củ cáp sạc nhanh</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Pin dự phòng" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">battery_charging_full</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Pin dự phòng 20k</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Kính cường lực" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">shield</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Kính cường lực 9H</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Ốp lưng" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">phone_iphone</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Ốp lưng chính hãng</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Bàn phím" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">mouse</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Chuột, phím cơ</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Camera" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">videocam</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Camera gia đình</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Hub" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">hub</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Hub cáp Type-C</span>
 </a>
-<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="#">
+<a class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-red-400 hover:shadow-md flex flex-col items-center text-center gap-2 group transition-all card-hover-smooth hover-lift" href="@Url.Action("Index", "Search", new { q = "Thẻ nhớ" })">
 <span class="material-symbols-outlined text-[28px] text-slate-500 group-hover:text-primary-container transition-colors">sd_card</span>
 <span class="text-caption-sm font-caption-sm font-semibold text-slate-800">Thẻ nhớ, USB cao</span>
 </a>
@@ -696,7 +696,7 @@
 <span class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></span>
 <h3 class="font-headline text-lg font-bold text-slate-900">Tin Công Nghệ ChillForum 24/7</h3>
 </div>
-<a class="font-caption-sm text-caption-sm text-primary-container font-semibold hover:underline" href="#">Xem thêm tin tức →</a>
+<a class="font-caption-sm text-caption-sm text-primary-container font-semibold hover:underline" href="@Url.Action("Index", "Shop")">Xem thêm tin tức →</a>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <!-- Article 1 -->
@@ -807,12 +807,12 @@
 </div>
 <p class="font-body-default text-body-default text-slate-500">Nhận ngay voucher ưu đãi 10% cùng danh sách deal sốc cập nhật sớm nhất mỗi tuần.</p>
 </div>
-<div class="w-full md:w-auto flex flex-col sm:flex-row items-center gap-2">
-<input class="w-full sm:w-72 bg-white border border-slate-300 text-slate-900 px-4 py-2.5 rounded-xl text-body-default font-body-default focus:outline-none focus:border-primary shadow-sm" placeholder="Nhập địa chỉ email của bạn..." type="email"/>
-<button class="w-full sm:w-auto bg-primary-container hover:bg-brand-red-vibrant text-on-primary px-6 py-2.5 rounded-xl font-title-sm text-title-sm font-bold transition-colors whitespace-nowrap shadow active:scale-95">
+<form class="w-full md:w-auto flex flex-col sm:flex-row items-center gap-2" onsubmit="event.preventDefault(); submitNewsletter(this);">
+<input id="newsletter-email" class="w-full sm:w-72 bg-white border border-slate-300 text-slate-900 px-4 py-2.5 rounded-xl text-body-default font-body-default focus:outline-none focus:border-primary shadow-sm" placeholder="Nhập địa chỉ email của bạn..." type="email" required />
+<button type="submit" class="w-full sm:w-auto bg-primary-container hover:bg-brand-red-vibrant text-on-primary px-6 py-2.5 rounded-xl font-title-sm text-title-sm font-bold transition-colors whitespace-nowrap shadow active:scale-95 cursor-pointer">
           Đăng Ký Ngay
-        </button>
-</div>
+</button>
+</form>
 </div>
 </section>
 </div>
@@ -960,5 +960,23 @@
       if (secsBox) secsBox.innerText = String(scs).padStart(2, '0');
     }
   }, 1000);
+
+  function submitNewsletter(form) {
+    const input = document.getElementById('newsletter-email');
+    const val = input ? input.value.trim() : '';
+    if (val) {
+      if (window.showToast) {
+        window.showToast({
+          type: 'success',
+          title: 'Đăng ký nhận ưu đãi',
+          message: 'Tuyệt vời! Mã voucher giảm 10% đã được gửi đến ' + val,
+          duration: 3500
+        });
+      } else {
+        alert('Đăng ký nhận tin thành công!');
+      }
+      form.reset();
+    }
+  }
 </script>
 
