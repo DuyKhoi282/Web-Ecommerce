@@ -120,14 +120,36 @@
                         <span class="text-slate-500">Ngày đặt</span>
                         <span class="font-semibold">@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-center">
                         <span class="text-slate-500">PT thanh toán</span>
-                        <span class="font-semibold">@Model.PaymentMethod</span>
+                        <span class="font-semibold text-slate-800">
+                            @(Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản (VietQR)" : (Model.PaymentMethod == "COD" ? "Tiền mặt khi nhận (COD)" : Model.PaymentMethod))
+                        </span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-center">
                         <span class="text-slate-500">TT thanh toán</span>
-                        <span class="font-semibold">@Model.PaymentStatus</span>
+                        <div>
+                            @if (Model.PaymentStatus == "Paid")
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Đã thanh toán
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Chưa thanh toán
+                                </span>
+                            }
+                        </div>
                     </div>
+                    @if (Model.PaymentDate.HasValue)
+                    {
+                        <div class="flex justify-between items-center text-xs text-slate-500">
+                            <span>Ngày thanh toán</span>
+                            <span class="font-medium text-slate-700">@Model.PaymentDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    }
                     @if (Model.PromotionalCode != null)
                     {
                         <div class="flex justify-between">
@@ -152,6 +174,50 @@
                             <span class="font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
                         </div>
                     </div>
+
+                    @* Action xác nhận thanh toán (Mark as Paid) *@
+                    @if (Model.Status != "Cancelled")
+                    {
+                        if (Model.PaymentStatus == "Unpaid")
+                        {
+                            <div class="pt-3 border-t border-slate-200">
+                                @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId" value="@Model.OrderID" />
+                                    <input type="hidden" name="paymentStatus" value="Paid" />
+                                    <button type="submit"
+                                            onclick="return confirm('Xác nhận đã nhận đủ tiền thanh toán cho đơn hàng #@Model.OrderID?');"
+                                            class="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs tracking-wide transition-all shadow-sm shadow-emerald-600/20">
+                                        <span class="material-symbols-outlined text-base">verified</span>
+                                        Xác nhận đã nhận thanh toán
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pt-3 border-t border-slate-200">
+                                <div class="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50/90 border border-emerald-200 rounded-xl px-3 py-2">
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        <span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+                                        Đã nhận thanh toán
+                                    </span>
+                                    @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post, new { @class = "inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="orderId" value="@Model.OrderID" />
+                                        <input type="hidden" name="paymentStatus" value="Unpaid" />
+                                        <button type="submit"
+                                                onclick="return confirm('Bạn có chắc muốn hoàn tác về Chưa thanh toán?');"
+                                                class="text-slate-400 hover:text-rose-600 transition-colors text-2xs underline ml-2">
+                                            Hoàn tác
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
 

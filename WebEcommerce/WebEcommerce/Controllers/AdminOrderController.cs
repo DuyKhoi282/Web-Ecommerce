@@ -612,6 +612,46 @@ namespace WebEcommerce.Controllers
             }
         }
 
+        // ==============================================
+        // POST: /AdminOrder/UpdatePaymentStatus
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdatePaymentStatus(int orderId, string paymentStatus)
+        {
+            try
+            {
+                var order = await _context.Orders.FindAsync(orderId);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction("Index");
+                }
+
+                if (paymentStatus != "Paid" && paymentStatus != "Unpaid")
+                {
+                    TempData["ErrorMessage"] = "Trạng thái thanh toán không hợp lệ.";
+                    return RedirectToAction("Detail", new { id = orderId });
+                }
+
+                order.PaymentStatus = paymentStatus;
+                order.PaymentDate = paymentStatus == "Paid" ? DateTime.UtcNow : (DateTime?)null;
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] =
+                    $"Đã cập nhật trạng thái thanh toán đơn #{orderId} thành \"{(paymentStatus == "Paid" ? "Đã thanh toán" : "Chưa thanh toán")}\".";
+
+                return RedirectToAction("Detail", new { id = orderId });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AdminOrder/UpdatePaymentStatus] {ex}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.";
+                return RedirectToAction("Detail", new { id = orderId });
+            }
+        }
+
         /// <summary>
         /// Kiểm tra transition hợp lệ
         /// Pending -> Confirmed -> Shipped -> Delivered
