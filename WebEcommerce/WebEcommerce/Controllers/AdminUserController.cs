@@ -67,7 +67,7 @@ namespace WebEcommerce.Controllers
             int totalStaff = await allUsersQuery.CountAsync(u => u.Roles.Any(r => staffRoleIds.Contains(r.RoleId)));
 
             // Query with filter
-            var query = _context.Users.AsQueryable();
+            var query = _context.Users.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using WebEcommerce.Filters;
 using WebEcommerce.Models;
-using static System.Web.Razor.Parser.SyntaxConstants;
 
 namespace WebEcommerce.Controllers
 {
@@ -29,6 +28,7 @@ namespace WebEcommerce.Controllers
             try
             {
                 var query = _context.Orders
+                    .AsNoTracking()
                     .Include(o => o.User)
                     .Include(o => o.OrderDetails)
                     .AsQueryable();
