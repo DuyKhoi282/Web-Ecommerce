@@ -95,7 +95,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ChangePassword Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[ChangePassword Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại.");
             }
 
@@ -129,7 +129,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Profile GET Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[Profile GET Error] {ex.Message}");
                 TempData["ErrorMessage"] = "Không thể tải thông tin hồ sơ. Vui lòng thử lại.";
                 return RedirectToAction("ChangePassword");
             }
@@ -216,7 +216,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Profile POST Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[Profile POST Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật hồ sơ. Vui lòng thử lại.");
             }
 

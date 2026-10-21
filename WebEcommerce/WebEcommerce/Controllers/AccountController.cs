@@ -451,7 +451,7 @@ try
                     // Tài khoản vẫn được tạo thành công
                     // dù mail chào mừng không gửi được.
 
-                    System.Diagnostics.Debug.WriteLine(
+                    System.Diagnostics.Trace.TraceError(
                         $"[Welcome Email Error] {emailEx.Message}"
                     );
                 }
@@ -478,7 +478,7 @@ try
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[VerifyOtp Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[VerifyOtp Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình xác thực. Vui lòng thử lại.");
             }
 
@@ -787,7 +787,7 @@ try
                     Session.Remove("PendingRegistration.OtpExpiresAt");
                     Session.Remove("PendingRegistration.OtpLastSentAt");
 
-                    System.Diagnostics.Debug.WriteLine(
+                    System.Diagnostics.Trace.TraceError(
                         $"[Resend OTP Email Error] {emailEx.Message}"
                     );
 
@@ -815,7 +815,7 @@ try
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceError(
                     $"[ResendOtp Error] {ex.Message}"
                 );
 
@@ -874,7 +874,7 @@ try
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Register OTP Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[Register OTP Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.");
             }
 
@@ -1167,7 +1167,7 @@ try
                 // Nếu gửi mail thất bại thì xóa dữ liệu đăng ký tạm
                 ClearPendingRegistrationSession();
 
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceError(
                     $"[Register OTP Email Error] {emailEx.Message}"
                 );
 
@@ -1209,7 +1209,7 @@ try
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceError(
                     $"[ConfirmEmail Error] {ex.Message}");
 
                 ViewBag.Message =
@@ -1315,7 +1315,7 @@ try
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Login Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[Login Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại.");
             }
 
@@ -1648,7 +1648,7 @@ $@"
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ForgotPassword Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[ForgotPassword Error] {ex.Message}");
             }
 
             return RedirectToAction("ForgotPasswordConfirmation", "Account");
@@ -1724,7 +1724,7 @@ $@"
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ResetPassword Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[ResetPassword Error] {ex.Message}");
                 ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng yêu cầu link đặt lại mật khẩu mới.");
             }
 
@@ -1767,7 +1767,7 @@ $@"
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AjaxLogin Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[AjaxLogin Error] {ex.Message}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
             }
         }
@@ -1790,7 +1790,7 @@ $@"
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AjaxRegister Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[AjaxRegister Error] {ex.Message}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
             }
         }

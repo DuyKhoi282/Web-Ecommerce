@@ -221,7 +221,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AdminUser/Details Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[AdminUser/Details Error] {ex.Message}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải thông tin người dùng.";
                 return RedirectToAction("Index");
             }
@@ -290,7 +290,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ToggleLock Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[ToggleLock Error] {ex.Message}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi thay đổi trạng thái tài khoản. Vui lòng thử lại.";
             }
 
@@ -373,7 +373,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ChangeRole Error] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[ChangeRole Error] {ex.Message}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi phân quyền người dùng. Vui lòng thử lại.";
             }
 
