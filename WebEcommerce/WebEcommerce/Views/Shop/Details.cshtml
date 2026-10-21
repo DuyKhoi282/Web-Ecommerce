@@ -352,7 +352,7 @@
                 </div>
 
                 <!-- Nút Xem Thêm / Thu Gọn -->
-                <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+                <div id="toggleDescWrapper" class="mt-4 pt-4 border-t border-slate-100 text-center">
                     <button type="button" id="toggleDescBtn" onclick="toggleDescription()" 
                             class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full border border-slate-300 hover:border-primary text-slate-700 hover:text-primary font-bold text-xs transition-all shadow-sm hover:shadow cursor-pointer">
                         <span id="toggleDescText">Xem thêm toàn bộ mô tả</span>
@@ -837,6 +837,15 @@
             var input = document.getElementById('qtyInput');
             if (input) {
                 updateQtyButtons(parseInt(input.value) || 1, getStockMax());
+            }
+        });
+
+        // Mô tả ngắn hơn khung 500px: lớp mờ sẽ che mất chữ, nên ẩn lớp mờ và nút. Chờ 'load' để ảnh có chiều cao thật.
+        window.addEventListener('load', function() {
+            var container = document.getElementById('productDescriptionContainer');
+            if (container && container.scrollHeight <= container.clientHeight) {
+                document.getElementById('descGradientOverlay').classList.add('hidden');
+                document.getElementById('toggleDescWrapper').classList.add('hidden');
             }
         });
     </script>
