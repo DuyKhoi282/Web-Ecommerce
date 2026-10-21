@@ -41,8 +41,11 @@ namespace WebEcommerce.Controllers
                 // KPI 2: Total Orders
                 model.TotalOrders = await _context.Orders.CountAsync();
 
-                // KPI 3: Total Customers
-                model.TotalCustomers = await _context.Users.CountAsync();
+                // KPI 3: Total Customers (chỉ đếm tài khoản có vai trò Customer, không tính Admin/nhân viên)
+                model.TotalCustomers = await _context.Roles
+                    .Where(r => r.Name == "Customer")
+                    .SelectMany(r => r.Users)
+                    .CountAsync();
 
                 // KPI 4: Total Products
                 model.TotalProducts = await _context.Products.CountAsync();
@@ -158,7 +161,8 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "Lỗi tải số liệu Dashboard: " + ex.Message;
+                System.Diagnostics.Trace.TraceError($"[AdminDashboard/Index Error] {ex}");
+                ViewBag.ErrorMessage = "Không thể tải số liệu Dashboard. Vui lòng thử lại sau.";
             }
 
             return View(model);
@@ -167,39 +171,51 @@ namespace WebEcommerce.Controllers
         [HttpGet]
         public async Task<JsonResult> GetRevenueData()
         {
-            var labels = new List<string>();
-            var revenues = new List<decimal>();
-
-            var currentMonth = DateTime.UtcNow;
-            var sixMonthsAgo = new DateTime(currentMonth.Year, currentMonth.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-5);
-            var ordersLast6Months = await _context.Orders
-                .AsNoTracking()
-                .Where(o => o.OrderDate >= sixMonthsAgo && o.Status != "Cancelled")
-                .Select(o => new { o.OrderDate, o.FinalAmount })
-                .ToListAsync();
-
-            for (int i = 5; i >= 0; i--)
+            try
             {
-                var m = currentMonth.AddMonths(-i);
-                labels.Add($"T{m.Month}/{m.Year}");
+                var labels = new List<string>();
+                var revenues = new List<decimal>();
 
-                var rev = ordersLast6Months
-                    .Where(o => o.OrderDate.Year == m.Year && o.OrderDate.Month == m.Month)
-                    .Sum(o => o.FinalAmount);
+                var currentMonth = DateTime.UtcNow;
+                var sixMonthsAgo = new DateTime(currentMonth.Year, currentMonth.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-5);
+                var ordersLast6Months = await _context.Orders
+                    .AsNoTracking()
+                    .Where(o => o.OrderDate >= sixMonthsAgo && o.Status != "Cancelled")
+                    .Select(o => new { o.OrderDate, o.FinalAmount })
+                    .ToListAsync();
 
-                revenues.Add(rev);
+                for (int i = 5; i >= 0; i--)
+                {
+                    var m = currentMonth.AddMonths(-i);
+                    labels.Add($"T{m.Month}/{m.Year}");
+
+                    var rev = ordersLast6Months
+                        .Where(o => o.OrderDate.Year == m.Year && o.OrderDate.Month == m.Month)
+                        .Sum(o => o.FinalAmount);
+
+                    revenues.Add(rev);
+                }
+
+                var statusCounts = await _context.Orders
+                    .AsNoTracking()
+                    .GroupBy(o => o.Status)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToListAsync();
+
+                var statusLabels = statusCounts.Select(s => s.Status ?? "Pending").ToList();
+                var statusData = statusCounts.Select(s => s.Count).ToList();
+
+                return Json(new { months = labels, revenues = revenues, statusLabels = statusLabels, statusData = statusData }, JsonRequestBehavior.AllowGet);
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[AdminDashboard/GetRevenueData Error] {ex}");
 
-            var statusCounts = await _context.Orders
-                .AsNoTracking()
-                .GroupBy(o => o.Status)
-                .Select(g => new { Status = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            var statusLabels = statusCounts.Select(s => s.Status ?? "Pending").ToList();
-            var statusData = statusCounts.Select(s => s.Count).ToList();
-
-            return Json(new { months = labels, revenues = revenues, statusLabels = statusLabels, statusData = statusData }, JsonRequestBehavior.AllowGet);
+                // Trả mã 500 để callback thành công của $.getJSON không chạy, biểu đồ để trống thay vì vỡ trang
+                Response.StatusCode = 500;
+                Response.TrySkipIisCustomErrors = true;
+                return Json(new { message = "Không thể tải dữ liệu biểu đồ." }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         protected override void Dispose(bool disposing)
