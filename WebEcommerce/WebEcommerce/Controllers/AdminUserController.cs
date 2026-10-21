@@ -258,28 +258,35 @@ namespace WebEcommerce.Controllers
                 var now = DateTime.UtcNow;
                 bool isCurrentlyLocked = !user.IsActive || (user.LockoutEndDateUtc.HasValue && user.LockoutEndDateUtc.Value > now);
 
+                // Gán mọi thay đổi rồi lưu một lần duy nhất để không bị lưu dở dang
                 if (isCurrentlyLocked)
                 {
                     // Mở khóa
                     user.IsActive = true;
                     user.LockoutEndDateUtc = null;
-                    await UserManager.UpdateAsync(user);
-                    await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.MinValue);
-                    await UserManager.ResetAccessFailedCountAsync(userId);
-                    await UserManager.UpdateSecurityStampAsync(userId);
-                    TempData["SuccessMessage"] = $"Đã mở khóa tài khoản cho người dùng {user.FullName ?? user.Email}.";
+                    user.AccessFailedCount = 0;
                 }
                 else
                 {
                     // Khóa tài khoản
                     user.IsActive = false;
-                    await UserManager.UpdateAsync(user);
-                    await UserManager.SetLockoutEnabledAsync(userId, true);
-                    await UserManager.SetLockoutEndDateAsync(userId, DateTimeOffset.UtcNow.AddYears(100));
-                    // Invalidate ngay lập tức cookie/session của tài khoản bị khóa
-                    await UserManager.UpdateSecurityStampAsync(userId);
-                    TempData["SuccessMessage"] = $"Đã khóa tài khoản người dùng {user.FullName ?? user.Email}.";
+                    user.LockoutEnabled = true;
+                    user.LockoutEndDateUtc = now.AddYears(100);
                 }
+
+                // Đổi Security Stamp để vô hiệu hóa ngay cookie/session cũ của tài khoản
+                user.SecurityStamp = Guid.NewGuid().ToString();
+
+                var result = await UserManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật trạng thái tài khoản: " + string.Join("; ", result.Errors);
+                    return RedirectToAction("Index");
+                }
+
+                TempData["SuccessMessage"] = isCurrentlyLocked
+                    ? $"Đã mở khóa tài khoản cho người dùng {user.FullName ?? user.Email}."
+                    : $"Đã khóa tài khoản người dùng {user.FullName ?? user.Email}.";
             }
             catch (Exception ex)
             {
@@ -325,26 +332,43 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
-                var currentRoles = await UserManager.GetRolesAsync(userId);
-                if (currentRoles.Any())
+                // Transaction phải mở trên đúng DbContext mà UserManager đang dùng (context OWIN của request),
+                // để gỡ role cũ + gán role mới cùng thành công hoặc cùng rollback (không để user mất hết role)
+                var identityDb = HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+                using (var transaction = identityDb.Database.BeginTransaction())
                 {
-                    var removeResult = await UserManager.RemoveFromRolesAsync(userId, currentRoles.ToArray());
-                    if (!removeResult.Succeeded)
+                    var currentRoles = await UserManager.GetRolesAsync(userId);
+                    if (currentRoles.Any())
                     {
-                        TempData["ErrorMessage"] = "Không thể gỡ bỏ vai trò hiện tại: " + string.Join("; ", removeResult.Errors);
+                        var removeResult = await UserManager.RemoveFromRolesAsync(userId, currentRoles.ToArray());
+                        if (!removeResult.Succeeded)
+                        {
+                            transaction.Rollback();
+                            TempData["ErrorMessage"] = "Không thể gỡ bỏ vai trò hiện tại: " + string.Join("; ", removeResult.Errors);
+                            return RedirectToAction("Index");
+                        }
+                    }
+
+                    var addResult = await UserManager.AddToRoleAsync(userId, newRole);
+                    if (!addResult.Succeeded)
+                    {
+                        transaction.Rollback();
+                        TempData["ErrorMessage"] = "Không thể gán vai trò mới: " + string.Join("; ", addResult.Errors);
                         return RedirectToAction("Index");
                     }
+
+                    // Cập nhật Security Stamp để vô hiệu hóa cookie/claim cũ và yêu cầu làm mới quyền
+                    var stampResult = await UserManager.UpdateSecurityStampAsync(userId);
+                    if (!stampResult.Succeeded)
+                    {
+                        transaction.Rollback();
+                        TempData["ErrorMessage"] = "Không thể làm mới phiên đăng nhập của người dùng: " + string.Join("; ", stampResult.Errors);
+                        return RedirectToAction("Index");
+                    }
+
+                    transaction.Commit();
                 }
 
-                var addResult = await UserManager.AddToRoleAsync(userId, newRole);
-                if (!addResult.Succeeded)
-                {
-                    TempData["ErrorMessage"] = "Không thể gán vai trò mới: " + string.Join("; ", addResult.Errors);
-                    return RedirectToAction("Index");
-                }
-
-                // Cập nhật Security Stamp để vô hiệu hóa cookie/claim cũ và yêu cầu làm mới quyền
-                await UserManager.UpdateSecurityStampAsync(userId);
                 TempData["SuccessMessage"] = $"Đã cập nhật vai trò của {user.FullName ?? user.Email} thành '{newRole}'.";
             }
             catch (Exception ex)
