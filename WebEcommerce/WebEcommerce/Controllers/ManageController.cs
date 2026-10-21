@@ -158,6 +158,10 @@ namespace WebEcommerce.Controllers
                 user.Address     = model.Address?.Trim();
                 user.PhoneNumber = model.PhoneNumber?.Trim();
 
+                const string avatarFolder = "/Content/Uploads/Avatars/";
+                string oldAvatar = user.Avatar;
+                string newAvatarPath = null;
+
                 // Nghiệp vụ: Upload Avatar — chỉ khi có file mới
                 if (model.AvatarFile != null && model.AvatarFile.ContentLength > 0)
                 {
@@ -182,29 +186,42 @@ namespace WebEcommerce.Controllers
                         return View(model);
                     }
 
-                    // Lưu file với tên = {userId}{ext} để tránh trùng lặp
-                    var uploadDir = Server.MapPath("~/Content/Uploads/Avatars/");
+                    // Kiểm tra nội dung thật của file (magic bytes), không tin vào đuôi file:
+                    // chặn file HTML/SVG/script bị đổi tên thành .png
+                    var detectedExtension = DetectImageExtension(model.AvatarFile.InputStream);
+                    if (detectedExtension == null)
+                    {
+                        ModelState.AddModelError("AvatarFile", "File tải lên không phải ảnh JPG, PNG hoặc GIF hợp lệ.");
+                        model.Email  = user.Email;
+                        model.Avatar = user.Avatar;
+                        return View(model);
+                    }
+
+                    var uploadDir = Server.MapPath("~" + avatarFolder);
                     if (!Directory.Exists(uploadDir))
                         Directory.CreateDirectory(uploadDir);
 
-                    // Xóa ảnh cũ nếu tồn tại
-                    if (!string.IsNullOrEmpty(user.Avatar))
-                    {
-                        var oldPath = Server.MapPath("~" + user.Avatar);
-                        if (System.IO.File.Exists(oldPath))
-                            System.IO.File.Delete(oldPath);
-                    }
+                    // Tên file duy nhất mỗi lần upload để không ghi đè ảnh cũ trước khi lưu CSDL thành công
+                    var fileName = $"{userId}_{DateTime.UtcNow.Ticks}{detectedExtension}";
+                    newAvatarPath = Path.Combine(uploadDir, fileName);
+                    model.AvatarFile.SaveAs(newAvatarPath);
 
-                    var fileName  = userId + extension;
-                    var savePath  = Path.Combine(uploadDir, fileName);
-                    model.AvatarFile.SaveAs(savePath);
-
-                    user.Avatar = $"/Content/Uploads/Avatars/{fileName}";
+                    user.Avatar = avatarFolder + fileName;
                 }
 
                 var result = await UserManager.UpdateAsync(user);
+                if (!result.Succeeded && newAvatarPath != null)
+                    DeleteFileQuietly(newAvatarPath); // CSDL không lưu được → bỏ ảnh mới, giữ ảnh cũ
+
                 if (result.Succeeded)
                 {
+                    // Chỉ xóa ảnh cũ khi ảnh mới đã lưu xong vào CSDL; chỉ xóa file trong thư mục Avatars
+                    if (newAvatarPath != null && oldAvatar != null &&
+                        oldAvatar.StartsWith(avatarFolder, StringComparison.OrdinalIgnoreCase))
+                    {
+                        DeleteFileQuietly(Server.MapPath("~" + oldAvatar));
+                    }
+
                     // Cập nhật lại session claims (FullName trong claim)
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
@@ -230,6 +247,39 @@ namespace WebEcommerce.Controllers
         // ═══════════════════════════════════════════════════════
         //  HELPERS
         // ═══════════════════════════════════════════════════
+
+        // Nhận diện ảnh qua chữ ký đầu file; trả về đuôi file tương ứng hoặc null nếu không phải JPG/PNG/GIF
+        private static string DetectImageExtension(Stream stream)
+        {
+            var header = new byte[8];
+            stream.Position = 0;
+            var read = stream.Read(header, 0, header.Length);
+            stream.Position = 0;
+
+            if (read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)
+                return ".jpg";
+            if (read >= 8 && header.SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }))
+                return ".png";
+            if (read >= 6 && header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8' &&
+                (header[4] == '7' || header[4] == '9') && header[5] == 'a')
+                return ".gif";
+
+            return null;
+        }
+
+        private static void DeleteFileQuietly(string path)
+        {
+            try
+            {
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                // Không xóa được file thừa thì chỉ ghi log, không làm hỏng thao tác chính
+                System.Diagnostics.Trace.TraceError($"[Avatar Delete Error] {path}: {ex.Message}");
+            }
+        }
 
         private void AddErrors(IdentityResult result)
         {
