@@ -524,24 +524,14 @@ try
                 // 2. Kiểm tra cooldown 60 giây
                 // ==========================================
 
-                var lastSentAt =
-                    Session["PendingRegistration.OtpLastSentAt"] as DateTime?;
+                var remainingSeconds = GetOtpCooldownSeconds();
 
-                if (lastSentAt.HasValue)
+                if (remainingSeconds > 0)
                 {
-                    var elapsed =
-                        DateTime.UtcNow - lastSentAt.Value;
+                    TempData["OtpError"] =
+                        $"Vui lòng chờ {remainingSeconds} giây trước khi gửi lại mã.";
 
-                    if (elapsed.TotalSeconds < 60)
-                    {
-                        var remainingSeconds =
-                            60 - (int)elapsed.TotalSeconds;
-
-                        TempData["OtpError"] =
-                            $"Vui lòng chờ {remainingSeconds} giây trước khi gửi lại mã.";
-
-                        return RedirectToAction("VerifyOtp", "Account");
-                    }
+                    return RedirectToAction("VerifyOtp", "Account");
                 }
 
 
@@ -879,71 +869,100 @@ try
 
             try
             {
-                // 1. Kiểm tra email đã tồn tại chưa
-                var existingUser = await UserManager.FindByEmailAsync(model.Email);
+                if (await StartPendingRegistrationAsync(model))
+                    return RedirectToAction("VerifyOtp", "Account");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Register OTP Error] {ex.Message}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.");
+            }
 
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError(
-                        "Email",
-                        "Email này đã được sử dụng."
-                    );
+            return View(model);
+        }
 
-                    return View(model);
-                }
+        // Dùng chung cho Register (form) và AjaxRegister (modal): kiểm tra dữ liệu,
+        // lưu đăng ký tạm vào Session và gửi OTP. Lỗi nghiệp vụ được ghi vào ModelState.
+        private async Task<bool> StartPendingRegistrationAsync(RegisterViewModel model)
+        {
+            // 1. Kiểm tra email đã tồn tại chưa
+            var existingUser = await UserManager.FindByEmailAsync(model.Email);
 
-                // 2. Kiểm tra password theo cấu hình Identity
-                var passwordValidation =
-                    await UserManager.PasswordValidator.ValidateAsync(model.Password);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(
+                    "Email",
+                    "Email này đã được sử dụng."
+                );
 
-                if (!passwordValidation.Succeeded)
-                {
-                    AddErrors(passwordValidation);
-                    return View(model);
-                }
+                return false;
+            }
 
-                // 3. Tạo mã OTP 6 chữ số
-                var otp = GenerateOtp();
+            // 2. Kiểm tra password theo cấu hình Identity
+            var passwordValidation =
+                await UserManager.PasswordValidator.ValidateAsync(model.Password);
 
-                // 4. Hash password trước khi lưu tạm
-                // Không lưu password gốc vào Session
-                var passwordHash =
-                    UserManager.PasswordHasher.HashPassword(model.Password);
+            if (!passwordValidation.Succeeded)
+            {
+                AddErrors(passwordValidation);
+                return false;
+            }
 
-                // 5. Lưu thông tin đăng ký tạm thời vào Session
-                Session["PendingRegistration.FullName"] =
-                    model.FullName.Trim();
+            // 3. Chặn gửi OTP liên tục (spam email) khi submit lại form trong 60 giây
+            var remainingSeconds = GetOtpCooldownSeconds();
 
-                Session["PendingRegistration.Email"] =
-                    model.Email.Trim();
+            if (remainingSeconds > 0)
+            {
+                ModelState.AddModelError(
+                    "",
+                    $"Vui lòng chờ {remainingSeconds} giây trước khi yêu cầu mã xác thực mới."
+                );
 
-                Session["PendingRegistration.PasswordHash"] =
-                    passwordHash;
+                return false;
+            }
 
-                Session["PendingRegistration.Otp"] =
-                    otp;
+            // 4. Tạo mã OTP 6 chữ số
+            var otp = GenerateOtp();
 
-                Session["PendingRegistration.OtpExpiresAt"] =
-                    DateTime.UtcNow.AddMinutes(10);
+            // 5. Hash password trước khi lưu tạm
+            // Không lưu password gốc vào Session
+            var passwordHash =
+                UserManager.PasswordHasher.HashPassword(model.Password);
 
-                Session["PendingRegistration.OtpAttempts"] = 0;
+            // 6. Lưu thông tin đăng ký tạm thời vào Session
+            Session["PendingRegistration.FullName"] =
+                model.FullName.Trim();
 
-                Session["PendingRegistration.OtpLastSentAt"] =
-                    DateTime.UtcNow;
+            Session["PendingRegistration.Email"] =
+                model.Email.Trim();
 
-                // 6. Gửi OTP đến email
-                try
-                {
-                    // Email chưa có UserId vì tài khoản chưa được tạo.
-                    // Vì vậy gửi trực tiếp thông qua EmailService.
-                    var emailService = new EmailService();
+            Session["PendingRegistration.PasswordHash"] =
+                passwordHash;
 
-                    await emailService.SendAsync(
-                        new IdentityMessage
-                        {
-                            Destination = model.Email,
-                            Subject = "Mã xác thực đăng ký - The Chill Shop",
-                            Body = $@"
+            Session["PendingRegistration.Otp"] =
+                otp;
+
+            Session["PendingRegistration.OtpExpiresAt"] =
+                DateTime.UtcNow.AddMinutes(10);
+
+            Session["PendingRegistration.OtpAttempts"] = 0;
+
+            Session["PendingRegistration.OtpLastSentAt"] =
+                DateTime.UtcNow;
+
+            // 7. Gửi OTP đến email
+            try
+            {
+                // Email chưa có UserId vì tài khoản chưa được tạo.
+                // Vì vậy gửi trực tiếp thông qua EmailService.
+                var emailService = new EmailService();
+
+                await emailService.SendAsync(
+                    new IdentityMessage
+                    {
+                        Destination = model.Email,
+                        Subject = "Mã xác thực đăng ký - The Chill Shop",
+                        Body = $@"
 <!DOCTYPE html>
 <html lang='vi'>
 <head>
@@ -1140,36 +1159,27 @@ try
 
 </body>
 </html>"
-                        }
-                    );
-                }
-                catch (Exception emailEx)
-                {
-                    // Nếu gửi mail thất bại thì xóa dữ liệu đăng ký tạm
-                    ClearPendingRegistrationSession();
-
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[Register OTP Email Error] {emailEx.Message}"
-                    );
-
-                    ModelState.AddModelError(
-                        "",
-                        "Không thể gửi mã xác thực đến email. Vui lòng thử lại."
-                    );
-
-                    return View(model);
-                }
-
-                // 7. Chuyển sang trang nhập OTP
-                return RedirectToAction("VerifyOtp", "Account");
+                    }
+                );
             }
-            catch (Exception ex)
+            catch (Exception emailEx)
             {
-                System.Diagnostics.Debug.WriteLine($"[Register OTP Error] {ex.Message}");
-                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.");
+                // Nếu gửi mail thất bại thì xóa dữ liệu đăng ký tạm
+                ClearPendingRegistrationSession();
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[Register OTP Email Error] {emailEx.Message}"
+                );
+
+                ModelState.AddModelError(
+                    "",
+                    "Không thể gửi mã xác thực đến email. Vui lòng thử lại."
+                );
+
+                return false;
             }
 
-            return View(model);
+            return true;
         }
 
         //=======================
@@ -1728,6 +1738,7 @@ $@"
         // POST: /Account/AjaxLogin
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> AjaxLogin(string email, string password, bool rememberMe = false)
         {
             try
@@ -1762,40 +1773,20 @@ $@"
         }
 
         // POST: /Account/AjaxRegister
+        // Nghiệp vụ: Modal đăng ký đi chung luồng OTP với form Register,
+        // không tạo tài khoản trực tiếp (tránh đăng ký bằng email của người khác)
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> AjaxRegister(string fullName, string email, string password, string confirmPassword)
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> AjaxRegister(RegisterViewModel model)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||
-                    string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
-                    return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin." });
+                if (ModelState.IsValid && await StartPendingRegistrationAsync(model))
+                    return Json(new { success = true, redirectUrl = Url.Action("VerifyOtp", "Account") });
 
-                if (password != confirmPassword)
-                    return Json(new { success = false, message = "Mật khẩu xác nhận không khớp." });
-
-                if (password.Length < 6)
-                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự." });
-
-                var user = new ApplicationUser
-                {
-                    UserName  = email,
-                    Email     = email,
-                    FullName  = fullName.Trim(),
-                    IsActive  = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                var result = await UserManager.CreateAsync(user, password);
-                if (result.Succeeded)
-                {
-                    await UserManager.AddToRoleAsync(user.Id, "Customer");
-                    return Json(new { success = true, message = "Đăng ký thành công! Vui lòng đăng nhập." });
-                }
-
-                var errors = string.Join(" ", result.Errors);
-                return Json(new { success = false, message = errors });
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return Json(new { success = false, message = string.Join(" ", errors) });
             }
             catch (Exception ex)
             {
@@ -1807,6 +1798,19 @@ $@"
         // ═══════════════════════════════════════════════════
         //  HELPERS
         // ═══════════════════════════════════════════════════
+
+        // Số giây còn phải chờ trước khi được gửi OTP mới (0 = được gửi)
+        private int GetOtpCooldownSeconds()
+        {
+            var lastSentAt = Session["PendingRegistration.OtpLastSentAt"] as DateTime?;
+
+            if (!lastSentAt.HasValue)
+                return 0;
+
+            var elapsed = DateTime.UtcNow - lastSentAt.Value;
+
+            return elapsed.TotalSeconds < 60 ? 60 - (int)elapsed.TotalSeconds : 0;
+        }
 
         private void ClearPendingRegistrationSession()
         {

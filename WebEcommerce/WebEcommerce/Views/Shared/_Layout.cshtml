@@ -729,6 +729,11 @@ header.is-scrolled {
     }
 
     // Auth Modal Logic
+    function antiForgeryParam() {
+        const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+        return `__RequestVerificationToken=${encodeURIComponent(token)}`;
+    }
+
     function handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
@@ -742,7 +747,7 @@ header.is-scrolled {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&rememberMe=${remember}`
+            body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&rememberMe=${remember}&${antiForgeryParam()}`
         })
         .then(res => res.json())
         .then(data => {
@@ -773,19 +778,13 @@ header.is-scrolled {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `fullName=${encodeURIComponent(fn)}&email=${encodeURIComponent(em)}&password=${encodeURIComponent(pw)}&confirmPassword=${encodeURIComponent(cpw)}`
+            body: `fullName=${encodeURIComponent(fn)}&email=${encodeURIComponent(em)}&password=${encodeURIComponent(pw)}&confirmPassword=${encodeURIComponent(cpw)}&${antiForgeryParam()}`
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                showToast({
-                    type: 'success',
-                    title: 'Đăng ký thành công',
-                    message: data.message || 'Tài khoản đã tạo thành công. Vui lòng đăng nhập.'
-                });
-                switchAuthTab('login');
-                const loginEmail = document.getElementById('loginEmail');
-                if (loginEmail) loginEmail.value = em;
+                // Chuyển sang trang nhập mã OTP đã gửi tới email
+                window.location.href = data.redirectUrl;
             } else {
                 errDiv.innerText = data.message;
                 errDiv.classList.remove('hidden');
