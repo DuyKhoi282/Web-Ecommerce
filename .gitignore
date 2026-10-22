@@ -69,3 +69,6 @@ desktop.ini
 *.bak
 *.tmp
 *~
+
+# Playwright CLI test logs/snapshots
+.playwright-cli/
