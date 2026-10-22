@@ -39,6 +39,12 @@
                     Mới
                 </span>
             }
+            @if (Model != null && Model.Status != 1)
+            {
+                <span class="px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-slate-700 text-white shadow-md tracking-wider">
+                    @(Model.Status == 3 ? "Ngừng kinh doanh" : "Hết hàng")
+                </span>
+            }
         </div>
 
         <!-- Wishlist / Favorite Icon (Top Right) -->

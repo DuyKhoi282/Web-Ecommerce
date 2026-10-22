@@ -1,0 +1,104 @@
+- generic [active] [ref=f5e1]:
+  - complementary [ref=f5e2]:
+    - generic [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - generic [ref=f5e5]: shopping_cart
+        - generic [ref=f5e7]:
+          - generic [ref=f5e8]: TheChillShop
+          - generic [ref=f5e9]: Kênh Người Bán
+      - navigation [ref=f5e10]:
+        - link "dashboard Tổng quan" [ref=f5e11] [cursor=pointer]:
+          - /url: /AdminDashboard
+          - generic [ref=f5e12]: dashboard
+          - generic [ref=f5e13]: Tổng quan
+        - link "category Danh mục sản phẩm" [ref=f5e14] [cursor=pointer]:
+          - /url: /Category
+          - generic [ref=f5e15]: category
+          - generic [ref=f5e16]: Danh mục sản phẩm
+        - link "inventory_2 Quản lý sản phẩm" [ref=f5e17] [cursor=pointer]:
+          - /url: /Product
+          - generic [ref=f5e18]: inventory_2
+          - generic [ref=f5e19]: Quản lý sản phẩm
+        - link "warehouse Kho & Tồn kho" [ref=f5e20] [cursor=pointer]:
+          - /url: /Inventory
+          - generic [ref=f5e21]: warehouse
+          - generic [ref=f5e22]: Kho & Tồn kho
+        - link "receipt_long Quản lý đơn hàng" [ref=f5e23] [cursor=pointer]:
+          - /url: /AdminOrder
+          - generic [ref=f5e24]: receipt_long
+          - generic [ref=f5e25]: Quản lý đơn hàng
+        - generic [ref=f5e26]: Hệ thống
+        - link "storefront Về trang bán hàng" [ref=f5e27] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f5e28]: storefront
+          - generic [ref=f5e29]: Về trang bán hàng
+    - generic [ref=f5e31]:
+      - generic [ref=f5e32]:
+        - generic [ref=f5e33]: MA
+        - generic [ref=f5e34]:
+          - generic "manager@thechillshop.vn" [ref=f5e35]
+          - generic [ref=f5e36]: Người bán
+      - button "logout" [ref=f5e38] [cursor=pointer]
+  - generic [ref=f5e40]:
+    - banner [ref=f5e41]:
+      - generic [ref=f5e42]:
+        - button "menu" [ref=f5e43] [cursor=pointer]
+        - generic [ref=f5e45]:
+          - link "Kênh người bán" [ref=f5e46] [cursor=pointer]:
+            - /url: /AdminDashboard
+          - generic [ref=f5e47]: /
+          - generic [ref=f5e48]: Cập nhật Tồn kho
+      - generic [ref=f5e49]:
+        - generic [ref=f5e50]:
+          - textbox "Tìm kiếm..." [ref=f5e51]
+          - generic [ref=f5e52]: search
+        - generic [ref=f5e53]:
+          - button "notifications" [ref=f5e54] [cursor=pointer]
+          - generic [ref=f5e57]: 22/10/2026
+    - main [ref=f5e58]:
+      - generic [ref=f5e59]:
+        - generic [ref=f5e60]:
+          - link "arrow_back" [ref=f5e61] [cursor=pointer]:
+            - /url: /Inventory
+          - generic [ref=f5e63]:
+            - heading "Nhập / Xuất Kho" [level=1] [ref=f5e64]
+            - paragraph [ref=f5e65]: Cập nhật số lượng tồn kho cho sản phẩm
+        - generic [ref=f5e67]:
+          - generic [ref=f5e68]: inventory_2
+          - generic [ref=f5e70]:
+            - heading "MacBook Air M2 8GB/256GB Midnight" [level=3] [ref=f5e71]
+            - paragraph [ref=f5e72]: "Tồn kho hiện tại: 40"
+        - generic [ref=f5e74]:
+          - generic [ref=f5e75]:
+            - generic [ref=f5e76]: Loại thao tác *
+            - generic [ref=f5e77]:
+              - generic [ref=f5e78] [cursor=pointer]:
+                - radio "add_circle NHẬP KHO Tăng số lượng tồn kho" [checked] [ref=f5e79]
+                - generic [ref=f5e80]:
+                  - generic [ref=f5e81]: add_circle
+                  - text: NHẬP KHO
+                  - paragraph [ref=f5e82]: Tăng số lượng tồn kho
+              - generic [ref=f5e83] [cursor=pointer]:
+                - radio "remove_circle XUẤT KHO Giảm số lượng tồn kho" [ref=f5e84]
+                - generic [ref=f5e85]:
+                  - generic [ref=f5e86]: remove_circle
+                  - text: XUẤT KHO
+                  - paragraph [ref=f5e87]: Giảm số lượng tồn kho
+          - generic [ref=f5e88]:
+            - generic [ref=f5e89]: Số lượng *
+            - spinbutton "0" [ref=f5e90]
+          - generic [ref=f5e91]:
+            - generic [ref=f5e92]: Ghi chú
+            - textbox "Lý do nhập/xuất kho..." [ref=f5e93]
+          - paragraph [ref=f5e95]:
+            - generic [ref=f5e96]: info
+            - text: Tồn kho sau khi cập nhật sẽ được tính tự động
+          - generic [ref=f5e97]:
+            - button "sync_alt Xác nhận cập nhật" [ref=f5e98] [cursor=pointer]:
+              - generic [ref=f5e99]: sync_alt
+              - text: Xác nhận cập nhật
+            - link "Hủy" [ref=f5e100] [cursor=pointer]:
+              - /url: /Inventory
+    - contentinfo [ref=f5e101]:
+      - generic [ref=f5e102]: © 2026 ShopeChill Ecommerce • Hệ thống hoạt động ổn định
+      - generic [ref=f5e103]: Hệ thống phân quyền RBAC • Phiên bản 1.0

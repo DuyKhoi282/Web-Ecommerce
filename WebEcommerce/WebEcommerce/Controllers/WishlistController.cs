@@ -81,7 +81,13 @@ namespace WebEcommerce.Controllers
                 {
                     _context.Wishlists.Remove(existing);
                     await _context.SaveChangesAsync();
-                    return Json(new { success = true, isLiked = false, message = "Đã bỏ sản phẩm khỏi danh sách yêu thích." });
+                    return Json(new
+                    {
+                        success = true,
+                        isLiked = false,
+                        count = await _context.Wishlists.CountAsync(w => w.UserID == userId),
+                        message = "Đã bỏ sản phẩm khỏi danh sách yêu thích."
+                    });
                 }
 
                 if (!await _context.Products.AnyAsync(p => p.ProductID == productId))
@@ -91,7 +97,13 @@ namespace WebEcommerce.Controllers
 
                 _context.Wishlists.Add(new Wishlist { UserID = userId, ProductID = productId });
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, isLiked = true, message = "Đã lưu sản phẩm vào danh sách yêu thích." });
+                return Json(new
+                {
+                    success = true,
+                    isLiked = true,
+                    count = await _context.Wishlists.CountAsync(w => w.UserID == userId),
+                    message = "Đã lưu sản phẩm vào danh sách yêu thích."
+                });
             }
             catch (DbEntityValidationException ex)
             {
