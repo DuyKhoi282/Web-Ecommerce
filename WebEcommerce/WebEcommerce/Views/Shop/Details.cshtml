@@ -293,7 +293,7 @@
                                 </a>
 
                                 <!-- Wishlist -->
-                                <button type="button" onclick="toggleWishlist(this)" 
+                                <button type="button" data-wishlist-id="@Model.ProductID" onclick="toggleWishlist(this)" aria-pressed="false"
                                         class="col-span-2 sm:col-span-1 h-12 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/40 bg-white transition-all cursor-pointer" 
                                         title="Thêm vào yêu thích">
                                     <span class="material-symbols-outlined text-xl">favorite</span>
@@ -740,26 +740,6 @@
             
             input.value = next;
             updateQtyButtons(next, max);
-        }
-
-        function toggleWishlist(btn) {
-            var icon = btn.querySelector('.material-symbols-outlined');
-            if (!icon) return;
-            
-            var isLiked = icon.style.fontVariationSettings && icon.style.fontVariationSettings.includes("'FILL' 1");
-            if (isLiked) {
-                icon.style.fontVariationSettings = "'FILL' 0";
-                icon.classList.remove('text-primary');
-                if (window.showToast) {
-                    showToast({ type: 'info', message: 'Đã bỏ sản phẩm khỏi danh sách yêu thích.' });
-                }
-            } else {
-                icon.style.fontVariationSettings = "'FILL' 1";
-                icon.classList.add('text-primary');
-                if (window.showToast) {
-                    showToast({ type: 'success', title: 'Yêu thích', message: 'Đã lưu sản phẩm vào danh sách yêu thích của bạn!' });
-                }
-            }
         }
 
         function buyNow(productId) {

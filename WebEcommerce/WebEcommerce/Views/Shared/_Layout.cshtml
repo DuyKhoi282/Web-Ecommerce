@@ -475,6 +475,17 @@ header.is-scrolled {
                     </div>
                 </a>
 
+                <!-- Sản phẩm yêu thích -->
+                <a href="@Url.Action("Index", "Wishlist")" class="flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-red-600 font-semibold transition-colors group">
+                    <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">favorite</span>
+                    </span>
+                    <div>
+                        <span class="block leading-tight">Sản phẩm yêu thích</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Sản phẩm bạn đã lưu</span>
+                    </div>
+                </a>
+
                 <!-- Đổi mật khẩu -->
                 <a href="@Url.Action("ChangePassword", "Manage")" class="flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-red-600 font-semibold transition-colors group">
                     <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
@@ -997,6 +1008,88 @@ header.is-scrolled {
             });
         });
     };
+
+    // AJAX Wishlist Logic (nút tim có data-wishlist-id)
+    function setWishlistState(btn, isLiked) {
+        var icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) {
+            icon.style.fontVariationSettings = isLiked ? "'FILL' 1" : "'FILL' 0";
+            icon.classList.toggle('text-primary', isLiked);
+        }
+        btn.setAttribute('aria-pressed', isLiked ? 'true' : 'false');
+        btn.title = isLiked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích';
+    }
+
+    window.toggleWishlist = function (btn) {
+        var productId = btn.getAttribute('data-wishlist-id');
+        if (!productId || btn.disabled) return;
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const formData = new URLSearchParams();
+        formData.append('productId', productId);
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        btn.disabled = true;
+        fetch('@Url.Action("Toggle", "Wishlist")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                document.querySelectorAll('[data-wishlist-id="' + productId + '"]').forEach(b => setWishlistState(b, data.isLiked));
+                showToast({ type: data.isLiked ? 'success' : 'info', title: 'Yêu thích', message: data.message });
+
+                // Trang /Wishlist: bỏ thích thì ẩn card
+                var grid = document.getElementById('wishlistGrid');
+                if (!data.isLiked && grid && grid.contains(btn)) {
+                    btn.closest('[data-product-id]')?.remove();
+                    var remaining = grid.children.length;
+                    var countEl = document.getElementById('wishlistCount');
+                    if (countEl) countEl.innerText = remaining;
+                    if (remaining === 0) window.location.reload();
+                }
+            } else if (data.requireLogin) {
+                showToast({
+                    type: 'warning',
+                    title: 'Yêu cầu đăng nhập',
+                    message: data.message,
+                    actionText: 'Đăng nhập ngay',
+                    onAction: function () { window.location.href = data.loginUrl; }
+                });
+            } else {
+                showToast({ type: 'error', message: data.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.' });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast({ type: 'error', title: 'Lỗi hệ thống', message: 'Không thể cập nhật danh sách yêu thích. Vui lòng thử lại.' });
+        })
+        .finally(() => { btn.disabled = false; });
+    };
+
+    @if (Request.IsAuthenticated)
+    {
+    <text>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!document.querySelector('[data-wishlist-id]')) return;
+        fetch('@Url.Action("MyProductIds", "Wishlist")')
+            .then(res => res.json())
+            .then(data => {
+                (data.productIds || []).forEach(id => {
+                    document.querySelectorAll('[data-wishlist-id="' + id + '"]').forEach(b => setWishlistState(b, true));
+                });
+            })
+            .catch(err => console.error("Error fetching wishlist", err));
+    });
+    </text>
+    }
 
     // Header User Menu Dropdown toggling & Auth Modal helpers
     function toggleHeaderUserMenu(e) {
