@@ -184,8 +184,9 @@ namespace WebEcommerce.Controllers
                 // ========================================
                 if (!string.IsNullOrWhiteSpace(model.PromoCode))
                 {
+                    var cleanPromo = model.PromoCode.Trim().ToUpper();
                     var promo = await _context.PromotionalCodes
-                        .FirstOrDefaultAsync(p => p.Code == model.PromoCode.Trim());
+                        .FirstOrDefaultAsync(p => p.Code.ToUpper() == cleanPromo || p.Code.Trim().ToUpper() == cleanPromo);
 
                     if (promo == null)
                     {
@@ -621,14 +622,15 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     return Json(new { success = false, message = "Vui lòng nhập mã giảm giá." });
                 }
 
+                var cleanCode = code.Trim().ToUpper();
                 var promo = await _context.PromotionalCodes
-                    .FirstOrDefaultAsync(p => p.Code == code.Trim());
+                    .FirstOrDefaultAsync(p => p.Code.ToUpper() == cleanCode || p.Code.Trim().ToUpper() == cleanCode);
 
                 if (promo == null)
                     return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
 
                 var now = DateTime.UtcNow;
-                if (!promo.IsActive || promo.StartDate > now || promo.EndDate < now)
+                if (!promo.IsActive || promo.StartDate > now.AddMinutes(1) || promo.EndDate < now)
                     return Json(new { success = false, message = "Mã giảm giá đã hết hạn hoặc chưa có hiệu lực." });
 
                 if (promo.CurrentUsage >= promo.MaxUsage)

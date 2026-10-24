@@ -1,0 +1,323 @@
+@model WebEcommerce.Models.PromotionListViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Quản lý Mã giảm giá (Voucher)";
+    var now = DateTime.UtcNow;
+}
+
+<!-- Toast thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="toast-success" class="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transition-all">
+        <span class="material-symbols-outlined text-xl">check_circle</span>
+        <span class="font-semibold text-sm">@TempData["SuccessMessage"]</span>
+        <button type="button" onclick="this.parentElement.remove()" class="ml-2 hover:text-emerald-200">
+            <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="toast-error" class="fixed top-6 right-6 z-50 bg-red-600 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transition-all">
+        <span class="material-symbols-outlined text-xl">error</span>
+        <span class="font-semibold text-sm">@TempData["ErrorMessage"]</span>
+        <button type="button" onclick="this.parentElement.remove()" class="ml-2 hover:text-red-200">
+            <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+    </div>
+}
+
+<!-- Header -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
+            <span>Kênh Quản trị</span>
+            <span>/</span>
+            <span class="text-chill-primary">Khuyến mãi & Voucher</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-chill-primary text-3xl">confirmation_number</span>
+            Quản lý Mã giảm giá (Voucher)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Thiết lập các mã voucher ưu đãi, tỷ lệ giảm giá và quản lý lượt sử dụng của khách hàng.
+        </p>
+    </div>
+    <a href="@Url.Action("Create", "Promotion")" class="bg-chill-primary hover:bg-chill-primaryDark active:scale-95 text-white px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-900/15 hover:shadow-xl transition-all">
+        <span class="material-symbols-outlined text-xl">add_circle</span>
+        Tạo mã voucher mới
+    </a>
+</div>
+
+<!-- 4 Thẻ KPI thống kê -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+            <span class="material-symbols-outlined text-2xl">loyalty</span>
+        </div>
+        <div>
+            <span class="text-xs font-semibold text-slate-500 block">Tổng số mã</span>
+            <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@Model.TotalCount</span>
+        </div>
+    </div>
+
+    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+            <span class="material-symbols-outlined text-2xl">verified</span>
+        </div>
+        <div>
+            <span class="text-xs font-semibold text-slate-500 block">Đang hoạt động</span>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-xl sm:text-2xl font-headline font-black text-emerald-600">@Model.ActiveCount</span>
+                <span class="text-2xs text-slate-400 font-medium">(@Model.InDateActiveCount trong hạn)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+            <span class="material-symbols-outlined text-2xl">hourglass_disabled</span>
+        </div>
+        <div>
+            <span class="text-xs font-semibold text-slate-500 block">Đã hết hạn</span>
+            <span class="text-xl sm:text-2xl font-headline font-black text-amber-600">@Model.ExpiredCount</span>
+        </div>
+    </div>
+
+    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+            <span class="material-symbols-outlined text-2xl">shopping_cart_checkout</span>
+        </div>
+        <div>
+            <span class="text-xs font-semibold text-slate-500 block">Tổng lượt đã dùng</span>
+            <span class="text-xl sm:text-2xl font-headline font-black text-purple-600">@Model.TotalUsageCount</span>
+        </div>
+    </div>
+</div>
+
+<!-- Thanh tìm kiếm & Bộ lọc -->
+<div class="admin-card rounded-2xl p-4 mb-6">
+    @using (Html.BeginForm("Index", "Promotion", FormMethod.Get, new { @class = "flex flex-col sm:flex-row items-stretch sm:items-center gap-3" }))
+    {
+        <div class="relative flex-1">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo mã voucher (VD: SALE10, FREESHIP)..."
+                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all text-slate-800" />
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Filter Trạng thái -->
+            <select name="status" class="px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all font-semibold text-slate-700">
+                <option value="All" @(Model.StatusFilter == "All" ? "selected" : "")>Tất cả trạng thái</option>
+                <option value="Active" @(Model.StatusFilter == "Active" ? "selected" : "")>Đang hoạt động</option>
+                <option value="Expired" @(Model.StatusFilter == "Expired" ? "selected" : "")>Đã hết hạn</option>
+                <option value="Inactive" @(Model.StatusFilter == "Inactive" ? "selected" : "")>Tạm ngưng</option>
+            </select>
+
+            <!-- Filter Loại giảm giá -->
+            <select name="type" class="px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all font-semibold text-slate-700">
+                <option value="All" @(Model.TypeFilter == "All" ? "selected" : "")>Tất cả loại giảm</option>
+                <option value="Percentage" @(Model.TypeFilter == "Percentage" ? "selected" : "")>Giảm theo %</option>
+                <option value="Fixed" @(Model.TypeFilter == "Fixed" ? "selected" : "")>Giảm số tiền cố định</option>
+            </select>
+
+            <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-base">filter_list</span>
+                Lọc
+            </button>
+
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.StatusFilter != "All" || Model.TypeFilter != "All")
+            {
+                <a href="@Url.Action("Index", "Promotion")" class="px-3 py-2.5 rounded-xl border-2 border-slate-300 text-slate-600 hover:text-red-600 text-xs sm:text-sm font-semibold transition-all">
+                    Xóa lọc
+                </a>
+            }
+        </div>
+    }
+</div>
+
+<!-- Bảng dữ liệu mã giảm giá -->
+<div class="admin-card rounded-2xl overflow-hidden mb-8">
+    <div class="w-full overflow-x-auto">
+        <table class="w-full text-xs sm:text-sm">
+            <thead>
+                <tr class="bg-slate-50/80 border-b-2 border-slate-200 text-slate-700">
+                    <th class="w-[22%] text-left px-3.5 py-3 font-bold uppercase text-2xs tracking-wider">Mã Voucher</th>
+                    <th class="w-[14%] text-left px-3 py-3 font-bold uppercase text-2xs tracking-wider">Mức giảm</th>
+                    <th class="w-[13%] text-left px-3 py-3 font-bold uppercase text-2xs tracking-wider">Đơn tối thiểu</th>
+                    <th class="w-[14%] text-left px-3 py-3 font-bold uppercase text-2xs tracking-wider">Lượt dùng</th>
+                    <th class="w-[17%] text-left px-3 py-3 font-bold uppercase text-2xs tracking-wider">Thời hạn</th>
+                    <th class="w-[10%] text-center px-2 py-3 font-bold uppercase text-2xs tracking-wider">Trạng thái</th>
+                    <th class="w-[10%] text-center px-2 py-3 font-bold uppercase text-2xs tracking-wider">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @if (Model.Promotions == null || !Model.Promotions.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-slate-400">
+                            <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
+                            <span class="font-semibold">Chưa có mã giảm giá nào phù hợp với bộ lọc.</span>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model.Promotions)
+                    {
+                        var isExpired = item.EndDate < now;
+                        var isUpcoming = item.StartDate > now;
+                        var isFullyUsed = item.MaxUsage > 0 && item.CurrentUsage >= item.MaxUsage;
+                        var usagePercent = item.MaxUsage > 0 ? (int)((double)item.CurrentUsage / item.MaxUsage * 100) : 0;
+                        if (usagePercent > 100) { usagePercent = 100; }
+
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <!-- Mã Code & Mô tả -->
+                            <td class="px-3.5 py-3">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono font-black text-xs px-2 py-0.5 rounded-lg bg-blue-50 text-[#0d47a1] border border-blue-200">
+                                        @item.Code
+                                    </span>
+                                    <button type="button" onclick="navigator.clipboard.writeText('@item.Code'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép mã @item.Code'});"
+                                            class="text-slate-400 hover:text-chill-primary transition-colors" title="Sao chép mã">
+                                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                                    </button>
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <p class="text-2xs text-slate-500 mt-1 max-w-[170px] truncate" title="@item.Description">
+                                        @item.Description
+                                    </p>
+                                }
+                            </td>
+
+                            <!-- Mức giảm -->
+                            <td class="px-3 py-3 font-semibold">
+                                @if (item.DiscountType == "Percentage")
+                                {
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                        <span class="material-symbols-outlined text-xs">percent</span>
+                                        Giảm @item.DiscountValue.ToString("N0")%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                        <span class="material-symbols-outlined text-xs">payments</span>
+                                        Giảm @string.Format("{0:N0}đ", item.DiscountValue)
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Đơn tối thiểu -->
+                            <td class="px-3 py-3 font-semibold text-slate-800 text-xs">
+                                @if (item.MinOrderAmount > 0)
+                                {
+                                    <span>@string.Format("{0:N0}đ", item.MinOrderAmount)</span>
+                                }
+                                else
+                                {
+                                    <span class="text-slate-400 font-normal">0đ</span>
+                                }
+                            </td>
+
+                            <!-- Lượt sử dụng & Progress Bar -->
+                            <td class="px-3 py-3">
+                                <div class="flex items-center gap-1.5 text-xs font-bold mb-1">
+                                    <span class="text-slate-700">@item.CurrentUsage/@item.MaxUsage</span>
+                                    <span class="text-slate-400 text-2xs">(@usagePercent%)</span>
+                                </div>
+                                <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
+                                    <div class="h-full rounded-full @(usagePercent >= 100 ? "bg-red-500" : (usagePercent >= 80 ? "bg-amber-500" : "bg-emerald-500"))"
+                                         style="width: @usagePercent%"></div>
+                                </div>
+                            </td>
+
+                            <!-- Thời hạn -->
+                            <td class="px-3 py-3 text-xs">
+                                <div class="text-slate-700 font-medium whitespace-nowrap">
+                                    @item.StartDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                </div>
+                                <div class="text-slate-500 font-medium whitespace-nowrap">
+                                    - @item.EndDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                </div>
+                                @if (isExpired)
+                                {
+                                    <span class="inline-block mt-0.5 text-2xs font-bold text-red-600 bg-red-50 px-1.5 py-0.2 rounded border border-red-200">
+                                        Đã hết hạn
+                                    </span>
+                                }
+                                else if (isUpcoming)
+                                {
+                                    <span class="inline-block mt-0.5 text-2xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                                        Sắp diễn ra
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-block mt-0.5 text-2xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                        Đang trong hạn
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Trạng thái (Toggle Switch Form) -->
+                            <td class="px-2 py-3 text-center">
+                                @using (Html.BeginForm("ToggleStatus", "Promotion", new { id = item.PromoCodeID }, FormMethod.Post, new { @class = "inline" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            title="Bấm để @(item.IsActive ? "Tạm ngưng" : "Kích hoạt") mã"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap @(item.IsActive ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200" : "bg-slate-200 text-slate-600 hover:bg-slate-300")">
+                                        <span class="w-1.5 h-1.5 rounded-full @(item.IsActive ? "bg-emerald-600" : "bg-slate-500")"></span>
+                                        @(item.IsActive ? "Hoạt động" : "Tạm ngưng")
+                                    </button>
+                                }
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="px-2 py-3 text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                    <!-- Xem chi tiết -->
+                                    <a href="@Url.Action("Details", "Promotion", new { id = item.PromoCodeID })"
+                                       class="p-1 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                       title="Xem chi tiết">
+                                        <span class="material-symbols-outlined text-base">visibility</span>
+                                    </a>
+
+                                    <!-- Chỉnh sửa -->
+                                    <a href="@Url.Action("Edit", "Promotion", new { id = item.PromoCodeID })"
+                                       class="p-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                       title="Chỉnh sửa">
+                                        <span class="material-symbols-outlined text-base">edit</span>
+                                    </a>
+
+                                    <!-- Xóa an toàn -->
+                                    @using (Html.BeginForm("Delete", "Promotion", new { id = item.PromoCodeID }, FormMethod.Post, new { @class = "inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá \"@item.Code\"?');"
+                                                class="p-1 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                title="Xóa voucher">
+                                            <span class="material-symbols-outlined text-base">delete</span>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    setTimeout(function () {
+        var successToast = document.getElementById('toast-success');
+        var errorToast = document.getElementById('toast-error');
+        if (successToast) successToast.remove();
+        if (errorToast) errorToast.remove();
+    }, 4000);
+</script>

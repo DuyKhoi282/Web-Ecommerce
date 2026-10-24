@@ -354,15 +354,22 @@
             if (bankRadio) bankRadio.addEventListener("change", updatePaymentStyle);
 
             // Promo Code Apply
+            var codeInput = document.getElementById("promo-code-input");
+            if (codeInput) {
+                codeInput.addEventListener("input", function () {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+
             var btnApplyPromo = document.getElementById("btn-apply-promo");
             if (btnApplyPromo) {
                 btnApplyPromo.addEventListener("click", function () {
-                    var codeInput = document.getElementById("promo-code-input");
-                    var code = codeInput ? codeInput.value.trim() : "";
+                    var code = codeInput ? codeInput.value.trim().toUpperCase() : "";
                     if (!code) {
                         notify("warning", "Mã giảm giá", "Vui lòng nhập mã giảm giá trước khi áp dụng.");
                         return;
                     }
+                    if (codeInput) codeInput.value = code;
 
                     var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
                     var formData = new URLSearchParams();
@@ -422,6 +429,7 @@
             var btnSubmit = document.getElementById("btn-submit-order");
             if (form && btnSubmit) {
                 form.addEventListener("submit", function () {
+                    if (codeInput) codeInput.value = codeInput.value.trim().toUpperCase();
                     btnSubmit.disabled = true;
                     btnSubmit.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">refresh</span> Đang khởi tạo đơn hàng...';
                 });

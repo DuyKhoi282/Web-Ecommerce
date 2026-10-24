@@ -231,6 +231,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\AdminOrderController.cs" />
+    <Compile Include="Controllers\PromotionController.cs" />
     <Compile Include="Filters\CustomAuthorizeAttribute.cs" />
     <Compile Include="Helpers\CookieCartItem.cs" />
     <Compile Include="Helpers\CookieCartHelper.cs" />
@@ -255,6 +256,7 @@
     <Compile Include="Models\Review.cs" />
     <Compile Include="Models\Wishlist.cs" />
     <Compile Include="Models\OrderViewModels.cs" />
+    <Compile Include="Models\PromotionViewModels.cs" />
     <Compile Include="Models\FlashSale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -358,6 +360,10 @@
     <Content Include="Views\AdminOrder\Index.cshtml" />
     <Content Include="Views\AdminOrder\Detail.cshtml" />
     <Content Include="Views\Account\VerifyOtp.cshtml" />
+    <Content Include="Views\Promotion\Index.cshtml" />
+    <Content Include="Views\Promotion\Create.cshtml" />
+    <Content Include="Views\Promotion\Edit.cshtml" />
+    <Content Include="Views\Promotion\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
