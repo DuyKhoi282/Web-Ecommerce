@@ -668,8 +668,8 @@ namespace WebEcommerce.Controllers
 
         /// <summary>
         /// Kiểm tra transition hợp lệ
-        /// Pending -> Confirmed -> Shipped -> Delivered
-        /// Pending/Confirmed/Shipped -> Cancelled
+        /// Pending -> Confirmed -> (Processing) -> Shipped -> Delivered
+        /// Pending/Confirmed/Processing/Shipped -> Cancelled
         /// </summary>
         private bool IsValidTransition(string currentStatus, string newStatus)
         {
@@ -678,6 +678,8 @@ namespace WebEcommerce.Controllers
                 case "Pending":
                     return newStatus == "Confirmed" || newStatus == "Cancelled";
                 case "Confirmed":
+                    return newStatus == "Processing" || newStatus == "Shipped" || newStatus == "Cancelled";
+                case "Processing":
                     return newStatus == "Shipped" || newStatus == "Cancelled";
                 case "Shipped":
                     return newStatus == "Delivered" || newStatus == "Cancelled";

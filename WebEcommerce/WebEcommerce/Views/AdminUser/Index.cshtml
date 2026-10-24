@@ -39,9 +39,10 @@
 }
 
 <!-- 4 KPI Metric Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+@* p-/gap-[1.25rem] thay p-5/gap-5 vì bootstrap.css có .p-5/.gap-5 { 3rem !important }; 4 cột từ 2xl để số tiền không tràn đè icon *@
+<div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-[1.25rem] mb-8">
     <!-- Card 1: Total Users -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#0d47a1] hover:border-[#0d47a1] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#0d47a1] hover:border-[#0d47a1] p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng người dùng</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalUsers.ToString("N0")</span>
@@ -53,7 +54,7 @@
     </div>
 
     <!-- Card 2: Customers -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#00b4d8] hover:border-[#00b4d8] p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#00b4d8] hover:border-[#00b4d8] p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
@@ -65,7 +66,7 @@
     </div>
 
     <!-- Card 3: Staff & Managers -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-purple-600 hover:border-purple-600 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-purple-600 hover:border-purple-600 p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Quản trị & Nhân viên</span>
             <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalStaff.ToString("N0")</span>
@@ -77,7 +78,7 @@
     </div>
 
     <!-- Card 4: Locked Users -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-rose-500 hover:border-rose-500 p-5 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-rose-500 hover:border-rose-500 p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
         <div>
             <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tài khoản bị khóa</span>
             <span class="block text-2xl font-black font-headline text-red-600 mt-1">@Model.TotalLocked.ToString("N0")</span>
