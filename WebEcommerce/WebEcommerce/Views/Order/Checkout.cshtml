@@ -40,6 +40,14 @@
         </div>
     }
 
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium flex items-center gap-2.5 shadow-2xs">
+            <span class="material-symbols-outlined text-xl text-amber-600">info</span>
+            <span>@TempData["InfoMessage"]</span>
+        </div>
+    }
+
     @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkout-form", @class = "grid grid-cols-1 lg:grid-cols-3 gap-8 items-start" }))
     {
         @Html.AntiForgeryToken()

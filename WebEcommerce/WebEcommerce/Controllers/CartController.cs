@@ -63,11 +63,13 @@ namespace WebEcommerce.Controllers
                         UnitPrice = unitPrice,
                         Quantity = ci.Quantity,
                         ItemTotal = unitPrice * ci.Quantity,
-                        StockQuantity = product.StockQuantity
+                        StockQuantity = product.StockQuantity,
+                        Status = product.Status
                     });
                 }
 
-                vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
+                // Tổng tiền giỏ hàng chỉ tính các sản phẩm còn hàng
+                vm.CartTotal = vm.AvailableCartTotal;
 
                 // Clean up cookie: remove items whose products no longer exist
                 if (vm.Items.Count < cookieItems.Count)
@@ -303,9 +305,9 @@ namespace WebEcommerce.Controllers
                 var product = await _context.Products
                     .FirstOrDefaultAsync(p => p.ProductID == productId);
 
-                if (product == null || product.Status != 1)
+                if (product == null || product.Status != 1 || product.StockQuantity <= 0)
                 {
-                    return Json(new { success = false, message = "Sản phẩm không còn kinh doanh." });
+                    return Json(new { success = false, message = "Sản phẩm hiện đã hết hàng hoặc không còn kinh doanh." });
                 }
 
                 // Read cookie
@@ -336,7 +338,7 @@ namespace WebEcommerce.Controllers
                 var unitPrice = GetCurrentProductPrice(product);
                 var itemTotal = unitPrice * newQuantity;
 
-                // Recalculate cart total
+                // Recalculate cart total (chỉ tính các sản phẩm còn hàng)
                 var allItems = CookieCartHelper.GetCartItems(Request);
                 // Update the in-memory list since Request cookie is stale
                 var itemInList = allItems.FirstOrDefault(i => i.ProductID == productId);
@@ -348,7 +350,7 @@ namespace WebEcommerce.Controllers
                     .Select(i => i.ProductID)
                     .ToList();
 
-                decimal cartTotal = itemTotal;
+                decimal cartTotal = (product.Status == 1 && product.StockQuantity > 0) ? itemTotal : 0m;
                 if (otherProductIds.Any())
                 {
                     var otherProducts = await _context.Products
@@ -358,7 +360,7 @@ namespace WebEcommerce.Controllers
                     foreach (var ci in allItems.Where(i => i.ProductID != productId))
                     {
                         var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                        if (op != null)
+                        if (op != null && op.Status == 1 && op.StockQuantity > 0)
                         {
                             cartTotal += GetCurrentProductPrice(op) * ci.Quantity;
                         }
@@ -433,7 +435,7 @@ namespace WebEcommerce.Controllers
                         foreach (var ri in remainingItems)
                         {
                             var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
-                            if (rp != null)
+                            if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
                             {
                                 remainTotal += GetCurrentProductPrice(rp) * ri.Quantity;
                             }
@@ -477,7 +479,7 @@ namespace WebEcommerce.Controllers
                     .Select(i => i.ProductID)
                     .ToList();
 
-                decimal cartTotal2 = itemTotal;
+                decimal cartTotal2 = (product != null && product.Status == 1 && product.StockQuantity > 0) ? itemTotal : 0m;
                 if (otherProductIds.Any())
                 {
                     var otherProducts = await _context.Products
@@ -487,7 +489,7 @@ namespace WebEcommerce.Controllers
                     foreach (var ci in allItems.Where(i => i.ProductID != productId))
                     {
                         var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                        if (op != null)
+                        if (op != null && op.Status == 1 && op.StockQuantity > 0)
                         {
                             cartTotal2 += GetCurrentProductPrice(op) * ci.Quantity;
                         }
@@ -558,7 +560,7 @@ namespace WebEcommerce.Controllers
                     foreach (var ri in remainingItems)
                     {
                         var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
-                        if (rp != null)
+                        if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
                         {
                             cartTotal += GetCurrentProductPrice(rp) * ri.Quantity;
                         }
@@ -611,6 +613,26 @@ namespace WebEcommerce.Controllers
         // ==============================================
         private decimal GetCurrentProductPrice(Product product)
         {
+            // 1. Kiểm tra nếu sản phẩm đang thuộc Flash Sale đang diễn ra và còn suất
+            try
+            {
+                var now = DateTime.UtcNow;
+                var flashItem = _context.FlashSaleItems
+                    .AsNoTracking()
+                    .Include(f => f.FlashSale)
+                    .FirstOrDefault(f => f.ProductID == product.ProductID
+                                      && f.FlashSale != null
+                                      && f.FlashSale.IsActive
+                                      && f.FlashSale.StartTime <= now
+                                      && f.FlashSale.EndTime > now
+                                      && f.SoldQuantity < f.MaxQuantity);
+                if (flashItem != null)
+                {
+                    return flashItem.FlashSalePrice;
+                }
+            }
+            catch {}
+
             if (product.DiscountPrice.HasValue &&
                 product.DiscountPrice.Value > 0)
             {

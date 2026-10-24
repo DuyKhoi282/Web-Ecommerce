@@ -51,9 +51,37 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                     .Take(8)
                     .ToListAsync();
 
+                // Query Flash Sale đang hoạt động trong CSDL
+                FlashSale activeFlashSale = null;
+                try
+                {
+                    var now = DateTime.UtcNow;
+                    activeFlashSale = await _db.FlashSales
+                        .AsNoTracking()
+                        .Include(fs => fs.FlashSaleItems)
+                        .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product))
+                        .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product.ProductImages))
+                        .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product.Category))
+                        .Where(fs => fs.IsActive && fs.StartTime <= now && fs.EndTime > now)
+                        .OrderByDescending(fs => fs.FlashSaleID)
+                        .FirstOrDefaultAsync();
+
+                    if (activeFlashSale != null && activeFlashSale.FlashSaleItems != null)
+                    {
+                        activeFlashSale.FlashSaleItems = activeFlashSale.FlashSaleItems
+                            .Where(fsi => fsi.Product != null && fsi.Product.Status != 3)
+                            .ToList();
+                    }
+                }
+                catch (Exception fsEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Home/ActiveFlashSale] {fsEx.Message}");
+                }
+
                 ViewBag.Categories = categories;
                 ViewBag.FeaturedProducts = featuredProducts;
                 ViewBag.AllProducts = allProducts;
+                ViewBag.ActiveFlashSale = activeFlashSale;
 
                 return View(products);
             }
@@ -63,6 +91,7 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                 ViewBag.Categories = new List<Category>();
                 ViewBag.FeaturedProducts = new List<Product>();
                 ViewBag.AllProducts = new List<Product>();
+                ViewBag.ActiveFlashSale = null;
                 return View(new List<Product>());
             }
         }
