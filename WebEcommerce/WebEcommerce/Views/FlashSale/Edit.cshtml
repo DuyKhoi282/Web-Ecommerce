@@ -1,0 +1,776 @@
+@model WebEcommerce.Models.FlashSaleFormViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chỉnh Sửa Đợt Flash Sale";
+}
+
+<div class="w-full max-w-7xl mx-auto mb-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <a href="@Url.Action("Index", "FlashSale")" class="text-xs font-bold text-chill-primary hover:underline flex items-center gap-1 mb-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Quay lại danh sách Flash Sale
+        </a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-amber-500 text-3xl">edit_note</span>
+                    Chỉnh Sửa Đợt Flash Sale #@Model.FlashSaleID
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Cập nhật khung giờ, mức giảm giá (%) hoặc giá bán trực tiếp của các sản phẩm trong đợt sale.
+                </p>
+            </div>
+            <a href="@Url.Action("Details", "FlashSale", new { id = Model.FlashSaleID })" 
+               class="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
+                <span class="material-symbols-outlined text-base">monitoring</span>
+                Xem thống kê
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">error</span>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    @Html.ValidationSummary(true, "", new { @class = "mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" })
+
+    @using (Html.BeginForm("Edit", "FlashSale", FormMethod.Post, new { id = "flashSaleEditForm", @class = "space-y-6" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.FlashSaleID)
+
+        <!-- HÀNG 1: THÔNG TIN CHIẾN DỊCH & XEM TRƯỚC SỰ KIỆN (CÂN ĐỐI VUÔNG VẮN, KHÔNG KHOẢNG TRỐNG) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <!-- Cột trái: 1. Thông tin chiến dịch & Lưu ý nghiệp vụ (7/12 cột trên lg) -->
+            <div class="lg:col-span-7 flex flex-col">
+                <div class="admin-card rounded-2xl p-6 sm:p-7 flex flex-col justify-between shadow-sm h-full">
+                    <div class="space-y-4">
+                        <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <span class="material-symbols-outlined text-amber-500">campaign</span>
+                            1. Thông tin chiến dịch Flash Sale
+                        </h2>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="Title">
+                                Tiêu đề chiến dịch <span class="text-red-500">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.Title, new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-bold text-slate-900 transition-all",
+                                id = "inputTitle",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="Description">
+                                Mô tả / Thông điệp khuyến mãi
+                            </label>
+                            @Html.TextAreaFor(m => m.Description, new {
+                                @class = "w-full px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm transition-all resize-y",
+                                rows = 2,
+                                id = "inputDescription"
+                            })
+                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Thời gian bắt đầu <span class="text-red-500">*</span>
+                                </label>
+                                <input type="datetime-local" name="StartTime" id="inputStartTime" 
+                                       value="@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")" required
+                                       class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold text-slate-800 transition-all" />
+                                @Html.ValidationMessageFor(m => m.StartTime, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Thời gian kết thúc <span class="text-red-500">*</span>
+                                </label>
+                                <input type="datetime-local" name="EndTime" id="inputEndTime" 
+                                       value="@Model.EndTime.ToString("yyyy-MM-ddTHH:mm")" required
+                                       class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold text-slate-800 transition-all" />
+                                @Html.ValidationMessageFor(m => m.EndTime, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                            </div>
+                        </div>
+
+                        <!-- Kích hoạt -->
+                        <div class="pt-1">
+                            <label class="relative flex items-center gap-3 cursor-pointer select-none">
+                                @Html.CheckBoxFor(m => m.IsActive, new { @class = "sr-only peer", id = "checkIsActive" })
+                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                <div>
+                                    <span class="text-sm font-bold text-slate-800 block">Kích hoạt sự kiện</span>
+                                    <span class="text-xs text-slate-500 block">Bật hoặc tạm ngưng đợt Flash Sale này.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Hộp lưu ý quy định khi chỉnh sửa tích hợp dưới đáy card -->
+                    <div class="mt-5 pt-3.5 border-t border-slate-200/80 bg-slate-50/80 -mx-6 -mb-6 sm:-mx-7 sm:-mb-7 p-4 sm:px-6 rounded-b-2xl border-dashed">
+                        <div class="flex items-center gap-2 mb-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-amber-500 text-base">info</span>
+                            Quy định khi chỉnh sửa Flash Sale
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-2xs text-slate-600">
+                            <div class="flex items-start gap-1.5">
+                                <span class="material-symbols-outlined text-emerald-600 text-sm shrink-0 mt-0.5">check_circle</span>
+                                <span>Tự động quy đổi linh hoạt giữa <strong>% Giảm giá</strong> và <strong>Giá Flash Sale</strong>.</span>
+                            </div>
+                            <div class="flex items-start gap-1.5">
+                                <span class="material-symbols-outlined text-emerald-600 text-sm shrink-0 mt-0.5">check_circle</span>
+                                <span>Sản phẩm có <strong>Đã bán &gt; 0</strong> được khóa nút xóa để bảo toàn dữ liệu.</span>
+                            </div>
+                            <div class="flex items-start gap-1.5">
+                                <span class="material-symbols-outlined text-emerald-600 text-sm shrink-0 mt-0.5">check_circle</span>
+                                <span>Suất mở bán tối thiểu không thấp hơn số suất <strong>đã bán thực tế</strong>.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Live Preview (5/12 cột trên lg - Chiều cao bằng chằn chặn cột trái) -->
+            <div class="lg:col-span-5 flex flex-col">
+                <!-- Thẻ XEM TRƯỚC SỰ KIỆN FLASH SALE -->
+                <div class="rounded-2xl overflow-hidden shadow-xl border-2 border-red-500/30 bg-gradient-to-b from-[#b30014] to-[#73000b] text-white p-5 sm:p-6 flex flex-col justify-between h-full space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-white/20 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-amber-400 text-2xl animate-bounce">bolt</span>
+                                <span class="font-black text-sm tracking-widest uppercase text-amber-300">FLASH SALE</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white uppercase tracking-wider shadow-inner" id="previewBadgeDiscount">LIVE DEMO</span>
+                        </div>
+
+                        <!-- Tiêu đề & Mô tả preview -->
+                        <div>
+                            <h3 id="previewTitle" class="font-headline font-black text-lg leading-snug text-white line-clamp-2">
+                                @Model.Title
+                            </h3>
+                            <p id="previewDescription" class="text-xs text-red-200 mt-1 line-clamp-2">
+                                @(string.IsNullOrEmpty(Model.Description) ? "Ưu đãi độc quyền chỉ trong hôm nay! Số lượng có hạn..." : Model.Description)
+                            </p>
+                        </div>
+
+                        <!-- Khung giờ áp dụng hiển thị trên Live Demo -->
+                        <div class="flex items-center gap-2 text-2xs text-amber-200/90 bg-black/20 px-3 py-1.5 rounded-lg border border-white/10">
+                            <span class="material-symbols-outlined text-xs text-amber-300">calendar_clock</span>
+                            <span id="previewTimeRange">Khung giờ áp dụng khuyến mãi</span>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách sản phẩm preview -->
+                    <div class="space-y-2 pt-3 border-t border-white/10 mt-auto">
+                        <span class="text-2xs font-bold uppercase tracking-wider text-amber-300/90 block">Sản phẩm trong đợt sale:</span>
+                        <div id="previewProductsList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HÀNG 2: DANH SÁCH SẢN PHẨM FLASH SALE (FULL WIDTH 100%, KHÔNG CUỘN NGANG, CHỈ CUỘN DỌC) -->
+        <div class="admin-card rounded-2xl p-6 sm:p-7 space-y-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="font-headline font-bold text-lg text-slate-900 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500 text-2xl">inventory_2</span>
+                        2. Sản phẩm tham gia Flash Sale
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Bảng hiển thị rộng rãi toàn màn hình, bạn có thể chỉnh theo <strong>% Mức giảm giá</strong> hoặc nhập trực tiếp <strong>Giá Flash Sale</strong>.</p>
+                </div>
+                <button type="button" onclick="openProductModal()" 
+                        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-sm shrink-0">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    Thêm sản phẩm
+                </button>
+            </div>
+
+            <!-- Thanh thiết lập mức giảm giá nhanh hàng loạt -->
+            <div class="p-3.5 sm:p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-600 text-lg">percent</span>
+                    <span class="font-bold text-amber-900">Mức giảm nhanh cho toàn bộ:</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" onclick="applyBulkDiscount(10)" class="px-3 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 active:scale-95 transition-all shadow-2xs">-10%</button>
+                    <button type="button" onclick="applyBulkDiscount(20)" class="px-3 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 active:scale-95 transition-all shadow-2xs">-20%</button>
+                    <button type="button" onclick="applyBulkDiscount(30)" class="px-3 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 active:scale-95 transition-all shadow-2xs">-30%</button>
+                    <button type="button" onclick="applyBulkDiscount(40)" class="px-3 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 active:scale-95 transition-all shadow-2xs">-40%</button>
+                    <button type="button" onclick="applyBulkDiscount(50)" class="px-3 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 active:scale-95 transition-all shadow-2xs">-50%</button>
+                    <div class="flex items-center ml-1">
+                        <input type="number" id="customBulkPercent" min="1" max="99" placeholder="%" 
+                               class="w-16 px-2 py-1 rounded-l-lg border border-r-0 border-amber-300 outline-none text-xs font-bold text-center bg-white" />
+                        <button type="button" onclick="applyCustomBulkDiscount()" 
+                                class="px-3 py-1 rounded-r-lg bg-amber-600 text-white font-bold hover:bg-amber-700 active:scale-95 transition-all">
+                            Áp dụng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng các sản phẩm đã chọn (100% full width, không có thanh cuộn ngang, chỉ cuộn dọc) -->
+            <div class="w-full">
+                <table class="w-full text-sm table-auto" id="tableSelectedProducts">
+                    <thead>
+                        <tr class="bg-slate-50 border-y border-slate-200">
+                            <th class="text-left py-3 px-3.5 font-bold text-slate-600 text-xs w-[32%]">SẢN PHẨM</th>
+                            <th class="text-right py-3 px-3.5 font-bold text-slate-600 text-xs w-[13%]">GIÁ GỐC</th>
+                            <th class="text-left py-3 px-3.5 font-bold text-slate-600 text-xs w-[20%]">MỨC GIẢM GIÁ (%) <span class="text-red-500">*</span></th>
+                            <th class="text-left py-3 px-3.5 font-bold text-slate-600 text-xs w-[20%]">GIÁ FLASH SALE (VNĐ) <span class="text-red-500">*</span></th>
+                            <th class="text-left py-3 px-3.5 font-bold text-slate-600 text-xs w-[11%]">SUẤT MỞ BÁN <span class="text-red-500">*</span></th>
+                            <th class="text-center py-3 px-2 font-bold text-slate-600 text-xs w-[4%]"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="itemsTableBody">
+                        @if (Model.Items != null && Model.Items.Any())
+                        {
+                            for (int i = 0; i < Model.Items.Count; i++)
+                            {
+                                var item = Model.Items[i];
+                                var discountPercent = item.DiscountPercent > 0 ? item.DiscountPercent : 20;
+                                var savedAmount = item.OriginalPrice > item.FlashSalePrice ? (item.OriginalPrice - item.FlashSalePrice) : 0;
+
+                                <tr class="product-row" data-product-id="@item.ProductID">
+                                    <td class="py-3.5 px-3.5">
+                                        <input type="hidden" name="Items[@i].FlashSaleItemID" value="@item.FlashSaleItemID" />
+                                        <input type="hidden" name="Items[@i].ProductID" value="@item.ProductID" />
+                                        <input type="hidden" name="Items[@i].ProductName" value="@item.ProductName" />
+                                        <input type="hidden" name="Items[@i].ProductImage" value="@item.ProductImage" />
+                                        <input type="hidden" name="Items[@i].OriginalPrice" value="@item.OriginalPrice" class="item-orig-price" />
+                                        <input type="hidden" name="Items[@i].StockQuantity" value="@item.StockQuantity" class="item-stock-qty" />
+                                        <input type="hidden" name="Items[@i].SoldQuantity" value="@item.SoldQuantity" class="item-sold-qty" />
+                                        
+                                        <div class="flex items-center gap-3.5">
+                                            <img src="@(string.IsNullOrEmpty(item.ProductImage) ? "/Content/images/placeholder.png" : item.ProductImage)" 
+                                                 alt="@item.ProductName" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                                            <div>
+                                                <span class="font-bold text-slate-900 block text-xs line-clamp-2">@item.ProductName</span>
+                                                <div class="flex items-center gap-2 text-2xs text-slate-500 mt-0.5">
+                                                    <span>Tồn kho: <strong class="text-slate-800">@item.StockQuantity</strong></span>
+                                                    @if (item.SoldQuantity > 0)
+                                                    {
+                                                        <span class="text-purple-600 font-bold">| Đã bán: @item.SoldQuantity</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-3.5 text-right font-bold text-slate-700 text-xs whitespace-nowrap">
+                                        @item.OriginalPrice.ToString("N0")đ
+                                    </td>
+
+                                    <!-- Ô chỉnh Mức giảm giá (%) -->
+                                    <td class="py-3.5 px-3.5">
+                                        <div class="space-y-1.5 max-w-[200px]">
+                                            <div class="relative flex items-center">
+                                                <input type="number" min="1" max="99" value="@discountPercent" 
+                                                       oninput="onPercentInput(this)"
+                                                       placeholder="%"
+                                                       class="w-full pl-3 pr-7 py-2 rounded-xl border-2 border-slate-300 focus:border-red-500 outline-none text-xs font-bold text-red-600 item-discount-percent bg-white" />
+                                                <span class="absolute right-2.5 text-xs font-bold text-slate-400 pointer-events-none">%</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <button type="button" onclick="setRowQuickDiscount(this, 10)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">10%</button>
+                                                <button type="button" onclick="setRowQuickDiscount(this, 20)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">20%</button>
+                                                <button type="button" onclick="setRowQuickDiscount(this, 30)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">30%</button>
+                                                <button type="button" onclick="setRowQuickDiscount(this, 50)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">50%</button>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Ô chỉnh Giá Flash Sale (VNĐ) -->
+                                    <td class="py-3.5 px-3.5">
+                                        <div class="space-y-1 max-w-[210px]">
+                                            <div class="relative flex items-center">
+                                                <input type="number" name="Items[@i].FlashSalePrice" value="@Convert.ToInt64(item.FlashSalePrice)" 
+                                                       min="1000" step="1000" required
+                                                       oninput="onPriceInput(this)"
+                                                       class="w-full pl-3 pr-8 py-2 rounded-xl border-2 border-slate-300 focus:border-red-500 outline-none text-xs font-bold text-red-600 item-sale-price bg-white" />
+                                                <span class="absolute right-2.5 text-xs font-bold text-slate-400 pointer-events-none">đ</span>
+                                            </div>
+                                            <div class="saved-amount-container">
+                                                @if (savedAmount > 0)
+                                                {
+                                                    <span class="text-[11px] text-emerald-600 font-bold block">✓ Tiết kiệm: @savedAmount.ToString("N0")đ</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Ô chỉnh Suất mở bán -->
+                                    <td class="py-3.5 px-3.5">
+                                        <div class="space-y-1 max-w-[130px]">
+                                            <input type="number" name="Items[@i].MaxQuantity" value="@item.MaxQuantity" 
+                                                   min="@Math.Max(1, item.SoldQuantity)" max="@item.StockQuantity" required
+                                                   class="w-full px-3 py-2 rounded-xl border-2 border-slate-300 focus:border-chill-primary outline-none text-xs font-bold text-slate-800 bg-white" />
+                                            <span class="text-[10px] text-slate-400 block font-medium">Tối thiểu: @item.SoldQuantity (đã bán)</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-2 text-center">
+                                        @if (item.SoldQuantity > 0)
+                                        {
+                                            <span class="text-slate-300 cursor-not-allowed inline-block p-2" title="Sản phẩm đã có suất bán, không thể xóa">
+                                                <span class="material-symbols-outlined text-lg">lock</span>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" onclick="removeProductRow(this)" title="Xóa khỏi đợt Flash Sale"
+                                                    class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                                <span class="material-symbols-outlined text-lg">delete</span>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Placeholder khi chưa chọn sản phẩm -->
+            <div id="noProductsNotice" class="@(Model.Items != null && Model.Items.Any() ? "hidden" : "") text-center py-10 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                <span class="material-symbols-outlined text-4xl text-slate-300 mb-1">add_shopping_cart</span>
+                <p class="text-sm font-bold text-slate-700">Chưa có sản phẩm nào được chọn</p>
+                <button type="button" onclick="openProductModal()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-bold hover:bg-red-100 transition-all mt-2">
+                    <span class="material-symbols-outlined text-base">add_circle</span>
+                    Chọn sản phẩm ngay
+                </button>
+            </div>
+        </div>
+
+        <!-- HÀNG 3: NÚT HÀNH ĐỘNG (LƯU & HỦY) -->
+        <div class="flex items-center gap-3 pt-2">
+            <button type="submit" class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 active:scale-95 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-900/20 hover:shadow-xl transition-all">
+                <span class="material-symbols-outlined text-xl">save</span>
+                Lưu Cập Nhật Flash Sale
+            </button>
+            <a href="@Url.Action("Index", "FlashSale")" class="px-6 py-3.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-bold text-sm transition-all">
+                Hủy bỏ
+            </a>
+        </div>
+    }
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL CHỌN SẢN PHẨM KHẢ DỤNG CHO FLASH SALE                   -->
+<!-- ============================================================== -->
+<div id="productModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-500 text-2xl">add_shopping_cart</span>
+                <h3 class="font-headline font-bold text-lg text-slate-900">Chọn sản phẩm tham gia Flash Sale</h3>
+            </div>
+            <button type="button" onclick="closeProductModal()" class="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+        </div>
+
+        <!-- Modal Search Bar -->
+        <div class="p-4 border-b border-slate-100 bg-slate-50">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                <input type="text" id="modalSearchInput" placeholder="Tìm theo tên sản phẩm, danh mục..." 
+                       oninput="filterModalProducts()"
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-chill-primary outline-none text-xs font-medium" />
+            </div>
+        </div>
+
+        <!-- Modal Products List -->
+        <div class="overflow-y-auto p-4 space-y-2 flex-1" id="modalProductsList">
+            @if (Model.AvailableProducts != null && Model.AvailableProducts.Any())
+            {
+                foreach (var p in Model.AvailableProducts)
+                {
+                    var img = p.ProductImages?.FirstOrDefault(x => x.IsMain)?.ImageURL 
+                             ?? p.ProductImages?.FirstOrDefault()?.ImageURL 
+                             ?? "/Content/images/placeholder.png";
+
+                    <div class="modal-product-item flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-chill-primary/50 hover:bg-slate-50 transition-all"
+                         data-id="@p.ProductID"
+                         data-name="@p.Name"
+                         data-image="@img"
+                         data-price="@Convert.ToInt64(p.Price)"
+                         data-stock="@p.StockQuantity"
+                         data-category="@(p.Category?.Name ?? "")">
+                        
+                        <div class="flex items-center gap-3">
+                            <img src="@img" alt="@p.Name" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                            <div>
+                                <span class="font-headline font-bold text-xs text-slate-900 block product-name">@p.Name</span>
+                                <span class="text-2xs text-slate-500 block">Danh mục: @(p.Category?.Name ?? "Chưa phân loại")</span>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-xs font-bold text-chill-primary">@p.Price.ToString("N0")đ</span>
+                                    <span class="text-2xs text-slate-400">| Tồn kho: <strong class="text-slate-700">@p.StockQuantity</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="selectProductFromModal(this)"
+                                class="btn-select-product px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shrink-0">
+                            + Chọn
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-end">
+            <button type="button" onclick="closeProductModal()" class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all">
+                Đóng
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById('inputTitle').addEventListener('input', function() {
+        document.getElementById('previewTitle').innerText = this.value || 'Flash Sale Giờ Vàng';
+    });
+
+    document.getElementById('inputDescription').addEventListener('input', function() {
+        document.getElementById('previewDescription').innerText = this.value || 'Ưu đãi độc quyền chỉ trong hôm nay! Số lượng có hạn...';
+    });
+
+    function openProductModal() {
+        updateModalButtonsState();
+        document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+        document.getElementById('productModal').classList.add('hidden');
+    }
+
+    function filterModalProducts() {
+        const query = document.getElementById('modalSearchInput').value.toLowerCase().trim();
+        const items = document.querySelectorAll('.modal-product-item');
+
+        items.forEach(item => {
+            const name = item.getAttribute('data-name').toLowerCase();
+            const cat = item.getAttribute('data-category').toLowerCase();
+            if (name.includes(query) || cat.includes(query)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function updateModalButtonsState() {
+        const selectedIds = Array.from(document.querySelectorAll('#itemsTableBody tr.product-row')).map(row => row.getAttribute('data-product-id'));
+        document.querySelectorAll('.modal-product-item').forEach(item => {
+            const id = item.getAttribute('data-id');
+            const btn = item.querySelector('.btn-select-product');
+            if (selectedIds.includes(id)) {
+                btn.innerText = '✓ Đã chọn';
+                btn.className = 'btn-select-product px-3.5 py-2 rounded-xl bg-slate-200 text-slate-500 text-xs font-bold cursor-not-allowed';
+                btn.disabled = true;
+            } else {
+                btn.innerText = '+ Chọn';
+                btn.className = 'btn-select-product px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shrink-0 cursor-pointer';
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function selectProductFromModal(btn) {
+        const item = btn.closest('.modal-product-item');
+        const id = item.getAttribute('data-id');
+        const name = item.getAttribute('data-name');
+        const image = item.getAttribute('data-image');
+        const price = parseInt(item.getAttribute('data-price')) || 0;
+        const stock = parseInt(item.getAttribute('data-stock')) || 0;
+
+        const defaultPercent = 20;
+        const defaultSalePrice = Math.max(1000, Math.round((price * (1 - defaultPercent / 100)) / 1000) * 1000);
+        const defaultMaxQty = Math.min(20, stock);
+        const savedAmount = price - defaultSalePrice;
+
+        const tbody = document.getElementById('itemsTableBody');
+        const rowIndex = tbody.querySelectorAll('tr.product-row').length;
+
+        const newRow = document.createElement('tr');
+        newRow.className = 'product-row';
+        newRow.setAttribute('data-product-id', id);
+        newRow.innerHTML = `
+            <td class="py-3.5 px-3.5">
+                <input type="hidden" name="Items[${rowIndex}].FlashSaleItemID" value="0" />
+                <input type="hidden" name="Items[${rowIndex}].ProductID" value="${id}" />
+                <input type="hidden" name="Items[${rowIndex}].ProductName" value="${escapeHtml(name)}" />
+                <input type="hidden" name="Items[${rowIndex}].ProductImage" value="${image}" />
+                <input type="hidden" name="Items[${rowIndex}].OriginalPrice" value="${price}" class="item-orig-price" />
+                <input type="hidden" name="Items[${rowIndex}].StockQuantity" value="${stock}" class="item-stock-qty" />
+                <input type="hidden" name="Items[${rowIndex}].SoldQuantity" value="0" class="item-sold-qty" />
+                
+                <div class="flex items-center gap-3.5">
+                    <img src="${image}" alt="${escapeHtml(name)}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                    <div>
+                        <span class="font-bold text-slate-900 block text-xs line-clamp-2">${escapeHtml(name)}</span>
+                        <div class="flex items-center gap-2 text-2xs text-slate-500 mt-0.5">
+                            <span>Tồn kho: <strong class="text-slate-800">${stock}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td class="py-3.5 px-3.5 text-right font-bold text-slate-700 text-xs whitespace-nowrap">
+                ${formatCurrency(price)}đ
+            </td>
+
+            <!-- Ô chỉnh Mức giảm giá (%) -->
+            <td class="py-3.5 px-3.5">
+                <div class="space-y-1.5 max-w-[200px]">
+                    <div class="relative flex items-center">
+                        <input type="number" min="1" max="99" value="${defaultPercent}" 
+                               oninput="onPercentInput(this)"
+                               placeholder="%"
+                               class="w-full pl-3 pr-7 py-2 rounded-xl border-2 border-slate-300 focus:border-red-500 outline-none text-xs font-bold text-red-600 item-discount-percent bg-white" />
+                        <span class="absolute right-2.5 text-xs font-bold text-slate-400 pointer-events-none">%</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="setRowQuickDiscount(this, 10)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">10%</button>
+                        <button type="button" onclick="setRowQuickDiscount(this, 20)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">20%</button>
+                        <button type="button" onclick="setRowQuickDiscount(this, 30)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">30%</button>
+                        <button type="button" onclick="setRowQuickDiscount(this, 50)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors">50%</button>
+                    </div>
+                </div>
+            </td>
+
+            <!-- Ô chỉnh Giá Flash Sale (VNĐ) -->
+            <td class="py-3.5 px-3.5">
+                <div class="space-y-1 max-w-[210px]">
+                    <div class="relative flex items-center">
+                        <input type="number" name="Items[${rowIndex}].FlashSalePrice" value="${defaultSalePrice}" 
+                               min="1000" step="1000" required
+                               oninput="onPriceInput(this)"
+                               class="w-full pl-3 pr-8 py-2 rounded-xl border-2 border-slate-300 focus:border-red-500 outline-none text-xs font-bold text-red-600 item-sale-price bg-white" />
+                        <span class="absolute right-2.5 text-xs font-bold text-slate-400 pointer-events-none">đ</span>
+                    </div>
+                    <div class="saved-amount-container">
+                        <span class="text-[11px] text-emerald-600 font-bold block">✓ Tiết kiệm: ${formatCurrency(savedAmount)}đ</span>
+                    </div>
+                </div>
+            </td>
+
+            <!-- Ô chỉnh Suất mở bán -->
+            <td class="py-3.5 px-3.5">
+                <div class="space-y-1 max-w-[130px]">
+                    <input type="number" name="Items[${rowIndex}].MaxQuantity" value="${defaultMaxQty}" 
+                           min="1" max="${stock}" required
+                           class="w-full px-3 py-2 rounded-xl border-2 border-slate-300 focus:border-chill-primary outline-none text-xs font-bold text-slate-800 bg-white" />
+                    <span class="text-[10px] text-slate-400 block font-medium">Tối đa: ${stock}</span>
+                </div>
+            </td>
+            <td class="py-3.5 px-2 text-center">
+                <button type="button" onclick="removeProductRow(this)" title="Xóa khỏi đợt Flash Sale"
+                        class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(newRow);
+        document.getElementById('noProductsNotice').classList.add('hidden');
+        reindexRows();
+        updateModalButtonsState();
+        updatePreviewProducts();
+    }
+
+    function removeProductRow(btn) {
+        const row = btn.closest('tr');
+        row.remove();
+        reindexRows();
+        updateModalButtonsState();
+        updatePreviewProducts();
+
+        const count = document.querySelectorAll('#itemsTableBody tr.product-row').length;
+        if (count === 0) {
+            document.getElementById('noProductsNotice').classList.remove('hidden');
+        }
+    }
+
+    function reindexRows() {
+        const rows = document.querySelectorAll('#itemsTableBody tr.product-row');
+        rows.forEach((row, idx) => {
+            row.querySelectorAll('input').forEach(input => {
+                const name = input.getAttribute('name');
+                if (name && name.startsWith('Items[')) {
+                    input.setAttribute('name', name.replace(/Items\[\d+\]/, `Items[${idx}]`));
+                }
+            });
+        });
+    }
+
+    function onPercentInput(input) {
+        const row = input.closest('tr');
+        const origPrice = parseFloat(row.querySelector('.item-orig-price').value) || 0;
+        let percent = parseFloat(input.value) || 0;
+
+        if (percent > 99) percent = 99;
+        if (percent < 0) percent = 0;
+
+        const saleInput = row.querySelector('.item-sale-price');
+        if (origPrice > 0 && percent > 0) {
+            const salePrice = Math.max(1000, Math.round((origPrice * (1 - percent / 100)) / 1000) * 1000);
+            saleInput.value = salePrice;
+            updateSavedAmount(row, origPrice, salePrice);
+        } else if (percent === 0) {
+            saleInput.value = origPrice;
+            updateSavedAmount(row, origPrice, origPrice);
+        }
+
+        updatePreviewProducts();
+    }
+
+    function setRowQuickDiscount(btn, percent) {
+        const row = btn.closest('tr');
+        const percentInput = row.querySelector('.item-discount-percent');
+        percentInput.value = percent;
+        onPercentInput(percentInput);
+    }
+
+    function onPriceInput(input) {
+        const row = input.closest('tr');
+        const origPrice = parseFloat(row.querySelector('.item-orig-price').value) || 0;
+        const salePrice = parseFloat(input.value) || 0;
+        const percentInput = row.querySelector('.item-discount-percent');
+
+        if (origPrice > 0 && salePrice > 0 && salePrice < origPrice) {
+            const percent = Math.round((origPrice - salePrice) * 100 / origPrice);
+            percentInput.value = percent;
+        } else if (salePrice >= origPrice) {
+            percentInput.value = 0;
+        }
+
+        updateSavedAmount(row, origPrice, salePrice);
+        updatePreviewProducts();
+    }
+
+    function updateSavedAmount(row, origPrice, salePrice) {
+        const container = row.querySelector('.saved-amount-container');
+        if (!container) return;
+
+        if (origPrice > 0 && salePrice > 0 && salePrice < origPrice) {
+            const diff = origPrice - salePrice;
+            container.innerHTML = `<span class="text-[10px] text-emerald-600 font-bold block">✓ Tiết kiệm: ${formatCurrency(diff)}đ</span>`;
+        } else if (salePrice >= origPrice) {
+            container.innerHTML = `<span class="text-[10px] text-red-500 font-bold block">⚠️ Giá sale phải nhỏ hơn giá gốc</span>`;
+        } else {
+            container.innerHTML = '';
+        }
+    }
+
+    function applyBulkDiscount(percent) {
+        const rows = document.querySelectorAll('#itemsTableBody tr.product-row');
+        if (rows.length === 0) {
+            alert('Vui lòng thêm sản phẩm vào danh sách trước khi áp dụng giảm giá hàng loạt.');
+            return;
+        }
+        rows.forEach(row => {
+            const percentInput = row.querySelector('.item-discount-percent');
+            if (percentInput) {
+                percentInput.value = percent;
+                onPercentInput(percentInput);
+            }
+        });
+    }
+
+    function applyCustomBulkDiscount() {
+        const input = document.getElementById('customBulkPercent');
+        const percent = parseFloat(input.value) || 0;
+        if (percent <= 0 || percent >= 100) {
+            alert('Vui lòng nhập phần trăm giảm giá hợp lệ từ 1% đến 99%.');
+            return;
+        }
+        applyBulkDiscount(percent);
+    }
+
+    function updatePreviewProducts() {
+        const list = document.getElementById('previewProductsList');
+        const rows = document.querySelectorAll('#itemsTableBody tr.product-row');
+        
+        if (rows.length === 0) {
+            list.innerHTML = '<p class="text-2xs text-red-200/70 italic text-center py-2">Chưa có sản phẩm nào được chọn.</p>';
+            return;
+        }
+
+        let html = '';
+        let maxPercent = 0;
+
+        rows.forEach(r => {
+            const name = r.querySelector('input[name$=".ProductName"]')?.value || '';
+            const image = r.querySelector('input[name$=".ProductImage"]')?.value || '';
+            const salePrice = parseFloat(r.querySelector('.item-sale-price')?.value) || 0;
+            const origPrice = parseFloat(r.querySelector('.item-orig-price')?.value) || 0;
+            const percent = origPrice > 0 && salePrice < origPrice ? Math.round((origPrice - salePrice) * 100 / origPrice) : 0;
+
+            if (percent > maxPercent) maxPercent = percent;
+
+            html += `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-black/20 text-xs">
+                    <div class="flex items-center gap-2 truncate mr-2">
+                        <img src="${image || '/Content/images/placeholder.png'}" class="w-7 h-7 rounded object-cover shrink-0" />
+                        <span class="truncate text-white font-medium text-2xs">${escapeHtml(name)}</span>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-amber-300 font-black text-xs">${formatCurrency(salePrice)}đ</span>
+                        ${percent > 0 ? `<span class="text-[9px] text-red-300 block">-${percent}%</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        list.innerHTML = html;
+        const badge = document.getElementById('previewBadgeDiscount');
+        if (badge && maxPercent > 0) {
+            badge.innerText = `GIẢM TỚI ${maxPercent}%`;
+        }
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN').format(amount);
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function updatePreviewTimeRange() {
+        const sInput = document.getElementById('inputStartTime');
+        const eInput = document.getElementById('inputEndTime');
+        const display = document.getElementById('previewTimeRange');
+        if (!display || !sInput || !eInput) return;
+
+        if (sInput.value && eInput.value) {
+            const s = new Date(sInput.value);
+            const e = new Date(eInput.value);
+            const pad = (n) => String(n).padStart(2, '0');
+            display.innerText = `${pad(s.getHours())}:${pad(s.getMinutes())} ${pad(s.getDate())}/${pad(s.getMonth() + 1)} - ${pad(e.getHours())}:${pad(e.getMinutes())} ${pad(e.getDate())}/${pad(e.getMonth() + 1)}`;
+        }
+    }
+
+    document.getElementById('inputStartTime')?.addEventListener('change', updatePreviewTimeRange);
+    document.getElementById('inputEndTime')?.addEventListener('change', updatePreviewTimeRange);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePreviewProducts();
+        updatePreviewTimeRange();
+    });
+</script>

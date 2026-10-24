@@ -51,36 +51,45 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                     .Take(8)
                     .ToListAsync();
 
-                // Query Flash Sale đang hoạt động trong CSDL
+                // Query danh sách các đợt Flash Sale đang và sắp diễn ra trong CSDL
+                var flashSales = new List<FlashSale>();
                 FlashSale activeFlashSale = null;
                 try
                 {
                     var now = DateTime.UtcNow;
-                    activeFlashSale = await _db.FlashSales
+                    flashSales = await _db.FlashSales
                         .AsNoTracking()
                         .Include(fs => fs.FlashSaleItems)
                         .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product))
                         .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product.ProductImages))
                         .Include(fs => fs.FlashSaleItems.Select(fsi => fsi.Product.Category))
-                        .Where(fs => fs.IsActive && fs.StartTime <= now && fs.EndTime > now)
-                        .OrderByDescending(fs => fs.FlashSaleID)
-                        .FirstOrDefaultAsync();
+                        .Where(fs => fs.IsActive && fs.EndTime > now)
+                        .OrderBy(fs => fs.StartTime)
+                        .ToListAsync();
 
-                    if (activeFlashSale != null && activeFlashSale.FlashSaleItems != null)
+                    foreach (var fs in flashSales)
                     {
-                        activeFlashSale.FlashSaleItems = activeFlashSale.FlashSaleItems
-                            .Where(fsi => fsi.Product != null && fsi.Product.Status != 3)
-                            .ToList();
+                        if (fs.FlashSaleItems != null)
+                        {
+                            fs.FlashSaleItems = fs.FlashSaleItems
+                                .Where(fsi => fsi.Product != null && fsi.Product.Status != 3)
+                                .ToList();
+                        }
                     }
+
+                    // Ưu tiên đợt đang diễn ra (StartTime <= now < EndTime), nếu không có thì lấy đợt sắp diễn ra sớm nhất
+                    activeFlashSale = flashSales.FirstOrDefault(fs => fs.StartTime <= now && fs.EndTime > now)
+                                      ?? flashSales.FirstOrDefault();
                 }
                 catch (Exception fsEx)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[Home/ActiveFlashSale] {fsEx.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[Home/FlashSales] {fsEx.Message}");
                 }
 
                 ViewBag.Categories = categories;
                 ViewBag.FeaturedProducts = featuredProducts;
                 ViewBag.AllProducts = allProducts;
+                ViewBag.FlashSales = flashSales;
                 ViewBag.ActiveFlashSale = activeFlashSale;
 
                 return View(products);
@@ -91,6 +100,7 @@ private readonly ApplicationDbContext _db = new ApplicationDbContext();
                 ViewBag.Categories = new List<Category>();
                 ViewBag.FeaturedProducts = new List<Product>();
                 ViewBag.AllProducts = new List<Product>();
+                ViewBag.FlashSales = new List<FlashSale>();
                 ViewBag.ActiveFlashSale = null;
                 return View(new List<Product>());
             }

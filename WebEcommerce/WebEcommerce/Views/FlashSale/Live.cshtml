@@ -1,0 +1,432 @@
+@using WebEcommerce.Models
+@model List<WebEcommerce.Models.FlashSaleItem>
+@{
+    ViewBag.Title = "⚡ Giờ Vàng Flash Sale - Săn Deal Giá Sốc | TheChillShop";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var allSales = ViewBag.AllSales as List<FlashSale> ?? new List<FlashSale>();
+    var currentSale = ViewBag.CurrentSale as FlashSale;
+    var saleCategories = ViewBag.SaleCategories as List<Category> ?? new List<Category>();
+    int? selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+
+    var now = DateTime.UtcNow;
+    var isLive = currentSale != null && currentSale.StartTime <= now && currentSale.EndTime > now;
+    var isUpcoming = currentSale != null && currentSale.StartTime > now;
+    var isEnded = currentSale != null && currentSale.EndTime <= now;
+
+    var targetTimeIso = currentSale != null 
+        ? (isLive ? currentSale.EndTime : (isUpcoming ? currentSale.StartTime : currentSale.EndTime)).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        : "";
+}
+
+<!-- FLASH SALE HERO BANNER -->
+<section class="relative w-full overflow-hidden bg-gradient-to-r from-red-700 via-rose-600 to-amber-600 text-white py-10 md:py-14 shadow-lg border-b-4 border-amber-400">
+    <!-- Background Sparkles & Flares -->
+    <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-red-950/40 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-[1280px] mx-auto px-4 relative z-10">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <!-- Left Info -->
+            <div class="space-y-4 text-center lg:text-left max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-amber-300 font-black text-xs uppercase tracking-wider shadow-sm border border-white/20">
+                    <span class="w-2 h-2 rounded-full bg-amber-300 animate-ping"></span>
+                    <span class="material-symbols-outlined text-sm">bolt</span>
+                    ĐẠI TIỆC CÔNG NGHỆ CHÍNH HÃNG
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black font-jakarta tracking-tight leading-tight drop-shadow-md">
+                    @(currentSale != null ? currentSale.Title : "GIỜ VÀNG FLASH SALE")
+                </h1>
+                <p class="text-rose-100 text-sm sm:text-base font-medium max-w-xl">
+                    @(currentSale != null && !string.IsNullOrWhiteSpace(currentSale.Description) 
+                        ? currentSale.Description 
+                        : "Săn deal giảm sốc tới 50% - Số lượng suất ưu đãi có hạn, hệ thống tự động chốt đơn theo thời gian thực!")
+                </p>
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1 text-xs font-semibold text-rose-100">
+                    <div class="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-base text-amber-300">verified</span>
+                        <span>100% Chính Hãng</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-base text-amber-300">local_shipping</span>
+                        <span>Giao Nhanh 2H</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-base text-amber-300">published_with_changes</span>
+                        <span>Đổi Trả 30 Ngày</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Giant Real Countdown Timer Box -->
+            @if (currentSale != null && !string.IsNullOrEmpty(targetTimeIso))
+            {
+                <div class="bg-black/30 backdrop-blur-xl border-2 border-amber-400/60 p-6 sm:p-7 rounded-3xl shadow-2xl text-center space-y-4 shrink-0 min-w-[280px] sm:min-w-[340px]">
+                    <div class="flex items-center justify-center gap-2 text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-base animate-bounce">alarm</span>
+                        <span>
+                            @if (isLive)
+                            {
+                                <span>KẾT THÚC SAU:</span>
+                            }
+                            else if (isUpcoming)
+                            {
+                                <span>BẮT ĐẦU SAU:</span>
+                            }
+                            else
+                            {
+                                <span>ĐỢT SALE ĐÃ KẾT THÚC</span>
+                            }
+                        </span>
+                    </div>
+
+                    @if (!isEnded)
+                    {
+                        <!-- Dynamic Clock Numbers -->
+                        <div class="flex items-center justify-center gap-2 sm:gap-3" id="liveFlashSaleCountdown" data-targettime="@targetTimeIso">
+                            <div class="hidden flex-col items-center" id="liveDaysWrapper">
+                                <div class="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-white text-red-600 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg font-jakarta" id="liveDaysBox">
+                                    00
+                                </div>
+                                <span class="text-[10px] uppercase font-bold text-rose-200 mt-1">Ngày</span>
+                            </div>
+                            <div class="flex-col items-center flex">
+                                <div class="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-white text-red-600 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg font-jakarta" id="liveHoursBox">
+                                    00
+                                </div>
+                                <span class="text-[10px] uppercase font-bold text-rose-200 mt-1">Giờ</span>
+                            </div>
+                            <span class="text-2xl font-black text-amber-300 -mt-4">:</span>
+                            <div class="flex-col items-center flex">
+                                <div class="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-white text-red-600 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg font-jakarta" id="liveMinsBox">
+                                    00
+                                </div>
+                                <span class="text-[10px] uppercase font-bold text-rose-200 mt-1">Phút</span>
+                            </div>
+                            <span class="text-2xl font-black text-amber-300 -mt-4">:</span>
+                            <div class="flex-col items-center flex">
+                                <div class="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-white text-red-600 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg font-jakarta" id="liveSecsBox">
+                                    00
+                                </div>
+                                <span class="text-[10px] uppercase font-bold text-rose-200 mt-1">Giây</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="py-2 text-rose-200 text-sm">
+                            Đợt ưu đãi này đã hết giờ. Vui lòng chọn khung giờ tiếp theo ở danh sách bên dưới!
+                        </div>
+                    }
+
+                    <div class="text-[11px] text-amber-200 font-semibold opacity-90 border-t border-white/10 pt-3">
+                        ⚡ Áp dụng cho đơn thanh toán online hoặc nhận tại shop
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- MAIN CONTENT WRAPPER -->
+<div class="bg-slate-50 min-h-screen py-8">
+    <div class="max-w-[1280px] mx-auto px-4 space-y-6">
+
+        <!-- TIMELINE KHUNG GIỜ FLASH SALE (SHOPEE STYLE TABS) -->
+        @if (allSales != null && allSales.Count > 1)
+        {
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">schedule</span>
+                        </span>
+                        <h2 class="font-headline font-bold text-base sm:text-lg text-slate-900">
+                            Các Khung Giờ Flash Sale Hôm Nay
+                        </h2>
+                    </div>
+                    <span class="text-xs text-slate-500 font-medium hidden sm:inline">Chọn khung giờ để xem danh sách ưu đãi</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 overflow-x-auto pb-1">
+                    @foreach (var sale in allSales)
+                    {
+                        var saleIsLive = sale.StartTime <= now && sale.EndTime > now;
+                        var saleIsUpcoming = sale.StartTime > now;
+                        var isCurrent = currentSale != null && currentSale.FlashSaleID == sale.FlashSaleID;
+                        var startTimeLocal = sale.StartTime.ToLocalTime();
+                        var isToday = startTimeLocal.Date == DateTime.Now.Date;
+                        var timeString = isToday ? startTimeLocal.ToString("HH:mm") : startTimeLocal.ToString("dd/MM HH:mm");
+
+                        <a href="@Url.Action("Live", "FlashSale", new { id = sale.FlashSaleID, categoryId = selectedCategoryId })"
+                           class="flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 text-center @(isCurrent ? "bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-600 shadow-md scale-[1.02]" : "bg-slate-50 hover:bg-red-50/40 text-slate-700 border-slate-200/90 hover:border-red-300")">
+                            <span class="font-black text-lg leading-tight font-jakarta tracking-tight">@timeString</span>
+                            <span class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mt-1 opacity-95">
+                                @if (saleIsLive)
+                                {
+                                    <span class="w-2 h-2 rounded-full bg-amber-300 animate-ping"></span>
+                                    <span>Đang diễn ra</span>
+                                }
+                                else if (saleIsUpcoming)
+                                {
+                                    <span>Sắp diễn ra</span>
+                                }
+                                else
+                                {
+                                    <span>Đã kết thúc</span>
+                                }
+                            </span>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- CATEGORY FILTER PILLS -->
+        @if (saleCategories != null && saleCategories.Any())
+        {
+            <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90 flex items-center gap-2 overflow-x-auto">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0 px-2 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">filter_alt</span> Lọc:
+                </span>
+
+                <a href="@Url.Action("Live", "FlashSale", new { id = currentSale?.FlashSaleID })"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 @(!selectedCategoryId.HasValue ? "bg-red-600 text-white shadow-sm" : "bg-slate-100 hover:bg-slate-200 text-slate-700")">
+                    Tất cả danh mục (@(currentSale?.FlashSaleItems?.Count ?? 0))
+                </a>
+
+                @foreach (var cat in saleCategories)
+                {
+                    var isCatSelected = selectedCategoryId.HasValue && selectedCategoryId.Value == cat.CategoryID;
+                    var catItemCount = currentSale?.FlashSaleItems?.Count(i => i.Product != null && i.Product.CategoryID == cat.CategoryID) ?? 0;
+                    <a href="@Url.Action("Live", "FlashSale", new { id = currentSale?.FlashSaleID, categoryId = cat.CategoryID })"
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 @(isCatSelected ? "bg-red-600 text-white shadow-sm" : "bg-slate-100 hover:bg-slate-200 text-slate-700")">
+                        @cat.Name (@catItemCount)
+                    </a>
+                }
+            </div>
+        }
+
+        <!-- PRODUCT GRID -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                @foreach (var item in Model)
+                {
+                    var product = item.Product;
+                    if (product == null) { continue; }
+
+                    var mainImage = product.ProductImages != null && product.ProductImages.Count > 0 
+                        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+                        : "https://via.placeholder.com/400x400";
+
+                    var discountPct = product.Price > 0 
+                        ? Math.Round((1 - (item.FlashSalePrice / product.Price)) * 100) 
+                        : 0;
+
+                    var soldPercent = item.MaxQuantity > 0 
+                        ? (int)((double)item.SoldQuantity / item.MaxQuantity * 100) 
+                        : 0;
+                    if (soldPercent > 100) { soldPercent = 100; }
+                    var isSoldOut = item.SoldQuantity >= item.MaxQuantity || product.StockQuantity <= 0;
+
+                    <div class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-sm border border-slate-200/90 hover:border-red-500 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                        <!-- Top Badges -->
+                        <div class="flex items-center justify-between">
+                            <span class="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-[13px]">bolt</span>
+                                -@discountPct%
+                            </span>
+                            <span class="bg-amber-100 text-amber-800 font-bold text-[10px] px-2 py-0.5 rounded-md">
+                                Trả góp 0%
+                            </span>
+                        </div>
+
+                        <!-- Product Image -->
+                        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-2 border border-slate-100 group-hover:border-slate-200 transition-colors">
+                            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImage" onerror="this.src='https://placehold.co/400x400?text=SP';" />
+                            @if (isSoldOut)
+                            {
+                                <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                                    <span class="bg-red-600 text-white text-xs font-black uppercase px-3 py-1.5 rounded-lg shadow-lg">Hết suất sale</span>
+                                </div>
+                            }
+                        </a>
+
+                        <!-- Product Information -->
+                        <div class="space-y-2">
+                            <h3 class="text-sm font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors">
+                                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" title="@product.Name">@product.Name</a>
+                            </h3>
+
+                            <div class="flex items-center gap-1.5">
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-1.5 py-0.5 rounded">@(product.Category?.Name ?? "Công nghệ")</span>
+                                <span class="text-[10px] text-slate-400 font-medium">Bảo hành 12T</span>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="pt-1">
+                                <div class="text-primary-container text-red-600 font-black text-base sm:text-lg leading-tight font-jakarta">
+                                    @string.Format("{0:N0}₫", item.FlashSalePrice)
+                                </div>
+                                <div class="text-slate-400 line-through text-xs font-semibold">
+                                    @string.Format("{0:N0}₫", product.Price)
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar (Shopee Style) -->
+                            <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden relative border border-slate-200/80 mt-1">
+                                <div class="bg-gradient-to-r from-amber-500 via-rose-500 to-red-600 h-full rounded-full transition-all duration-500" style="width: @soldPercent%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                                    @if (isSoldOut)
+                                    {
+                                        <span>CHÁY HÀNG (@item.SoldQuantity/@item.MaxQuantity)</span>
+                                    }
+                                    else if (soldPercent >= 75)
+                                    {
+                                        <span>🔥 SẮP HẾT • ĐÃ BÁN @item.SoldQuantity/@item.MaxQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span>ĐÃ BÁN @item.SoldQuantity/@item.MaxQuantity</span>
+                                    }
+                                </span>
+                            </div>
+
+                            <!-- Call to Action Button -->
+                            <div class="pt-1">
+                                @if (isSoldOut)
+                                {
+                                    <button disabled class="w-full py-2 rounded-xl bg-slate-200 text-slate-400 font-bold text-xs uppercase cursor-not-allowed">
+                                        Hết Suất
+                                    </button>
+                                }
+                                else if (isLive)
+                                {
+                                    <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" 
+                                       class="w-full py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold text-xs uppercase shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                                        <span class="material-symbols-outlined text-[16px]">bolt</span>
+                                        <span>Mua Ngay</span>
+                                    </a>
+                                }
+                                else if (isUpcoming)
+                                {
+                                    <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" 
+                                       class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs uppercase border border-slate-300 flex items-center justify-center gap-1.5 transition-all">
+                                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                        <span>Xem Trước</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" 
+                                       class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase flex items-center justify-center gap-1">
+                                        <span>Xem Chi Tiết</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- EMPTY STATE -->
+            <div class="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-200/90 max-w-lg mx-auto space-y-4">
+                <div class="w-20 h-20 rounded-full bg-rose-50 text-red-600 flex items-center justify-center mx-auto shadow-inner">
+                    <span class="material-symbols-outlined text-4xl">local_fire_department</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Chưa có sản phẩm trong khung giờ này</h3>
+                <p class="text-sm text-slate-500">
+                    Sản phẩm của đợt Flash Sale đang được ban quản trị hoàn tất cập nhật. Vui lòng quay lại trong giây lát hoặc khám phá các danh mục sản phẩm khác!
+                </p>
+                <div class="pt-2">
+                    <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md transition-all">
+                        <span class="material-symbols-outlined text-base">shopping_bag</span>
+                        <span>Khám phá sản phẩm TheChillShop</span>
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- POLICY BANNERS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">price_check</span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">Cam kết giá sốc nhất</h4>
+                    <p class="text-xs text-slate-500">Hoàn tiền 111% nếu tìm thấy nơi nào bán rẻ hơn với hàng chính hãng.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">security</span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">Bảo hành 1 đổi 1 30 ngày</h4>
+                    <p class="text-xs text-slate-500">Yên tâm trải nghiệm sản phẩm, hỗ trợ kỹ thuật và bảo hành chính hãng tận nơi.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">local_shipping</span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">Giao nhanh nội thành 2h</h4>
+                    <p class="text-xs text-slate-500">Đơn hàng được chuẩn bị siêu tốc ngay sau khi đặt hàng thành công.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- COUNTDOWN TIMER SCRIPT FOR LIVE PAGE -->
+<script>
+    (function () {
+        const countdownEl = document.getElementById('liveFlashSaleCountdown');
+        if (!countdownEl) return;
+
+        const targetTimeStr = countdownEl.getAttribute('data-targettime');
+        if (!targetTimeStr) return;
+
+        const targetTime = new Date(targetTimeStr).getTime();
+        const daysBox = document.getElementById('liveDaysBox');
+        const daysWrapper = document.getElementById('liveDaysWrapper');
+        const hoursBox = document.getElementById('liveHoursBox');
+        const minsBox = document.getElementById('liveMinsBox');
+        const secsBox = document.getElementById('liveSecsBox');
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+
+            const days = Math.floor(diff / 86400);
+            const hrs = Math.floor((diff % 86400) / 3600);
+            const mns = Math.floor((diff % 3600) / 60);
+            const scs = diff % 60;
+
+            if (daysWrapper && daysBox) {
+                if (days > 0) {
+                    daysWrapper.classList.remove('hidden');
+                    daysWrapper.classList.add('flex');
+                    daysBox.innerText = String(days).padStart(2, '0');
+                } else {
+                    daysWrapper.classList.remove('flex');
+                    daysWrapper.classList.add('hidden');
+                }
+            }
+
+            if (hoursBox) hoursBox.innerText = String(hrs).padStart(2, '0');
+            if (minsBox) minsBox.innerText = String(mns).padStart(2, '0');
+            if (secsBox) secsBox.innerText = String(scs).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    })();
+</script>

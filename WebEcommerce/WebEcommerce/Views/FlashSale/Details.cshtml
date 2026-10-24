@@ -1,0 +1,270 @@
+@model WebEcommerce.Models.FlashSaleDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chi Tiết Đợt Flash Sale #" + Model.FlashSale.FlashSaleID;
+    var now = DateTime.UtcNow;
+    var sale = Model.FlashSale;
+}
+
+<div class="w-full max-w-7xl mx-auto mb-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <a href="@Url.Action("Index", "FlashSale")" class="text-xs font-bold text-chill-primary hover:underline flex items-center gap-1 mb-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Quay lại danh sách Flash Sale
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-amber-500 text-3xl">bolt</span>
+                        @sale.Title
+                    </h1>
+                    @if (Model.IsLive)
+                    {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-red-100 text-red-700 border border-red-200 animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-red-600"></span>
+                            ĐANG LIVE TRANG CHỦ
+                        </span>
+                    }
+                    else if (Model.IsUpcoming)
+                    {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                            Sắp diễn ra
+                        </span>
+                    }
+                    else if (Model.IsEnded)
+                    {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            Đã kết thúc
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Tạm ngưng
+                        </span>
+                    }
+                </div>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    @(string.IsNullOrEmpty(sale.Description) ? "Không có mô tả bổ sung." : sale.Description)
+                </p>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2">
+                <a href="@Url.Action("Edit", "FlashSale", new { id = sale.FlashSaleID })" 
+                   class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                    Chỉnh sửa
+                </a>
+
+                @using (Html.BeginForm("ToggleStatus", "FlashSale", new { id = sale.FlashSaleID }, FormMethod.Post, new { @class = "inline" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" 
+                            onclick="return confirm('Bạn có chắc muốn @(sale.IsActive ? "tạm ngưng" : "kích hoạt lại") đợt Flash Sale này?');"
+                            class="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">@(sale.IsActive ? "pause" : "play_arrow")</span>
+                        @(sale.IsActive ? "Tạm ngưng" : "Kích hoạt lại")
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner Countdown nếu đang Live hoặc Sắp diễn ra -->
+    @if (Model.IsLive)
+    {
+        <div class="mb-6 rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-red-600 to-amber-600 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-red-900/15">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl animate-spin">alarm</span>
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-200 block">Sự kiện đang diễn ra trong khung giờ vàng</span>
+                    <span class="text-base sm:text-lg font-black block">Đang giảm giá trực tiếp trên toàn hệ thống</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-semibold bg-black/25 px-4 py-2.5 rounded-xl backdrop-blur-xs">
+                <span>Kết thúc lúc:</span>
+                <span class="font-bold text-amber-300">@sale.EndTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+        </div>
+    }
+
+    <!-- 4 Thẻ KPI thống kê đợt Flash Sale -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                <span class="material-symbols-outlined text-2xl">payments</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Doanh thu Flash Sale</span>
+                <span class="text-xl sm:text-2xl font-headline font-black text-emerald-600">@Model.TotalEstimatedRevenue.ToString("N0")đ</span>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+                <span class="material-symbols-outlined text-2xl">shopping_cart_checkout</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Suất đã bán ra</span>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@Model.TotalSoldQuantity</span>
+                    <span class="text-xs font-bold text-slate-400">/@Model.TotalMaxQuantity suất</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                <span class="material-symbols-outlined text-2xl">percent</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Tỷ lệ cháy hàng</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl sm:text-2xl font-headline font-black @(Model.SoldPercentage >= 90 ? "text-red-600" : "text-blue-600")">@Model.SoldPercentage%</span>
+                    @if (Model.SoldPercentage >= 100)
+                    {
+                        <span class="text-[10px] font-black uppercase text-red-600 bg-red-100 px-1.5 py-0.5 rounded">Hết sạch</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+                <span class="material-symbols-outlined text-2xl">inventory_2</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Sản phẩm tham gia</span>
+                <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@Model.TotalItems sản phẩm</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách sản phẩm trong Flash Sale -->
+    <div class="admin-card rounded-2xl p-6 sm:p-7 space-y-4">
+        <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="material-symbols-outlined text-amber-500">format_list_bulleted</span>
+            Danh sách sản phẩm trong đợt giảm giá
+        </h2>
+
+        <div class="w-full">
+            <table class="w-full text-sm table-auto">
+                <thead>
+                    <tr class="bg-slate-50 border-y border-slate-200">
+                        <th class="text-left px-4 py-3 font-bold text-slate-700 text-xs w-[30%]">SẢN PHẨM</th>
+                        <th class="text-right px-4 py-3 font-bold text-slate-700 text-xs w-[12%]">GIÁ GỐC</th>
+                        <th class="text-right px-4 py-3 font-bold text-slate-700 text-xs w-[14%]">GIÁ FLASH SALE</th>
+                        <th class="text-center px-4 py-3 font-bold text-slate-700 text-xs w-[10%]">MỨC GIẢM</th>
+                        <th class="text-left px-4 py-3 font-bold text-slate-700 text-xs w-[16%]">TIẾN ĐỘ BÁN</th>
+                        <th class="text-right px-4 py-3 font-bold text-slate-700 text-xs w-[10%]">DOANH THU</th>
+                        <th class="text-center px-4 py-3 font-bold text-slate-700 text-xs w-[8%]">TRẠNG THÁI</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @if (sale.FlashSaleItems != null && sale.FlashSaleItems.Any())
+                    {
+                        foreach (var it in sale.FlashSaleItems)
+                        {
+                            var prod = it.Product;
+                            var img = prod?.ProductImages?.FirstOrDefault(x => x.IsMain)?.ImageURL 
+                                     ?? prod?.ProductImages?.FirstOrDefault()?.ImageURL 
+                                     ?? "/Content/images/placeholder.png";
+
+                            var origPrice = prod?.Price ?? 0;
+                            var percent = origPrice > 0 && it.FlashSalePrice < origPrice 
+                                ? (int)Math.Round((origPrice - it.FlashSalePrice) * 100 / origPrice) 
+                                : 0;
+
+                            var itemRevenue = it.SoldQuantity * it.FlashSalePrice;
+                            var itemPercent = it.MaxQuantity > 0 ? (int)Math.Round((double)it.SoldQuantity * 100 / it.MaxQuantity) : 0;
+                            var isSoldOut = it.SoldQuantity >= it.MaxQuantity;
+
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <!-- Sản phẩm -->
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <img src="@img" alt="@(prod?.Name ?? "")" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                                        <div>
+                                            <a href="@Url.Action("Detail", "Product", new { id = it.ProductID })" class="font-bold text-slate-900 hover:text-red-600 transition-colors text-xs block line-clamp-1">
+                                                @(prod?.Name ?? ("Sản phẩm #" + it.ProductID))
+                                            </a>
+                                            <span class="text-2xs text-slate-500 block">Danh mục: @(prod?.Category?.Name ?? "N/A")</span>
+                                            <span class="text-2xs text-slate-400 block">Tồn kho còn lại: <strong class="text-slate-700">@(prod?.StockQuantity ?? 0)</strong></span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Giá gốc -->
+                                <td class="px-4 py-3.5 text-right font-medium text-slate-500 text-xs line-through">
+                                    @origPrice.ToString("N0")đ
+                                </td>
+
+                                <!-- Giá Flash Sale -->
+                                <td class="px-4 py-3.5 text-right font-black text-red-600 text-sm">
+                                    @it.FlashSalePrice.ToString("N0")đ
+                                </td>
+
+                                <!-- Mức giảm -->
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-red-700 border border-red-200">
+                                        -@percent%
+                                    </span>
+                                </td>
+
+                                <!-- Tiến độ bán -->
+                                <td class="px-4 py-3.5">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center justify-between text-2xs font-bold text-slate-700">
+                                            <span>Đã bán: @it.SoldQuantity/@it.MaxQuantity</span>
+                                            <span class="@(itemPercent >= 100 ? "text-red-600" : "text-slate-500")">@itemPercent%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                            <div class="h-2 rounded-full @(itemPercent >= 100 ? "bg-red-600" : (itemPercent >= 50 ? "bg-amber-500" : "bg-emerald-500")) transition-all" style="width: @Math.Min(itemPercent, 100)%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Doanh thu -->
+                                <td class="px-4 py-3.5 text-right font-bold text-slate-900 text-xs">
+                                    @itemRevenue.ToString("N0")đ
+                                </td>
+
+                                <!-- Trạng thái -->
+                                <td class="px-4 py-3.5 text-center">
+                                    @if (isSoldOut)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-extrabold bg-red-100 text-red-700 border border-red-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>Đã hết suất
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Còn @(it.MaxQuantity - it.SoldQuantity) suất
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-6 text-slate-400 text-xs">
+                                Chưa có sản phẩm nào trong đợt sale này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
