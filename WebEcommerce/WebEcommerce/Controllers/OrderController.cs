@@ -362,6 +362,7 @@ namespace WebEcommerce.Controllers
             try
             {
                 var userId = User.Identity.GetUserId();
+
                 var order = await _context.Orders
                     .Include(o => o.OrderDetails.Select(od => od.Product.ProductImages))
                     .Include(o => o.PromotionalCode)
@@ -372,6 +373,10 @@ namespace WebEcommerce.Controllers
                     TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
                     return RedirectToAction("Index");
                 }
+
+                ViewBag.HasOrderReview = await _context.OrderReviews
+           .AnyAsync(r => r.OrderID == id && r.UserID == userId);
+
 
                 return View(order);
             }

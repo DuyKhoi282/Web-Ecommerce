@@ -1,0 +1,341 @@
+﻿
+@model WebEcommerce.Models.Order
+@using System.Linq
+
+@{
+    ViewBag.Title = ViewBag.IsEdit == true
+        ? "Chỉnh sửa đánh giá"
+        : "Đánh giá đơn hàng";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var existingOrderReview =
+        ViewBag.ExistingOrderReview as WebEcommerce.Models.OrderReview;
+
+    var existingProductReviews =
+        ViewBag.ExistingProductReviews as List<WebEcommerce.Models.Review>;
+}
+
+<style>
+    .star-rating {
+        display: inline-flex;
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+
+        .star-rating label {
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .star-rating input[type="radio"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .star-rating .star {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+            .star-rating .star.is-active {
+                color: #f59e0b;
+                background: #fef3c7;
+                border-color: #f59e0b;
+            }
+
+        .star-rating label:hover .star {
+            border-color: #f59e0b;
+        }
+
+        .star-rating input:focus-visible + .star {
+            outline: 2px solid #f59e0b;
+            outline-offset: 3px;
+        }
+</style>
+
+<div class="container mx-auto max-w-4xl px-4 py-8">
+
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-800">
+            @(ViewBag.IsEdit == true
+                ? "Chỉnh sửa đánh giá"
+                : "Đánh giá đơn hàng")
+        </h1>
+
+        <p class="mt-2 text-gray-500">
+            Cảm ơn bạn đã mua sắm tại The Chill Shop.
+            Hãy chia sẻ trải nghiệm của bạn nhé!
+        </p>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <strong>Không thể gửi đánh giá:</strong>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+            <strong>Thành công!</strong>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Model == null)
+    {
+        <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+            Không tìm thấy thông tin đơn hàng.
+        </div>
+    }
+    else
+    {
+        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        Đơn hàng #@Model.OrderID
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Đánh giá tổng thể trải nghiệm mua hàng của bạn.
+                    </p>
+                </div>
+
+                <span class="rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700">
+                    @Model.Status
+                </span>
+            </div>
+        </div>
+
+        <form action="@Url.Action("SubmitOrderReview", "Review")"
+              method="post"
+              class="space-y-6">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="orderId"
+                   value="@Model.OrderID" />
+
+            <!-- Đánh giá tổng thể đơn hàng -->
+            <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 class="mb-2 text-xl font-semibold text-gray-800">
+                    Đánh giá tổng thể đơn hàng
+                </h2>
+
+                <p class="mb-4 text-sm text-gray-500">
+                    Bạn hài lòng với trải nghiệm mua hàng ở mức nào?
+                </p>
+
+                <div class="mb-5">
+                    <label class="mb-3 block font-medium text-gray-700">
+                        Số sao <span class="text-red-500">*</span>
+                    </label>
+
+                    <div class="star-rating">
+                        @for (int rating = 1; rating <= 5; rating++)
+                        {
+                            <label>
+                                <input type="radio"
+                                       name="orderRating"
+                                       value="@rating"
+                                       required
+                                       @(existingOrderReview != null && existingOrderReview.Rating == rating ? "checked" : "") />
+
+                                <span class="star h-12 w-12 rounded-xl text-xl">
+                                    ★
+                                </span>
+                            </label>
+                        }
+                    </div>
+
+                    <p class="mt-2 text-xs text-gray-400">
+                        1 sao: Rất không hài lòng · 5 sao: Rất hài lòng
+                    </p>
+                </div>
+
+                <div>
+                    <label for="orderComment"
+                           class="mb-2 block font-medium text-gray-700">
+                        Nhận xét về đơn hàng
+                    </label>
+
+                    <textarea id="orderComment"
+                              name="orderComment"
+                              rows="4"
+                              maxlength="2000"
+                              placeholder="Chia sẻ trải nghiệm về đóng gói, giao hàng và dịch vụ..."
+                              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100">@(existingOrderReview?.Comment ?? "")</textarea>
+                </div>
+            </section>
+
+            <!-- Đánh giá từng sản phẩm -->
+            <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 class="mb-2 text-xl font-semibold text-gray-800">
+                    Đánh giá sản phẩm
+                </h2>
+
+                <p class="mb-6 text-sm text-gray-500">
+                    Chọn số sao cho từng sản phẩm bạn đã mua.
+                </p>
+
+                @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                {
+                    for (int i = 0; i < Model.OrderDetails.Count; i++)
+                    {
+                        var detail = Model.OrderDetails.ElementAt(i);
+                        var product = detail.Product;
+
+                        var existingProductReview = existingProductReviews?
+                            .FirstOrDefault(r => r.ProductID == detail.ProductID);
+
+                        <div class="@(i > 0 ? "mt-6 border-t border-gray-100 pt-6" : "")">
+                            <div class="mb-4">
+                                <h3 class="font-semibold text-gray-800">
+                                    @(product != null
+                                        ? product.Name
+                                        : "Sản phẩm #" + detail.ProductID)
+                                </h3>
+
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Mã sản phẩm: @detail.ProductID
+                                    · Số lượng: @detail.Quantity
+                                </p>
+                            </div>
+
+                            <input type="hidden"
+                                   name="productIds"
+                                   value="@detail.ProductID" />
+
+                            <div class="mb-4">
+                                <label class="mb-3 block text-sm font-medium text-gray-700">
+                                    Số sao sản phẩm
+                                </label>
+
+                                <div class="star-rating">
+                                    @for (int rating = 1; rating <= 5; rating++)
+                                    {
+                                        <label>
+                                            <input type="radio"
+                                                   name="productRatings[@i]"
+                                                   value="@rating"
+                                                   required
+                                                   @(existingProductReview != null && existingProductReview.Rating == rating ? "checked" : "") />
+
+                                            <span class="star h-10 w-10 rounded-lg text-lg">
+                                                ★
+                                            </span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="productComment_@i"
+                                       class="mb-2 block text-sm font-medium text-gray-700">
+                                    Nhận xét về sản phẩm
+                                </label>
+
+                                <textarea id="productComment_@i"
+                                          name="productComments[@i]"
+                                          rows="3"
+                                          maxlength="2000"
+                                          placeholder="Chất lượng, mẫu mã, trải nghiệm sử dụng..."
+                                          class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100">@(existingProductReview?.Comment ?? "")</textarea>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-sm text-gray-500">
+                        Không có sản phẩm trong đơn hàng này.
+                    </p>
+                }
+            </section>
+
+            <!-- Nút thao tác -->
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <a href="@Url.Action("Detail", "Order", new { id = Model.OrderID })"
+                   class="inline-flex items-center justify-center rounded-xl border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50">
+                    Quay lại đơn hàng
+                </a>
+
+                <button type="submit"
+                        class="inline-flex items-center justify-center rounded-xl bg-amber-500 px-8 py-3 font-semibold text-white shadow-sm transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2">
+                    @(ViewBag.IsEdit == true
+                        ? "Lưu thay đổi"
+                        : "Gửi đánh giá")
+                </button>
+            </div>
+        </form>
+    }
+</div>
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var groups = document.querySelectorAll(".star-rating");
+
+            groups.forEach(function (group) {
+                var radios = group.querySelectorAll(
+                    'input[type="radio"]'
+                );
+
+                function updateStars() {
+                    var selectedRating = 0;
+
+                    radios.forEach(function (element) {
+                        var radio = element;
+
+                        if (!(radio instanceof HTMLInputElement)) {
+                            return;
+                        }
+
+                        if (radio.checked) {
+                            selectedRating = Number(radio.value);
+                        }
+                    });
+
+                    radios.forEach(function (element) {
+                        var radio = element;
+
+                        if (!(radio instanceof HTMLInputElement)) {
+                            return;
+                        }
+
+                        var star = radio.nextElementSibling;
+                        var rating = Number(radio.value);
+
+                        if (!star) {
+                            return;
+                        }
+
+                        if (rating <= selectedRating && selectedRating > 0) {
+                            star.classList.add("is-active");
+                        } else {
+                            star.classList.remove("is-active");
+                        }
+                    });
+                }
+
+                radios.forEach(function (element) {
+                    element.addEventListener("change", updateStars);
+                });
+
+                // Hiển thị lại số sao đã lưu khi mở form chỉnh sửa.
+                updateStars();
+            });
+        });
+</script>

@@ -67,6 +67,7 @@ namespace WebEcommerce.Models
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
+        public virtual DbSet<OrderReview> OrderReviews { get; set; }
         public virtual DbSet<Wishlist> Wishlists { get; set; }
         public virtual DbSet<FlashSale> FlashSales { get; set; }
         public virtual DbSet<FlashSaleItem> FlashSaleItems { get; set; }
