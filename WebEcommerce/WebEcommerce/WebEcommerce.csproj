@@ -242,6 +242,7 @@
     <Compile Include="Helpers\CookieCartHelper.cs" />
     <Compile Include="Helpers\FlashSaleHelper.cs" />
     <Compile Include="Helpers\StockHelper.cs" />
+    <Compile Include="Helpers\VietnameseNumberHelper.cs" />
     <Compile Include="Models\CartViewModels.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
