@@ -24,10 +24,11 @@ namespace WebEcommerce.Controllers
         // GET: /AdminOrder
         // ==============================================
         [HttpGet]
-        public async Task<ActionResult> Index(string status = "")
+        public async Task<ActionResult> Index(string status = "", int page = 1)
         {
             try
             {
+                int pageSize = 20;
                 var query = _context.Orders
                     .AsNoTracking()
                     .Include(o => o.User)
@@ -39,11 +40,22 @@ namespace WebEcommerce.Controllers
                     query = query.Where(o => o.Status == status);
                 }
 
+                int totalCount = await query.CountAsync();
+                int totalPages = Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
+                page = Math.Max(1, Math.Min(page, totalPages));
+
+                // ThenBy OrderID để thứ tự ổn định khi trùng OrderDate, tránh lặp/sót đơn giữa các trang
                 var orders = await query
                     .OrderByDescending(o => o.OrderDate)
+                    .ThenByDescending(o => o.OrderID)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
 
                 ViewBag.CurrentStatus = status;
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.TotalCount = totalCount;
                 return View(orders);
             }
             catch (Exception ex)
