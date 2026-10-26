@@ -14,15 +14,17 @@
         case "Cancelled": statusColor = "bg-red-100 text-red-700"; break;
     }
 
-    // Determine allowed next statuses
-    var nextStatuses = new System.Collections.Generic.List<string>();
-    switch (Model.Status)
+    // Mỗi đơn chỉ có một việc cần làm tiếp (luật nằm ở OrderStatusHelper)
+    var nextStatus = WebEcommerce.Helpers.OrderStatusHelper.GetNextStatus(Model.Status);
+    var canCancel = WebEcommerce.Helpers.OrderStatusHelper.CanCancel(Model.Status);
+    var needsPayment = nextStatus != null && WebEcommerce.Helpers.OrderStatusHelper.NeedsPayment(Model.PaymentMethod, Model.PaymentStatus);
+    var nextActionLabels = new System.Collections.Generic.Dictionary<string, string>
     {
-        case "Pending": nextStatuses.AddRange(new[] { "Confirmed", "Cancelled" }); break;
-        case "Confirmed": nextStatuses.AddRange(new[] { "Processing", "Shipped", "Cancelled" }); break;
-        case "Processing": nextStatuses.AddRange(new[] { "Shipped", "Cancelled" }); break;
-        case "Shipped": nextStatuses.AddRange(new[] { "Delivered", "Cancelled" }); break;
-    }
+        { "Confirmed", "Xác nhận đơn hàng" },
+        { "Processing", "Bắt đầu đóng gói" },
+        { "Shipped", "Giao cho đơn vị vận chuyển" },
+        { "Delivered", "Xác nhận đã giao thành công" }
+    };
 }
 
 <div class="p-6 lg:p-8">
@@ -238,21 +240,13 @@
                 {
                     if (Model.PaymentMethod == "BankTransfer")
                     {
-                        if (Model.PaymentStatus == "Unpaid")
+                        if (Model.PaymentStatus != "Paid")
                         {
                             <div class="pt-3 border-t border-slate-200">
-                                @using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
-                                {
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="orderId" value="@Model.OrderID" />
-                                    <input type="hidden" name="paymentStatus" value="Paid" />
-                                    <button type="submit"
-                                            onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng #@Model.OrderID?');"
-                                            class="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs tracking-wide transition-all shadow-sm shadow-emerald-600/20">
-                                        <span class="material-symbols-outlined text-base">verified</span>
-                                        Xác nhận đã nhận chuyển khoản
-                                    </button>
-                                }
+                                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-base text-amber-600 flex-shrink-0 mt-0.5">hourglass_top</span>
+                                    <p>Đang chờ khách chuyển khoản. Kiểm tra tài khoản rồi xác nhận ở thẻ <strong>Cập nhật trạng thái</strong>.</p>
+                                </div>
                             </div>
                         }
                         else
@@ -263,7 +257,7 @@
                                         <span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
                                         Đã nhận chuyển khoản
                                     </span>
-                                    @if (Model.Status != "Shipped" && Model.Status != "Delivered")
+                                    @if (Model.Status == "Pending")
                                     {
                                         using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post, new { @class = "inline" }))
                                         {
@@ -312,67 +306,73 @@
             </div>
         </div>
 
-        @if (nextStatuses.Any())
+        @if (nextStatus != null || canCancel)
         {
             <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Cập nhật trạng thái</h2>
-                <div class="space-y-2">
-                    @foreach (var ns in nextStatuses)
+                <div class="space-y-3">
+                    @if (needsPayment)
                     {
-                        var isBlockedByPayment = (ns == "Shipped" || ns == "Delivered") && Model.PaymentMethod == "BankTransfer" && Model.PaymentStatus != "Paid";
-                        var btnClass = ns == "Cancelled"
-                            ? "border-red-300 text-red-600 hover:bg-red-50"
-                            : "border-[#0d47a1] text-[#0d47a1] hover:bg-[#0d47a1] hover:text-white";
-
-                        if (isBlockedByPayment)
+                        <p class="text-xs text-slate-500">Đơn chuyển khoản: cần xác nhận đã nhận tiền trước khi xử lý tiếp.</p>
+                        using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
                         {
-                            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
-                                <div class="flex items-center gap-1.5 font-bold mb-1 text-amber-800">
-                                    <span class="material-symbols-outlined text-base text-amber-600">lock</span>
-                                    Khóa chuyển sang @ns
-                                </div>
-                                <p class="text-2xs text-amber-700 leading-relaxed">
-                                    Đơn hàng chuyển khoản bắt buộc phải được <strong>"Xác nhận đã nhận chuyển khoản"</strong> ở thẻ bên trên trước khi xuất kho / giao hàng (@ns).
-                                </p>
-                            </div>
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="orderId" value="@Model.OrderID" />
+                            <input type="hidden" name="paymentStatus" value="Paid" />
+                            <button type="submit"
+                                    onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng #@Model.OrderID?');"
+                                    class="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-sm active:scale-[0.99]">
+                                <span class="material-symbols-outlined text-base">verified</span>
+                                Xác nhận đã nhận chuyển khoản
+                            </button>
                         }
-                        else
+                    }
+                    else if (nextStatus != null)
+                    {
+                        using (Html.BeginForm("UpdateStatus", "AdminOrder", FormMethod.Post))
                         {
-                            using (Html.BeginForm("UpdateStatus", "AdminOrder", FormMethod.Post))
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="orderId" value="@Model.OrderID" />
+                            <input type="hidden" name="newStatus" value="@nextStatus" />
+                            <button type="submit"
+                                    class="w-full py-2.5 rounded-xl border-2 border-[#0d47a1] bg-[#0d47a1] text-white hover:bg-[#0b3c8a] font-bold text-sm transition-all shadow-xs active:scale-[0.99]">
+                                @nextActionLabels[nextStatus] →
+                            </button>
+                        }
+                    }
+
+                    @if (canCancel)
+                    {
+                        <details>
+                            <summary class="list-none cursor-pointer w-full py-2.5 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm text-center transition-all">
+                                Hủy đơn hàng
+                            </summary>
+                            @using (Html.BeginForm("UpdateStatus", "AdminOrder", FormMethod.Post, new { @class = "mt-3" }))
                             {
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="orderId" value="@Model.OrderID" />
-                                <input type="hidden" name="newStatus" value="@ns" />
+                                <input type="hidden" name="newStatus" value="Cancelled" />
 
-                                if (ns == "Cancelled")
-                                {
-                                    <div class="mb-3">
-                                        <label for="CancellationReason"
-                                               class="block text-sm font-semibold text-slate-700 mb-2">
-                                            Lý do hủy đơn hàng <span class="text-red-600">*</span>
-                                        </label>
-
-                                        <textarea id="CancellationReason"
-                                                  name="cancellationReason"
-                                                  rows="4"
-                                                  maxlength="1000"
-                                                  required
-                                                  placeholder="Nhập lý do hủy đơn để thông báo cho khách hàng..."
-                                                  class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm focus:border-red-400 focus:outline-none"></textarea>
-
-                                        <p class="mt-1 text-xs text-slate-500">
-                                            Tối đa 1000 ký tự.
-                                        </p>
-                                    </div>
-                                }
+                                <label for="CancellationReason"
+                                       class="block text-sm font-semibold text-slate-700 mb-2">
+                                    Lý do hủy đơn hàng <span class="text-red-600">*</span>
+                                </label>
+                                <textarea id="CancellationReason"
+                                          name="cancellationReason"
+                                          rows="4"
+                                          maxlength="1000"
+                                          required
+                                          placeholder="Nhập lý do hủy đơn để thông báo cho khách hàng..."
+                                          class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm focus:border-red-400 focus:outline-none"></textarea>
+                                <p class="mt-1 mb-3 text-xs text-slate-500">Tối đa 1000 ký tự. Tồn kho, suất Flash Sale và lượt dùng voucher sẽ được hoàn lại.</p>
 
                                 <button type="submit"
-                                        onclick="@(ns == "Cancelled" ? "return confirm('Bạn có chắc muốn hủy đơn hàng này?');" : "")"
-                                        class="w-full py-2.5 rounded-xl border-2 @btnClass font-bold text-sm transition-all shadow-xs active:scale-[0.99]">
-                                    → Chuyển sang @ns
+                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');"
+                                        class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-all active:scale-[0.99]">
+                                    Xác nhận hủy đơn
                                 </button>
                             }
-                        }
+                        </details>
                     }
                 </div>
             </div>

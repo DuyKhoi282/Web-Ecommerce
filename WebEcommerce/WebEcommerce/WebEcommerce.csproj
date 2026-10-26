@@ -241,6 +241,7 @@
     <Compile Include="Helpers\CookieCartItem.cs" />
     <Compile Include="Helpers\CookieCartHelper.cs" />
     <Compile Include="Helpers\FlashSaleHelper.cs" />
+    <Compile Include="Helpers\OrderStatusHelper.cs" />
     <Compile Include="Helpers\StockHelper.cs" />
     <Compile Include="Helpers\VietnameseNumberHelper.cs" />
     <Compile Include="Models\CartViewModels.cs" />

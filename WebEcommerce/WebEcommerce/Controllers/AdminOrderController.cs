@@ -119,17 +119,19 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Validate transition
-                if (!IsValidTransition(order.Status, newStatus))
+                // Validate transition: chỉ được đi đúng bước kế tiếp, hoặc hủy khi hàng chưa rời kho
+                bool isValidTransition = newStatus == "Cancelled"
+                    ? OrderStatusHelper.CanCancel(order.Status)
+                    : newStatus != null && newStatus == OrderStatusHelper.GetNextStatus(order.Status);
+                if (!isValidTransition)
                 {
                     TempData["ErrorMessage"] = $"Không thể chuyển trạng thái từ \"{order.Status}\" sang \"{newStatus}\".";
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
-                // Chặn xuất kho/giao hàng (Shipped) và hoàn thành (Delivered) cho đơn chuyển khoản khi chưa thanh toán
-                if ((newStatus == "Shipped" || newStatus == "Delivered") && order.PaymentMethod == "BankTransfer" && order.PaymentStatus != "Paid")
+                if (newStatus != "Cancelled" && OrderStatusHelper.NeedsPayment(order.PaymentMethod, order.PaymentStatus))
                 {
-                    TempData["ErrorMessage"] = $"Không thể chuyển đơn hàng chuyển khoản sang \"{newStatus}\" khi chưa nhận thanh toán! Đơn hàng chuyển khoản bắt buộc phải được xác nhận thanh toán trước khi xuất kho / giao hàng.";
+                    TempData["ErrorMessage"] = "Đơn hàng chuyển khoản phải được xác nhận đã nhận tiền trước khi xử lý tiếp.";
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
@@ -667,8 +669,8 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Detail", new { id = orderId });
                 }
 
-                // Không cho phép hoàn tác về Unpaid khi đơn hàng đã xuất kho hoặc đã hoàn thành
-                if (paymentStatus == "Unpaid" && (order.Status == "Shipped" || order.Status == "Delivered"))
+                // Đơn đã xác nhận dựa trên việc đã nhận tiền -> chỉ hoàn tác khi đơn còn chờ xác nhận
+                if (paymentStatus == "Unpaid" && order.Status != "Pending")
                 {
                     TempData["ErrorMessage"] = $"Không thể chuyển trạng thái thanh toán về \"Chưa thanh toán\" khi đơn hàng đang ở trạng thái \"{order.Status}\".";
                     return RedirectToAction("Detail", new { id = orderId });
@@ -689,28 +691,6 @@ namespace WebEcommerce.Controllers
                 System.Diagnostics.Debug.WriteLine($"[AdminOrder/UpdatePaymentStatus] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.";
                 return RedirectToAction("Detail", new { id = orderId });
-            }
-        }
-
-        /// <summary>
-        /// Kiểm tra transition hợp lệ
-        /// Pending -> Confirmed -> (Processing) -> Shipped -> Delivered
-        /// Pending/Confirmed/Processing/Shipped -> Cancelled
-        /// </summary>
-        private bool IsValidTransition(string currentStatus, string newStatus)
-        {
-            switch (currentStatus)
-            {
-                case "Pending":
-                    return newStatus == "Confirmed" || newStatus == "Cancelled";
-                case "Confirmed":
-                    return newStatus == "Processing" || newStatus == "Shipped" || newStatus == "Cancelled";
-                case "Processing":
-                    return newStatus == "Shipped" || newStatus == "Cancelled";
-                case "Shipped":
-                    return newStatus == "Delivered" || newStatus == "Cancelled";
-                default:
-                    return false;
             }
         }
 
