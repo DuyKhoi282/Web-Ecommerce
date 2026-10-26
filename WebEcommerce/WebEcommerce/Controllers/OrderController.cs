@@ -321,12 +321,12 @@ namespace WebEcommerce.Controllers
                             };
                             _context.OrderDetails.Add(orderDetail);
 
-                            // Decrement stock
-                            item.Product.StockQuantity -= item.Quantity;
-                            if (item.Product.StockQuantity <= 0)
+                            // Trừ kho nguyên tử; đơn khác vừa mua hết thì hủy cả đơn này
+                            if (StockHelper.TryAdjust(_context, item.Product.ProductID, -item.Quantity) == null)
                             {
-                                item.Product.StockQuantity = 0;
-                                item.Product.Status = 2; // Out of stock
+                                transaction.Rollback();
+                                TempData["ErrorMessage"] = $"\"{item.Product.Name}\" vừa được khách khác mua, tồn kho không còn đủ {item.Quantity} sản phẩm. Vui lòng kiểm tra lại giỏ hàng.";
+                                return RedirectToAction("Index", "Cart");
                             }
 
                             // Giữ suất vào đúng FlashSaleItem đã dùng để tính giá; hết suất do đơn khác giành trước thì hủy đơn
@@ -499,14 +499,8 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                         {
                             if (detail.Product != null)
                             {
-                                // Hoàn lại tồn kho
-                                detail.Product.StockQuantity += detail.Quantity;
-
-                                if (detail.Product.Status == 2 &&
-                                    detail.Product.StockQuantity > 0)
-                                {
-                                    detail.Product.Status = 1;
-                                }
+                                // Hoàn lại tồn kho (nguyên tử, tự chuyển Hết hàng -> Còn hàng)
+                                StockHelper.TryAdjust(_context, detail.ProductID, detail.Quantity);
 
                                 // Hoàn lại suất Flash Sale mà dòng đơn này đã giữ (nếu có)
                                 if (detail.FlashSaleItemID.HasValue)

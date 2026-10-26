@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -100,7 +101,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Index] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Promotion/Index] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải danh sách mã giảm giá.";
                 return View(new PromotionListViewModel());
             }
@@ -213,10 +214,16 @@ namespace WebEcommerce.Controllers
                 TempData["SuccessMessage"] = $"Đã tạo mã giảm giá \"{entity.Code}\" thành công!";
                 return RedirectToAction("Index");
             }
+            catch (DbEntityValidationException ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[Promotion/Create POST] Validation: {ex}");
+                ModelState.AddModelError("", "Dữ liệu mã giảm giá không hợp lệ. Vui lòng kiểm tra lại các trường.");
+                return View(model);
+            }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Create POST] {ex}");
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi lưu mã giảm giá: " + ex.Message;
+                System.Diagnostics.Trace.TraceError($"[Promotion/Create POST] {ex}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi lưu mã giảm giá. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -258,7 +265,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Edit GET] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Promotion/Edit GET] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi.";
                 return RedirectToAction("Index");
             }
@@ -351,10 +358,16 @@ namespace WebEcommerce.Controllers
                 TempData["SuccessMessage"] = $"Đã cập nhật mã giảm giá \"{entity.Code}\" thành công!";
                 return RedirectToAction("Index");
             }
+            catch (DbEntityValidationException ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[Promotion/Edit POST] Validation: {ex}");
+                ModelState.AddModelError("", "Dữ liệu mã giảm giá không hợp lệ. Vui lòng kiểm tra lại các trường.");
+                return View(model);
+            }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Edit POST] {ex}");
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật: " + ex.Message;
+                System.Diagnostics.Trace.TraceError($"[Promotion/Edit POST] {ex}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật mã giảm giá. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -386,7 +399,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/ToggleStatus] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Promotion/ToggleStatus] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi đổi trạng thái.";
                 return RedirectToAction("Index");
             }
@@ -431,7 +444,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Delete] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Promotion/Delete] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xóa mã giảm giá.";
                 return RedirectToAction("Index");
             }
@@ -474,7 +487,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Promotion/Details] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Promotion/Details] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải chi tiết mã giảm giá.";
                 return RedirectToAction("Index");
             }

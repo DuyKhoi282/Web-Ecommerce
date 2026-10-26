@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using WebEcommerce.Filters;
+using WebEcommerce.Helpers;
 using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
@@ -183,36 +184,28 @@ namespace WebEcommerce.Controllers
                     return View(model);
                 }
 
-                if (model.OperationType == "import")
+                if (model.OperationType != "import" && model.OperationType != "export")
                 {
-                    product.StockQuantity += model.QuantityChange;
-                }
-                else if (model.OperationType == "export")
-                {
-                    if (product.StockQuantity < model.QuantityChange)
-                    {
-                        ModelState.AddModelError("QuantityChange", $"Số lượng xuất ({model.QuantityChange}) vượt quá tồn kho hiện tại ({product.StockQuantity}).");
-                        model.ProductName = product.Name;
-                        model.CurrentStock = product.StockQuantity;
-                        return View(model);
-                    }
-                    product.StockQuantity -= model.QuantityChange;
+                    ModelState.AddModelError("", "Loại thao tác không hợp lệ.");
+                    model.ProductName = product.Name;
+                    model.CurrentStock = product.StockQuantity;
+                    return View(model);
                 }
 
-                // Cập nhật trạng thái tự động
-                if (product.StockQuantity == 0 && product.Status == 1)
+                // Cộng/trừ nguyên tử trong CSDL (tự cập nhật trạng thái Còn/Hết hàng), không ghi đè đơn hàng vừa trừ kho
+                int delta = model.OperationType == "import" ? model.QuantityChange : -model.QuantityChange;
+                int? newStock = StockHelper.TryAdjust(_context, product.ProductID, delta);
+                if (newStock == null)
                 {
-                    product.Status = 2; // Chuyển sang Hết hàng
+                    await _context.Entry(product).ReloadAsync();
+                    ModelState.AddModelError("QuantityChange", $"Số lượng xuất ({model.QuantityChange}) vượt quá tồn kho hiện tại ({product.StockQuantity}).");
+                    model.ProductName = product.Name;
+                    model.CurrentStock = product.StockQuantity;
+                    return View(model);
                 }
-                else if (product.StockQuantity > 0 && product.Status == 2)
-                {
-                    product.Status = 1; // Chuyển sang Còn hàng
-                }
-
-                await _context.SaveChangesAsync();
 
                 string action = model.OperationType == "import" ? "Nhập" : "Xuất";
-                TempData["SuccessMessage"] = $"{action} kho thành công! Sản phẩm \"{product.Name}\": Tồn kho mới = {product.StockQuantity}";
+                TempData["SuccessMessage"] = $"{action} kho thành công! Sản phẩm \"{product.Name}\": Tồn kho mới = {newStock}";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

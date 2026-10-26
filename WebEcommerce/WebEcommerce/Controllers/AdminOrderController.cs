@@ -151,11 +151,8 @@ namespace WebEcommerce.Controllers
                             {
                                 if (detail.Product != null)
                                 {
-                                    detail.Product.StockQuantity += detail.Quantity;
-                                    if (detail.Product.Status == 2 && detail.Product.StockQuantity > 0)
-                                    {
-                                        detail.Product.Status = 1;
-                                    }
+                                    // Hoàn lại tồn kho (nguyên tử, tự chuyển Hết hàng -> Còn hàng)
+                                    StockHelper.TryAdjust(_context, detail.ProductID, detail.Quantity);
 
                                     // Hoàn lại suất Flash Sale mà dòng đơn này đã giữ (nếu có)
                                     if (detail.FlashSaleItemID.HasValue)

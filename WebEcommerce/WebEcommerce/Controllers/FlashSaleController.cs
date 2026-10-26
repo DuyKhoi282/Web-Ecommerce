@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -99,7 +100,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Index] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Index] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải danh sách Flash Sale.";
                 return View(new FlashSaleListViewModel());
             }
@@ -136,7 +137,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Create GET] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Create GET] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi chuẩn bị form tạo Flash Sale.";
                 return RedirectToAction("Index");
             }
@@ -258,17 +259,23 @@ namespace WebEcommerce.Controllers
                         TempData["SuccessMessage"] = $"Đã tạo đợt Flash Sale \"{flashSale.Title}\" với {model.Items.Count} sản phẩm thành công!";
                         return RedirectToAction("Index");
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         transaction.Rollback();
-                        throw ex;
+                        throw;
                     }
                 }
             }
+            catch (DbEntityValidationException ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Create POST] Validation: {ex}");
+                ModelState.AddModelError("", "Dữ liệu Flash Sale không hợp lệ. Vui lòng kiểm tra lại các trường.");
+                return View(model);
+            }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Create POST] {ex}");
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tạo Flash Sale: " + ex.Message;
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Create POST] {ex}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi tạo Flash Sale. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -332,7 +339,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Edit GET] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Edit GET] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi.";
                 return RedirectToAction("Index");
             }
@@ -496,17 +503,23 @@ namespace WebEcommerce.Controllers
                         TempData["SuccessMessage"] = $"Đã cập nhật đợt Flash Sale \"{flashSale.Title}\" thành công!";
                         return RedirectToAction("Index");
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         transaction.Rollback();
-                        throw ex;
+                        throw;
                     }
                 }
             }
+            catch (DbEntityValidationException ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Edit POST] Validation: {ex}");
+                ModelState.AddModelError("", "Dữ liệu Flash Sale không hợp lệ. Vui lòng kiểm tra lại các trường.");
+                return View(model);
+            }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Edit POST] {ex}");
-                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật: " + ex.Message;
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Edit POST] {ex}");
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật Flash Sale. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -551,7 +564,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Details] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Details] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải chi tiết Flash Sale.";
                 return RedirectToAction("Index");
             }
@@ -584,7 +597,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/ToggleStatus] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/ToggleStatus] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi đổi trạng thái.";
                 return RedirectToAction("Index");
             }
@@ -629,7 +642,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Delete] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Delete] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi xóa Flash Sale.";
                 return RedirectToAction("Index");
             }
@@ -731,7 +744,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FlashSale/Live] {ex}");
+                System.Diagnostics.Trace.TraceError($"[FlashSale/Live] {ex}");
                 ViewBag.AllSales = new List<FlashSale>();
                 ViewBag.CurrentSale = null;
                 ViewBag.SaleCategories = new List<Category>();

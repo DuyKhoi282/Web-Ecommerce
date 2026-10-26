@@ -37,6 +37,11 @@
         </div>
     }
 
+    @if (!ViewData.ModelState.IsValidField(""))
+    {
+        @Html.ValidationSummary(true, "", new { @class = "mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" })
+    }
+
     @if (Model.CurrentUsage > 0)
     {
         <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-amber-900 text-xs leading-relaxed">
