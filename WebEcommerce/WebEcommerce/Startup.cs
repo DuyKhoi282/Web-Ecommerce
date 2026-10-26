@@ -163,69 +163,55 @@ namespace WebEcommerce
         }
 
         /// <summary>
-        /// Khởi tạo đợt Flash Sale mẫu nếu CSDL chưa có hoặc gia hạn nếu đã hết hạn
+        /// Khởi tạo đợt Flash Sale mẫu khi CSDL chưa có đợt nào.
+        /// Không tự bật/gia hạn lại đợt đã có để tôn trọng thao tác tắt/kết thúc của admin.
         /// </summary>
         private void SeedDefaultFlashSale(ApplicationDbContext context)
         {
             try
             {
+                if (context.FlashSales.Any()) return;
+
+                var sampleProducts = context.Products
+                    .Where(p => p.Status != 3)
+                    .OrderBy(p => p.ProductID)
+                    .Take(5)
+                    .ToList();
+                if (!sampleProducts.Any()) return;
+
                 var now = DateTime.UtcNow;
-                var hasActiveFlashSale = context.FlashSales.Any(fs => fs.IsActive && fs.EndTime > now);
-                if (!hasActiveFlashSale)
+                var fs = new FlashSale
                 {
-                    var existing = context.FlashSales.OrderByDescending(fs => fs.FlashSaleID).FirstOrDefault();
-                    if (existing != null)
+                    Title = "FLASH SALE TỰU TRƯỜNG - GIẢM SỐC TỚI 50%",
+                    Description = "Ưu đãi độc quyền chớp nhoáng! Số lượng có hạn, tự động kết thúc khi hết thời gian!",
+                    StartTime = now.AddHours(-1),
+                    EndTime = now.AddHours(28),
+                    IsActive = true,
+                    CreatedAt = now
+                };
+                context.FlashSales.Add(fs);
+                context.SaveChanges();
+
+                foreach (var p in sampleProducts)
+                {
+                    decimal fsPrice = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0
+                        ? Math.Round(p.DiscountPrice.Value * 0.85m)
+                        : Math.Round(p.Price * 0.7m);
+
+                    context.FlashSaleItems.Add(new FlashSaleItem
                     {
-                        existing.IsActive = true;
-                        existing.StartTime = now.AddHours(-1);
-                        existing.EndTime = now.AddHours(28);
-                        context.SaveChanges();
-                    }
-                    else
-                    {
-                        var sampleProducts = context.Products
-                            .Where(p => p.Status != 3)
-                            .OrderBy(p => p.ProductID)
-                            .Take(5)
-                            .ToList();
-
-                        if (sampleProducts.Any())
-                        {
-                            var fs = new FlashSale
-                            {
-                                Title = "FLASH SALE TỰU TRƯỜNG - GIẢM SỐC TỚI 50%",
-                                Description = "Ưu đãi độc quyền chớp nhoáng! Số lượng có hạn, tự động kết thúc khi hết thời gian!",
-                                StartTime = now.AddHours(-1),
-                                EndTime = now.AddHours(28),
-                                IsActive = true,
-                                CreatedAt = now
-                            };
-                            context.FlashSales.Add(fs);
-                            context.SaveChanges();
-
-                            foreach (var p in sampleProducts)
-                            {
-                                decimal fsPrice = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0
-                                    ? Math.Round(p.DiscountPrice.Value * 0.85m)
-                                    : Math.Round(p.Price * 0.7m);
-
-                                context.FlashSaleItems.Add(new FlashSaleItem
-                                {
-                                    FlashSaleID = fs.FlashSaleID,
-                                    ProductID = p.ProductID,
-                                    FlashSalePrice = fsPrice,
-                                    MaxQuantity = 30,
-                                    SoldQuantity = 12
-                                });
-                            }
-                            context.SaveChanges();
-                        }
-                    }
+                        FlashSaleID = fs.FlashSaleID,
+                        ProductID = p.ProductID,
+                        FlashSalePrice = fsPrice,
+                        MaxQuantity = 30,
+                        SoldQuantity = 0 // chưa có đơn thật nào, tránh làm sai thống kê doanh thu flash sale
+                    });
                 }
+                context.SaveChanges();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Startup/SeedDefaultFlashSale] {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"[Startup/SeedDefaultFlashSale] {ex}");
             }
         }
     }

@@ -50,7 +50,7 @@ namespace WebEcommerce.Controllers
                         continue;
                     }
 
-                    var unitPrice = GetCurrentProductPrice(product);
+                    var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, ci.Quantity);
                     var image = product.ProductImages?
                         .FirstOrDefault(x => x.IsMain)
                         ?? product.ProductImages?.FirstOrDefault();
@@ -335,7 +335,7 @@ namespace WebEcommerce.Controllers
                 CookieCartHelper.UpdateQuantity(Request, Response, productId, newQuantity);
 
                 // Calculate totals
-                var unitPrice = GetCurrentProductPrice(product);
+                var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, newQuantity);
                 var itemTotal = unitPrice * newQuantity;
 
                 // Recalculate cart total (chỉ tính các sản phẩm còn hàng)
@@ -362,7 +362,7 @@ namespace WebEcommerce.Controllers
                         var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
                         if (op != null && op.Status == 1 && op.StockQuantity > 0)
                         {
-                            cartTotal += GetCurrentProductPrice(op) * ci.Quantity;
+                            cartTotal += FlashSaleHelper.GetUnitPrice(_context, op, ci.Quantity) * ci.Quantity;
                         }
                     }
                 }
@@ -437,7 +437,7 @@ namespace WebEcommerce.Controllers
                             var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
                             if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
                             {
-                                remainTotal += GetCurrentProductPrice(rp) * ri.Quantity;
+                                remainTotal += FlashSaleHelper.GetUnitPrice(_context, rp, ri.Quantity) * ri.Quantity;
                             }
                             remainCount += ri.Quantity;
                         }
@@ -464,7 +464,7 @@ namespace WebEcommerce.Controllers
                 decimal unitPrice = 0;
                 if (product != null)
                 {
-                    unitPrice = GetCurrentProductPrice(product);
+                    unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, newQuantity);
                 }
 
                 var itemTotal = unitPrice * newQuantity;
@@ -491,7 +491,7 @@ namespace WebEcommerce.Controllers
                         var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
                         if (op != null && op.Status == 1 && op.StockQuantity > 0)
                         {
-                            cartTotal2 += GetCurrentProductPrice(op) * ci.Quantity;
+                            cartTotal2 += FlashSaleHelper.GetUnitPrice(_context, op, ci.Quantity) * ci.Quantity;
                         }
                     }
                 }
@@ -562,7 +562,7 @@ namespace WebEcommerce.Controllers
                         var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
                         if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
                         {
-                            cartTotal += GetCurrentProductPrice(rp) * ri.Quantity;
+                            cartTotal += FlashSaleHelper.GetUnitPrice(_context, rp, ri.Quantity) * ri.Quantity;
                         }
                         cartItemCount += ri.Quantity;
                     }
@@ -606,40 +606,6 @@ namespace WebEcommerce.Controllers
                 System.Diagnostics.Debug.WriteLine($"[Cart/GetCartCount] {ex}");
                 return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
             }
-        }
-
-        // ==============================================
-        // Get current selling price
-        // ==============================================
-        private decimal GetCurrentProductPrice(Product product)
-        {
-            // 1. Kiểm tra nếu sản phẩm đang thuộc Flash Sale đang diễn ra và còn suất
-            try
-            {
-                var now = DateTime.UtcNow;
-                var flashItem = _context.FlashSaleItems
-                    .AsNoTracking()
-                    .Include(f => f.FlashSale)
-                    .FirstOrDefault(f => f.ProductID == product.ProductID
-                                      && f.FlashSale != null
-                                      && f.FlashSale.IsActive
-                                      && f.FlashSale.StartTime <= now
-                                      && f.FlashSale.EndTime > now
-                                      && f.SoldQuantity < f.MaxQuantity);
-                if (flashItem != null)
-                {
-                    return flashItem.FlashSalePrice;
-                }
-            }
-            catch {}
-
-            if (product.DiscountPrice.HasValue &&
-                product.DiscountPrice.Value > 0)
-            {
-                return product.DiscountPrice.Value;
-            }
-
-            return product.Price;
         }
 
         protected override void Dispose(bool disposing)

@@ -67,7 +67,7 @@ namespace WebEcommerce.Controllers
                         continue;
                     }
 
-                    var unitPrice = GetCurrentProductPrice(product);
+                    var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, checkoutQty);
                     var image = product.ProductImages?
                         .FirstOrDefault(x => x.IsMain)
                         ?? product.ProductImages?.FirstOrDefault();
@@ -168,7 +168,7 @@ namespace WebEcommerce.Controllers
                 // ========================================
                 // LỌC SẢN PHẨM KHẢ DỤNG TẠI THỜI ĐIỂM CHECKOUT
                 // ========================================
-                var orderItems = new List<(Product Product, int Quantity, decimal CurrentPrice)>();
+                var orderItems = new List<(Product Product, int Quantity, decimal CurrentPrice, int? FlashSaleItemId)>();
                 decimal totalAmount = 0;
 
                 foreach (var ci in cookieItems)
@@ -183,9 +183,10 @@ namespace WebEcommerce.Controllers
                     var purchaseQty = Math.Min(ci.Quantity, product.StockQuantity);
                     if (purchaseQty <= 0) continue;
 
-                    var currentPrice = GetCurrentProductPrice(product);
+                    var flashItem = FlashSaleHelper.FindActiveItem(_context, product.ProductID, purchaseQty);
+                    var currentPrice = flashItem?.FlashSalePrice ?? FlashSaleHelper.GetRegularPrice(product);
                     totalAmount += currentPrice * purchaseQty;
-                    orderItems.Add((product, purchaseQty, currentPrice));
+                    orderItems.Add((product, purchaseQty, currentPrice, flashItem?.FlashSaleItemID));
                 }
 
                 if (!orderItems.Any())
@@ -308,18 +309,13 @@ namespace WebEcommerce.Controllers
                                 item.Product.Status = 2; // Out of stock
                             }
 
-                            // Cập nhật số lượng đã bán của Flash Sale nếu có
-                            var now = DateTime.UtcNow;
-                            var activeFsItem = await _context.FlashSaleItems
-                                .Include(f => f.FlashSale)
-                                .FirstOrDefaultAsync(f => f.ProductID == item.Product.ProductID
-                                                       && f.FlashSale != null
-                                                       && f.FlashSale.IsActive
-                                                       && f.FlashSale.StartTime <= now
-                                                       && f.FlashSale.EndTime > now);
-                            if (activeFsItem != null)
+                            // Giữ suất vào đúng FlashSaleItem đã dùng để tính giá; hết suất do đơn khác giành trước thì hủy đơn
+                            if (item.FlashSaleItemId.HasValue
+                                && !FlashSaleHelper.TryReserve(_context, item.FlashSaleItemId.Value, item.Quantity))
                             {
-                                activeFsItem.SoldQuantity += item.Quantity;
+                                transaction.Rollback();
+                                TempData["ErrorMessage"] = $"Suất Flash Sale của \"{item.Product.Name}\" vừa hết, giá đã được cập nhật. Vui lòng kiểm tra lại giỏ hàng.";
+                                return RedirectToAction("Index", "Cart");
                             }
                         }
 
@@ -722,7 +718,7 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     if (product != null && product.Status == 1 && product.StockQuantity > 0)
                     {
                         var qty = Math.Min(ci.Quantity, product.StockQuantity);
-                        serverTotal += GetCurrentProductPrice(product) * qty;
+                        serverTotal += FlashSaleHelper.GetUnitPrice(_context, product, qty) * qty;
                     }
                 }
 
@@ -775,7 +771,7 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                 var qty = Math.Min(ci.Quantity, product.StockQuantity);
                 if (qty <= 0) continue;
 
-                var unitPrice = GetCurrentProductPrice(product);
+                var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, qty);
                 var image = product.ProductImages?
                     .FirstOrDefault(x => x.IsMain)
                     ?? product.ProductImages?.FirstOrDefault();
@@ -794,33 +790,6 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
             }
             vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
             return vm;
-        }
-
-        private decimal GetCurrentProductPrice(Product product)
-        {
-            // 1. Kiểm tra nếu sản phẩm đang thuộc Flash Sale đang diễn ra và còn suất
-            try
-            {
-                var now = DateTime.UtcNow;
-                var flashItem = _context.FlashSaleItems
-                    .AsNoTracking()
-                    .Include(f => f.FlashSale)
-                    .FirstOrDefault(f => f.ProductID == product.ProductID
-                                      && f.FlashSale != null
-                                      && f.FlashSale.IsActive
-                                      && f.FlashSale.StartTime <= now
-                                      && f.FlashSale.EndTime > now
-                                      && f.SoldQuantity < f.MaxQuantity);
-                if (flashItem != null)
-                {
-                    return flashItem.FlashSalePrice;
-                }
-            }
-            catch {}
-
-            if (product.DiscountPrice.HasValue && product.DiscountPrice.Value > 0)
-                return product.DiscountPrice.Value;
-            return product.Price;
         }
 
         protected override void Dispose(bool disposing)
