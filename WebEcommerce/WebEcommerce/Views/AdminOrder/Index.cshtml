@@ -62,13 +62,13 @@
                 <table class="w-full text-sm min-w-[850px]">
                     <thead>
                         <tr class="bg-slate-50 border-b-2 border-slate-200">
-                            <th class="text-left px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[100px]">Mã ĐH</th>
-                            <th class="text-left px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[180px]">Khách hàng</th>
-                            <th class="text-left px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[140px]">Ngày đặt</th>
-                            <th class="text-right px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Tổng tiền</th>
-                            <th class="text-center px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Trạng thái</th>
-                            <th class="text-center px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Thanh toán</th>
-                            <th class="text-center px-5 py-3 font-bold text-slate-700 whitespace-nowrap min-w-[80px]"></th>
+                            <th class="text-left px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[100px]">Mã ĐH</th>
+                            <th class="text-left px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[180px]">Khách hàng</th>
+                            <th class="text-left px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[140px]">Ngày đặt</th>
+                            <th class="text-right px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Tổng tiền</th>
+                            <th class="text-center px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Trạng thái</th>
+                            <th class="text-center px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[120px]">Thanh toán</th>
+                            <th class="text-center px-[1.25rem] py-3 font-bold text-slate-700 whitespace-nowrap min-w-[80px]"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
@@ -85,14 +85,14 @@
                                 case "Cancelled": sColor = "bg-red-100 text-red-700"; break;
                             }
                             <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-5 py-3 font-bold text-slate-900">#@order.OrderID</td>
-                                <td class="px-5 py-3 text-slate-600">@(order.User?.FullName ?? order.User?.Email ?? "N/A")</td>
-                                <td class="px-5 py-3 text-slate-600">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="px-5 py-3 text-right font-bold text-slate-900">@string.Format("{0:N0}đ", order.FinalAmount)</td>
-                                <td class="px-5 py-3 text-center">
+                                <td class="px-[1.25rem] py-3 font-bold text-slate-900">#@order.OrderID</td>
+                                <td class="px-[1.25rem] py-3 text-slate-600">@(order.User?.FullName ?? order.User?.Email ?? "N/A")</td>
+                                <td class="px-[1.25rem] py-3 text-slate-600">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="px-[1.25rem] py-3 text-right font-bold text-slate-900">@string.Format("{0:N0}đ", order.FinalAmount)</td>
+                                <td class="px-[1.25rem] py-3 text-center">
                                     <span class="px-2.5 py-1 rounded-full text-xs font-bold @sColor">@order.Status</span>
                                 </td>
-                                <td class="px-5 py-3 text-center">
+                                <td class="px-[1.25rem] py-3 text-center">
                                     @if (order.PaymentStatus == "Paid")
                                     {
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -106,7 +106,7 @@
                                         </span>
                                     }
                                 </td>
-                                <td class="px-5 py-3 text-center">
+                                <td class="px-[1.25rem] py-3 text-center">
                                     <a href="@Url.Action("Detail", "AdminOrder", new { id = order.OrderID })" class="px-3 py-1.5 rounded-lg bg-blue-50 text-[#0d47a1] hover:bg-[#0d47a1] hover:text-white font-bold text-xs border border-blue-200 transition-all">
                                         Xem
                                     </a>

@@ -83,7 +83,7 @@
                    class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all text-slate-800" />
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <!-- Filter Trạng thái -->
             <select name="status" class="px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-chill-primary focus:bg-white outline-none transition-all font-semibold text-slate-700">
                 <option value="All" @(Model.StatusFilter == "All" ? "selected" : "")>Tất cả trạng thái</option>
@@ -99,7 +99,7 @@
                 <option value="Fixed" @(Model.TypeFilter == "Fixed" ? "selected" : "")>Giảm số tiền cố định</option>
             </select>
 
-            <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm">
+            <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark text-white px-[1.25rem] py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 shrink-0 shadow-sm">
                 <span class="material-symbols-outlined text-base">filter_list</span>
                 Lọc
             </button>

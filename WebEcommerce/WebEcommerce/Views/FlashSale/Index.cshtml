@@ -85,7 +85,7 @@
         </div>
 
         <!-- Filter Status -->
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <select name="status" class="px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-chill-primary outline-none text-sm font-semibold text-slate-700 bg-white cursor-pointer transition-all">
                 <option value="All" @(Model.StatusFilter == "All" ? "selected" : "")>Tất cả trạng thái</option>
                 <option value="Live" @(Model.StatusFilter == "Live" ? "selected" : "")>🔥 Đang diễn ra (Live)</option>
@@ -94,7 +94,7 @@
                 <option value="Inactive" @(Model.StatusFilter == "Inactive" ? "selected" : "")>🚫 Tạm ngưng</option>
             </select>
 
-            <button type="submit" class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1.5 transition-all">
+            <button type="submit" class="bg-slate-900 hover:bg-black text-white px-[1.25rem] py-2.5 rounded-xl font-bold text-sm flex items-center gap-1.5 transition-all">
                 <span class="material-symbols-outlined text-lg">filter_alt</span>
                 Lọc
             </button>
@@ -135,12 +135,12 @@ else
             <table class="w-full text-sm min-w-[950px]">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="text-left px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[220px]">SỰ KIỆN FLASH SALE</th>
-                        <th class="text-left px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[190px]">THỜI GIAN & TIẾN ĐỘ</th>
-                        <th class="text-center px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[140px]">SẢN PHẨM</th>
-                        <th class="text-left px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[170px]">TIẾN ĐỘ BÁN HÀNG</th>
-                        <th class="text-center px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[130px]">TRẠNG THÁI</th>
-                        <th class="text-right px-5 py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[130px]">THAO TÁC</th>
+                        <th class="text-left px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[220px]">SỰ KIỆN FLASH SALE</th>
+                        <th class="text-left px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[190px]">THỜI GIAN & TIẾN ĐỘ</th>
+                        <th class="text-center px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[140px]">SẢN PHẨM</th>
+                        <th class="text-left px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[170px]">TIẾN ĐỘ BÁN HÀNG</th>
+                        <th class="text-center px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[130px]">TRẠNG THÁI</th>
+                        <th class="text-right px-[1.25rem] py-3.5 font-bold text-slate-700 whitespace-nowrap min-w-[130px]">THAO TÁC</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -158,7 +158,7 @@ else
 
                         <tr class="hover:bg-slate-50/70 transition-colors @(isLive ? "bg-amber-50/20" : "")">
                             <!-- Tiêu đề -->
-                            <td class="px-5 py-4 align-top">
+                            <td class="px-[1.25rem] py-4 align-top">
                                 <div class="flex items-start gap-3">
                                     <div class="w-10 h-10 rounded-xl @(isLive ? "bg-gradient-to-br from-red-500 to-amber-500 text-white" : "bg-slate-100 text-slate-600") flex items-center justify-center shrink-0 shadow-sm font-bold">
                                         <span class="material-symbols-outlined text-xl">bolt</span>
@@ -177,7 +177,7 @@ else
                             </td>
 
                             <!-- Thời gian -->
-                            <td class="px-5 py-4 align-top">
+                            <td class="px-[1.25rem] py-4 align-top">
                                 <div class="space-y-1 text-xs">
                                     <div class="flex items-center gap-1.5 text-slate-700">
                                         <span class="material-symbols-outlined text-sm text-slate-400">play_circle</span>
@@ -193,7 +193,7 @@ else
                             </td>
 
                             <!-- Sản phẩm tham gia -->
-                            <td class="px-5 py-4 align-top text-center">
+                            <td class="px-[1.25rem] py-4 align-top text-center">
                                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                                     <span class="material-symbols-outlined text-sm text-slate-500">inventory_2</span>
                                     @itemCount sản phẩm
@@ -221,7 +221,7 @@ else
                             </td>
 
                             <!-- Tiến độ bán hàng -->
-                            <td class="px-5 py-4 align-top">
+                            <td class="px-[1.25rem] py-4 align-top">
                                 <div class="space-y-1.5">
                                     <div class="flex items-center justify-between text-xs font-semibold">
                                         <span class="text-slate-600">Đã bán: <strong class="text-slate-900">@totalSoldQty</strong>/@totalMaxQty</span>
@@ -238,7 +238,7 @@ else
                             </td>
 
                             <!-- Trạng thái -->
-                            <td class="px-5 py-4 align-top text-center">
+                            <td class="px-[1.25rem] py-4 align-top text-center">
                                 @if (isLive)
                                 {
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-red-100 text-red-700 border border-red-200 shadow-xs animate-pulse">
@@ -270,7 +270,7 @@ else
                             </td>
 
                             <!-- Thao tác -->
-                            <td class="px-5 py-4 align-top text-right">
+                            <td class="px-[1.25rem] py-4 align-top text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <!-- Xem chi tiết -->
                                     <a href="@Url.Action("Details", "FlashSale", new { id = sale.FlashSaleID })" 
