@@ -47,6 +47,7 @@ namespace WebEcommerce.Controllers
                 // Build cart view model for the checkout page - Chỉ lấy các sản phẩm còn hàng
                 var cartVm = new CartViewModel();
                 int outOfStockCount = 0;
+                int reducedCount = 0;
 
                 foreach (var ci in cookieItems)
                 {
@@ -66,6 +67,7 @@ namespace WebEcommerce.Controllers
                         outOfStockCount++;
                         continue;
                     }
+                    if (checkoutQty < ci.Quantity) reducedCount++;
 
                     var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, checkoutQty);
                     var image = product.ProductImages?
@@ -96,13 +98,18 @@ namespace WebEcommerce.Controllers
                 {
                     TempData["InfoMessage"] = $"Đã tự động loại bỏ {outOfStockCount} sản phẩm tạm hết hàng khỏi đơn thanh toán.";
                 }
+                if (reducedCount > 0)
+                {
+                    TempData["InfoMessage"] = (TempData["InfoMessage"] + $" Đã giảm số lượng {reducedCount} sản phẩm xuống bằng tồn kho hiện có.").Trim();
+                }
 
                 // Lấy thông tin user để pre-fill
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 var vm = new CheckoutViewModel
                 {
                     ShippingAddress = user?.Address ?? "",
-                    ReceiverPhone = user?.PhoneNumber ?? ""
+                    ReceiverPhone = user?.PhoneNumber ?? "",
+                    CartSignature = GetCartSignature(cartVm.Items.Select(i => (i.ProductID, i.Quantity, i.UnitPrice)))
                 };
 
                 ViewBag.Cart = cartVm;
@@ -193,6 +200,18 @@ namespace WebEcommerce.Controllers
                 {
                     TempData["ErrorMessage"] = "Các sản phẩm trong giỏ hàng hiện đã hết hàng hoặc không khả dụng. Vui lòng kiểm tra lại giỏ hàng.";
                     return RedirectToAction("Index", "Cart");
+                }
+
+                // Tồn kho/giá đổi giữa lúc xem và lúc đặt: không tự cắt đơn, cho khách xem lại danh sách mới
+                var currentSignature = GetCartSignature(orderItems.Select(i => (i.Product.ProductID, i.Quantity, i.CurrentPrice)));
+                if (model.CartSignature != currentSignature)
+                {
+                    ModelState.Remove("CartSignature");
+                    model.CartSignature = currentSignature;
+                    TempData["ErrorMessage"] = "Số lượng hoặc giá sản phẩm vừa thay đổi do tồn kho. Vui lòng kiểm tra lại đơn hàng bên dưới rồi đặt hàng lần nữa.";
+                    ViewBag.Cart = cartVm;
+                    ViewBag.CartTotal = cartVm.CartTotal;
+                    return View(model);
                 }
 
                 decimal discountAmount = 0;
@@ -782,6 +801,11 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
             }
             vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
             return vm;
+        }
+
+        private static string GetCartSignature(IEnumerable<(int ProductId, int Quantity, decimal UnitPrice)> items)
+        {
+            return string.Join(",", items.Select(i => $"{i.ProductId}:{i.Quantity}:{i.UnitPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)}"));
         }
 
         protected override void Dispose(bool disposing)

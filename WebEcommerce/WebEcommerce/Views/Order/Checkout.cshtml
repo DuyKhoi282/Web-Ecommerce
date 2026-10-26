@@ -51,6 +51,7 @@
     @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkout-form", @class = "grid grid-cols-1 lg:grid-cols-3 gap-8 items-start" }))
     {
         @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.CartSignature)
 
         <!-- Left Column: Order Forms -->
         <div class="lg:col-span-2 space-y-6">

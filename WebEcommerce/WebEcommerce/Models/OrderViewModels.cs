@@ -26,5 +26,8 @@ namespace WebEcommerce.Models
         [StringLength(50)]
         [Display(Name = "Mã giảm giá")]
         public string PromoCode { get; set; }
+
+        // Danh sách sản phẩm/số lượng/giá khách đã thấy ở trang thanh toán, POST so lại trước khi tạo đơn
+        public string CartSignature { get; set; }
     }
 }
