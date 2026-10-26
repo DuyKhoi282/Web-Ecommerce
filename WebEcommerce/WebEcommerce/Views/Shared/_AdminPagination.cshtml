@@ -1,0 +1,70 @@
+@*
+    Phân trang dùng chung cho trang admin. Gọi:
+    @Html.Partial("_AdminPagination", new ViewDataDictionary { { "CurrentPage", Model.CurrentPage }, { "TotalPages", Model.TotalPages } })
+    Link giữ nguyên query string hiện tại (bộ lọc), chỉ đổi tham số page.
+*@
+@{
+    int current = (int)ViewData["CurrentPage"];
+    int total = (int)ViewData["TotalPages"];
+    var action = ViewContext.RouteData.Values["action"].ToString();
+    Func<int, string> pageUrl = p =>
+    {
+        var rv = new RouteValueDictionary();
+        foreach (string key in Request.QueryString.AllKeys)
+        {
+            if (key != null) { rv[key] = Request.QueryString[key]; }
+        }
+        rv["page"] = p;
+        return Url.Action(action, rv);
+    };
+    // Cửa sổ 5 trang quanh trang hiện tại, luôn kèm trang 1 và trang cuối
+    int from = Math.Max(1, current - 2), to = Math.Min(total, current + 2);
+    var btn = "min-w-[2.25rem] h-9 px-2 rounded-lg flex items-center justify-center text-sm font-bold transition-colors";
+    var idle = btn + " bg-white text-slate-700 border border-slate-300 hover:border-[#d70018] hover:text-[#d70018]";
+    var disabled = btn + " bg-white text-slate-300 border border-slate-200 cursor-not-allowed";
+}
+@helper NavBtn(bool enabled, string href, string icon, string label, string idleCls, string disabledCls)
+{
+    if (enabled)
+    {
+        <a href="@href" class="@idleCls" aria-label="@label" title="@label"><span class="material-symbols-outlined text-lg">@icon</span></a>
+    }
+    else
+    {
+        <span class="@disabledCls" aria-disabled="true"><span class="material-symbols-outlined text-lg">@icon</span></span>
+    }
+}
+@if (total > 1)
+{
+    <nav class="flex flex-wrap justify-center items-center gap-1.5" aria-label="Phân trang">
+        @NavBtn(current > 1, pageUrl(1), "first_page", "Trang đầu", idle, disabled)
+        @NavBtn(current > 1, pageUrl(current - 1), "chevron_left", "Trang trước", idle, disabled)
+
+        @if (from > 1)
+        {
+            <a href="@pageUrl(1)" class="@idle">1</a>
+            if (from > 2) { <span class="px-1 text-slate-400">…</span> }
+        }
+        @for (int i = from; i <= to; i++)
+        {
+            if (i == current)
+            {
+                <span class="@btn bg-[#d70018] text-white shadow-sm" aria-current="page">@i</span>
+            }
+            else
+            {
+                <a href="@pageUrl(i)" class="@idle">@i</a>
+            }
+        }
+        @if (to < total)
+        {
+            if (to < total - 1) { <span class="px-1 text-slate-400">…</span> }
+            <a href="@pageUrl(total)" class="@idle">@total</a>
+        }
+
+        @NavBtn(current < total, pageUrl(current + 1), "chevron_right", "Trang sau", idle, disabled)
+        @NavBtn(current < total, pageUrl(total), "last_page", "Trang cuối", idle, disabled)
+
+        <span class="ml-2 text-xs font-medium text-slate-500">Trang @current / @total</span>
+    </nav>
+}

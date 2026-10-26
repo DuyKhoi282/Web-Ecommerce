@@ -27,28 +27,30 @@
     <p class="text-sm text-slate-500 mt-1">Theo dõi, nhập/xuất số lượng tồn kho và cảnh báo sắp hết hàng</p>
 </div>
 
-<!-- KPI Cards -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="admin-card rounded-2xl p-4 text-center">
-        <span class="material-symbols-outlined text-3xl text-blue-500 mb-1 block">inventory_2</span>
-        <p class="text-2xl font-extrabold text-slate-900">@Model.TotalProducts</p>
-        <p class="text-xs text-slate-500 font-medium">Tổng sản phẩm</p>
-    </div>
-    <div class="admin-card rounded-2xl p-4 text-center">
-        <span class="material-symbols-outlined text-3xl text-emerald-500 mb-1 block">check_circle</span>
-        <p class="text-2xl font-extrabold text-emerald-600">@Model.NormalStockCount</p>
-        <p class="text-xs text-slate-500 font-medium">Tồn kho ổn (≥5)</p>
-    </div>
-    <div class="admin-card rounded-2xl p-4 text-center border-2 border-amber-200">
-        <span class="material-symbols-outlined text-3xl text-amber-500 mb-1 block">warning</span>
-        <p class="text-2xl font-extrabold text-amber-600">@Model.LowStockCount</p>
-        <p class="text-xs text-slate-500 font-medium">Sắp hết (&lt;5)</p>
-    </div>
-    <div class="admin-card rounded-2xl p-4 text-center border-2 border-red-200">
-        <span class="material-symbols-outlined text-3xl text-red-500 mb-1 block">remove_shopping_cart</span>
-        <p class="text-2xl font-extrabold text-red-600">@Model.OutOfStockCount</p>
-        <p class="text-xs text-slate-500 font-medium">Hết hàng (0)</p>
-    </div>
+<!-- KPI Cards: gọn 1 dòng, bấm để lọc theo mức tồn (số đếm là toàn kho nên link bỏ search/danh mục) -->
+@{
+    var kpis = new[] {
+        new { Filter = "all", Icon = "inventory_2", Tone = "bg-blue-50 text-blue-600", Num = "text-slate-900", Value = Model.TotalProducts, Label = "Tổng sản phẩm" },
+        new { Filter = "ok", Icon = "check_circle", Tone = "bg-emerald-50 text-emerald-600", Num = "text-emerald-600", Value = Model.NormalStockCount, Label = "Tồn kho ổn (≥5)" },
+        new { Filter = "low", Icon = "warning", Tone = "bg-amber-50 text-amber-600", Num = "text-amber-600", Value = Model.LowStockCount, Label = "Sắp hết (<5)" },
+        new { Filter = "out", Icon = "remove_shopping_cart", Tone = "bg-red-50 text-red-600", Num = "text-red-600", Value = Model.OutOfStockCount, Label = "Hết hàng (0)" }
+    };
+}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    @foreach (var k in kpis)
+    {
+        var active = Model.StockFilter == k.Filter;
+        <a href="@Url.Action("Index", "Inventory", new { stockFilter = k.Filter })" @(active ? "aria-current=true" : "")
+           class="admin-card rounded-xl px-[0.875rem] py-[0.625rem] flex items-center gap-3 transition-colors hover:border-slate-400 @(active ? "ring-2 ring-[#d70018]/40" : "")">
+            <span class="w-9 h-9 rounded-lg @k.Tone flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl">@k.Icon</span>
+            </span>
+            <span class="leading-tight">
+                <span class="block text-lg font-extrabold @k.Num">@k.Value</span>
+                <span class="block text-xs text-slate-500 font-medium">@k.Label</span>
+            </span>
+        </a>
+    }
 </div>
 
 <!-- Bộ lọc -->
@@ -168,17 +170,7 @@
 </div>
 
 <!-- Phân trang -->
-@if (Model.TotalPages > 1)
-{
-    <div class="flex justify-center items-center gap-2 mt-6">
-        @for (int i = 1; i <= Model.TotalPages; i++)
-        {
-            var activeClass = i == Model.CurrentPage ? "bg-chill-primary text-white shadow-lg" : "bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50";
-            <a href="@Url.Action("Index", "Inventory", new { search = Model.SearchTerm, stockFilter = Model.StockFilter, categoryId = Model.SelectedCategoryID, page = i })"
-               class="@activeClass w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold transition-all">@i</a>
-        }
-    </div>
-}
+@Html.Partial("_AdminPagination", new ViewDataDictionary { { "CurrentPage", Model.CurrentPage }, { "TotalPages", Model.TotalPages } })
 
 <style>
     @@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }

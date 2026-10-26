@@ -364,41 +364,7 @@
             <strong>@Model.TotalCount</strong> người dùng
         </div>
 
-        @if (Model.TotalPages > 1)
-        {
-            <div class="flex items-center gap-1">
-                @if (Model.CurrentPage > 1)
-                {
-                    <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = Model.CurrentPage - 1 })" 
-                       class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
-                        Trước
-                    </a>
-                }
-
-                @for (int p = 1; p <= Model.TotalPages; p++)
-                {
-                    if (p == Model.CurrentPage)
-                    {
-                        <span class="px-3 py-1.5 rounded-lg bg-[#0d47a1] text-white font-bold">@p</span>
-                    }
-                    else if (p <= 3 || p > Model.TotalPages - 2 || Math.Abs(p - Model.CurrentPage) <= 1)
-                    {
-                        <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = p })" 
-                           class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
-                            @p
-                        </a>
-                    }
-                }
-
-                @if (Model.CurrentPage < Model.TotalPages)
-                {
-                    <a href="@Url.Action("Index", "AdminUser", new { search = Model.SearchTerm, role = Model.SelectedRole, status = Model.SelectedStatus, page = Model.CurrentPage + 1 })" 
-                       class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition-colors">
-                        Sau
-                    </a>
-                }
-            </div>
-        }
+        @Html.Partial("_AdminPagination", new ViewDataDictionary { { "CurrentPage", Model.CurrentPage }, { "TotalPages", Model.TotalPages } })
     </div>
 </div>
 
