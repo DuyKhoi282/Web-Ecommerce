@@ -23,39 +23,7 @@ namespace WebEcommerce
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    // Ensure missing Identity tables exist
-                    context.Database.ExecuteSqlCommand(@"
-                        CREATE TABLE IF NOT EXISTS ""AspNetUserClaims"" (
-                            ""Id"" SERIAL PRIMARY KEY,
-                            ""UserId"" VARCHAR(128) NOT NULL REFERENCES ""AspNetUsers""(""Id"") ON DELETE CASCADE,
-                            ""ClaimType"" TEXT,
-                            ""ClaimValue"" TEXT
-                        );
-                        CREATE TABLE IF NOT EXISTS ""AspNetUserLogins"" (
-                            ""LoginProvider"" VARCHAR(128) NOT NULL,
-                            ""ProviderKey"" VARCHAR(128) NOT NULL,
-                            ""UserId"" VARCHAR(128) NOT NULL REFERENCES ""AspNetUsers""(""Id"") ON DELETE CASCADE,
-                            PRIMARY KEY (""LoginProvider"", ""ProviderKey"", ""UserId"")
-                        );
-                        CREATE TABLE IF NOT EXISTS ""FlashSales"" (
-                            ""FlashSaleID"" SERIAL PRIMARY KEY,
-                            ""Title"" VARCHAR(200) NOT NULL,
-                            ""Description"" TEXT,
-                            ""StartTime"" TIMESTAMP NOT NULL,
-                            ""EndTime"" TIMESTAMP NOT NULL,
-                            ""IsActive"" BOOLEAN NOT NULL DEFAULT TRUE,
-                            ""CreatedAt"" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                        );
-                        CREATE TABLE IF NOT EXISTS ""FlashSaleItems"" (
-                            ""FlashSaleItemID"" SERIAL PRIMARY KEY,
-                            ""FlashSaleID"" INT NOT NULL REFERENCES ""FlashSales""(""FlashSaleID"") ON DELETE CASCADE,
-                            ""ProductID"" INT NOT NULL REFERENCES ""Products""(""ProductID"") ON DELETE CASCADE,
-                            ""FlashSalePrice"" NUMERIC(18, 2) NOT NULL,
-                            ""MaxQuantity"" INT NOT NULL DEFAULT 50,
-                            ""SoldQuantity"" INT NOT NULL DEFAULT 0
-                        );
-                    ");
-
+                    // Bảng AspNet* có trong 01, bảng flash sale do DatabaseConfig chạy script 08 (Application_Start chạy trước)
                     SeedDefaultFlashSale(context);
 
                     var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
