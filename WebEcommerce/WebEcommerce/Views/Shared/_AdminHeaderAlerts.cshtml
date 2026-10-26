@@ -1,0 +1,20 @@
+@* Pill "cần xử lý" trên header admin, dữ liệu từ AdminDashboard/HeaderAlerts. Ẩn pill khi số bằng 0. *@
+@{
+    int pendingOrders = ViewBag.PendingOrders;
+    int lowStock = ViewBag.LowStock;
+    var pill = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors";
+}
+@if (pendingOrders > 0)
+{
+    <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="@pill bg-blue-50 text-[#0d47a1] border-blue-200 hover:bg-[#0d47a1] hover:text-white" title="Xem đơn hàng chờ xác nhận">
+        <span class="material-symbols-outlined text-base" aria-hidden="true">schedule</span>
+        <span>@pendingOrders<span class="sr-only md:not-sr-only"> đơn chờ xác nhận</span></span>
+    </a>
+}
+@if (lowStock > 0)
+{
+    <a href="@Url.Action("Index", "Inventory", new { stockFilter = "low" })" class="@pill bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-500 hover:text-white" title="Xem sản phẩm sắp hết hàng (còn dưới 5)">
+        <span class="material-symbols-outlined text-base" aria-hidden="true">warning</span>
+        <span>@lowStock<span class="sr-only md:not-sr-only"> sắp hết hàng</span></span>
+    </a>
+}

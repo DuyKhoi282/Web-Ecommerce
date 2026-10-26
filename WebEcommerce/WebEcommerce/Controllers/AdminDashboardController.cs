@@ -24,6 +24,24 @@ namespace WebEcommerce.Controllers
             _context = context;
         }
 
+        // Số việc cần xử lý trên header admin, gọi bằng Html.Action trong _AdminLayout
+        [ChildActionOnly]
+        public ActionResult HeaderAlerts()
+        {
+            try
+            {
+                ViewBag.PendingOrders = _context.Orders.Count(o => o.Status == "Pending");
+                // Cùng điều kiện với Inventory stockFilter=low để số trên header khớp danh sách khi bấm vào
+                ViewBag.LowStock = _context.Products.Count(p => p.Status != 3 && p.StockQuantity > 0 && p.StockQuantity < 5);
+                return PartialView("_AdminHeaderAlerts");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"[AdminDashboard/HeaderAlerts Error] {ex}");
+                return new EmptyResult();
+            }
+        }
+
         // GET: AdminDashboard
         public async Task<ActionResult> Index()
         {
