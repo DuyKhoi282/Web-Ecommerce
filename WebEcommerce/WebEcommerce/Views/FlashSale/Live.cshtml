@@ -14,8 +14,9 @@
     var isUpcoming = currentSale != null && currentSale.StartTime > now;
     var isEnded = currentSale != null && currentSale.EndTime <= now;
 
-    var targetTimeIso = currentSale != null 
-        ? (isLive ? currentSale.EndTime : (isUpcoming ? currentSale.StartTime : currentSale.EndTime)).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    // DB đã lưu UTC (timestamp không tz, Kind=Unspecified): gọi ToUniversalTime sẽ trừ thêm 7 tiếng
+    var targetTimeIso = currentSale != null
+        ? (isLive ? currentSale.EndTime : (isUpcoming ? currentSale.StartTime : currentSale.EndTime)).ToString("yyyy-MM-ddTHH:mm:ssZ")
         : "";
 }
 

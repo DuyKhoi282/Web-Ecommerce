@@ -226,7 +226,8 @@
     {
         var isTabVisible = fs.FlashSaleID == activeFlashSaleId;
         var isLive = fs.StartTime <= DateTime.UtcNow && fs.EndTime > DateTime.UtcNow;
-        var targetTimeIso = (isLive ? fs.EndTime : fs.StartTime).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        // DB đã lưu UTC (timestamp không tz, Kind=Unspecified): gọi ToUniversalTime sẽ trừ thêm 7 tiếng
+        var targetTimeIso = (isLive ? fs.EndTime : fs.StartTime).ToString("yyyy-MM-ddTHH:mm:ssZ");
         var items = fs.FlashSaleItems?.Where(i => i.Product != null && i.Product.Status != 3).ToList() ?? new List<FlashSaleItem>();
         if (!items.Any()) { continue; }
 
