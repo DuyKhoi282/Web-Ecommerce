@@ -371,6 +371,25 @@ namespace WebEcommerce.Controllers
                 }
                 else
                 {
+                    // Sản phẩm và số đã bán của item cũ lấy từ DB, không tin hidden field client gửi lên
+                    var dbItems = await _context.FlashSaleItems
+                        .AsNoTracking()
+                        .Include(i => i.Product)
+                        .Where(i => i.FlashSaleID == model.FlashSaleID)
+                        .ToListAsync();
+
+                    foreach (var item in model.Items)
+                    {
+                        var dbItem = dbItems.FirstOrDefault(d => d.FlashSaleItemID == item.FlashSaleItemID);
+                        item.ProductID = dbItem?.ProductID ?? item.ProductID;
+                        item.SoldQuantity = dbItem?.SoldQuantity ?? 0;
+                    }
+
+                    foreach (var removed in dbItems.Where(d => d.SoldQuantity > 0 && !model.Items.Any(i => i.FlashSaleItemID == d.FlashSaleItemID)))
+                    {
+                        ModelState.AddModelError("", $"Sản phẩm \"{removed.Product?.Name}\" đã bán {removed.SoldQuantity} suất nên không thể xóa khỏi đợt Flash Sale.");
+                    }
+
                     var productIds = model.Items.Select(i => i.ProductID).ToList();
                     if (productIds.Count != productIds.Distinct().Count())
                     {
@@ -437,7 +456,7 @@ namespace WebEcommerce.Controllers
                         // Đồng bộ danh sách FlashSaleItems:
                         // 1. Xóa những item không còn trong danh sách gửi lên (nếu chưa bán suất nào)
                         var submittedItemIds = model.Items.Where(i => i.FlashSaleItemID > 0).Select(i => i.FlashSaleItemID).ToList();
-                        var itemsToRemove = flashSale.FlashSaleItems.Where(i => !submittedItemIds.Contains(i.FlashSaleItemID)).ToList();
+                        var itemsToRemove = flashSale.FlashSaleItems.Where(i => !submittedItemIds.Contains(i.FlashSaleItemID) && i.SoldQuantity == 0).ToList();
 
                         foreach (var rem in itemsToRemove)
                         {

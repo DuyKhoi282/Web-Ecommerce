@@ -37,7 +37,7 @@
         </div>
     }
 
-    @Html.ValidationSummary(true, "", new { @class = "mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" })
+    @Html.ValidationSummary(false, "", new { @class = "mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" })
 
     @using (Html.BeginForm("Edit", "FlashSale", FormMethod.Post, new { id = "flashSaleEditForm", @class = "space-y-6" }))
     {
