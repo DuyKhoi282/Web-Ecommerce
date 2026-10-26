@@ -548,7 +548,7 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                 if (order.Status != "Pending")
                 {
                     TempData["ErrorMessage"] = order.Status == "Confirmed"
-                        ? "Đơn hàng đã được xác nhận và đang được chuẩn bị. Quý khách không thể tự hủy trực tiếp, vui lòng liên hệ tổng đài CSKH 1900 8888 để được hỗ trợ."
+                        ? "Đơn hàng đã được xác nhận và đang được chuẩn bị. Quý khách không thể tự hủy trực tiếp, vui lòng liên hệ tổng đài CSKH 1800.2097 để được hỗ trợ."
                         : $"Không thể hủy đơn hàng ở trạng thái \"{order.Status}\".";
 
                     return RedirectToAction("Detail", new { id = id });

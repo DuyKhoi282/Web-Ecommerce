@@ -2,494 +2,382 @@
 @{
     ViewBag.Title = "Chi tiết đơn hàng #" + Model.OrderID;
 
-    var statusColor = "bg-slate-100 text-slate-700";
-    var statusIcon = "schedule";
-    switch (Model.Status)
+    // Cùng nhãn/màu với Views/Order/Index.cshtml: nhãn, câu mô tả, màu chữ, icon
+    var statusInfo = new Dictionary<string, string[]>
     {
-        case "Pending": statusColor = "bg-amber-100 text-amber-700"; statusIcon = "schedule"; break;
-        case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; statusIcon = "check_circle"; break;
-        case "Processing": statusColor = "bg-sky-100 text-sky-700"; statusIcon = "inventory_2"; break;
-        case "Shipped": statusColor = "bg-purple-100 text-purple-700"; statusIcon = "local_shipping"; break;
-        case "Delivered": statusColor = "bg-green-100 text-green-700"; statusIcon = "verified"; break;
-        case "Cancelled": statusColor = "bg-red-100 text-red-700"; statusIcon = "cancel"; break;
-    }
-    var canCancel = (Model.Status == "Pending");
+        { "Pending", new[] { "Chờ xác nhận", "Đang chờ shop xác nhận đơn", "text-primary-container", "schedule" } },
+        { "Confirmed", new[] { "Đã xác nhận", "Shop đang chuẩn bị hàng", "text-primary-container", "task_alt" } },
+        { "Processing", new[] { "Đang xử lý", "Đơn hàng đang được đóng gói", "text-primary-container", "inventory_2" } },
+        { "Shipped", new[] { "Đang giao", "Đơn hàng đang trên đường đến bạn", "text-primary-container", "local_shipping" } },
+        { "Delivered", new[] { "Đã giao", "Giao hàng thành công", "text-emerald-600", "verified" } },
+        { "Cancelled", new[] { "Đã hủy", "Đơn hàng đã bị hủy", "text-slate-500", "cancel" } }
+    };
+    var info = statusInfo.ContainsKey(Model.Status ?? "") ? statusInfo[Model.Status] : new[] { Model.Status, "", "text-slate-500", "help" };
+
+    var steps = new[] { "Pending", "Confirmed", "Processing", "Shipped", "Delivered" };
+    var currentStep = Array.IndexOf(steps, Model.Status);
+
+    var isCancelled = Model.Status == "Cancelled";
+    var canCancel = Model.Status == "Pending";
+    var isPaid = Model.PaymentStatus == "Paid";
+    var isAwaitingConfirm = Model.PaymentStatus == "PendingConfirmation";
+    var details = Model.OrderDetails?.ToList() ?? new List<WebEcommerce.Models.OrderDetail>();
+    var paymentText = Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản VietQR" : (Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng (COD)" : Model.PaymentMethod);
 }
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="mb-8">
-        <a href="@Url.Action("Index", "Order")" class="text-sm text-[#0d47a1] hover:underline font-semibold flex items-center gap-1 mb-3">
-            <span class="material-symbols-outlined text-base">arrow_back</span> Quay lại lịch sử đơn hàng
-        </a>
-        <div class="flex items-center gap-3 mb-2">
-            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">receipt</span>
-            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">Đơn hàng #@Model.OrderID</h1>
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @statusColor">
-                <span class="material-symbols-outlined text-sm">@statusIcon</span>
-                @Model.Status
-            </span>
-            @if (Model.Status != "Cancelled")
-            {
-                <a href="@Url.Action("Invoice", "Export", new { id = Model.OrderID })"
-                   class="ml-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-sm font-semibold text-[#0d47a1] transition-colors">
-                    <span class="material-symbols-outlined text-base">picture_as_pdf</span> Tải hóa đơn PDF
-                </a>
-            }
-        </div>
-    </div>
+<div class="max-w-[1280px] mx-auto px-4 py-6 w-full">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-5" aria-label="Breadcrumb">
+        <a href="@Url.Action("Index", "Home")" class="hover:text-primary-container transition-colors">Trang chủ</a>
+        <span>/</span>
+        <a href="@Url.Action("Profile", "Manage")" class="hover:text-primary-container transition-colors">Tài khoản</a>
+        <span>/</span>
+        <a href="@Url.Action("Index", "Order")" class="hover:text-primary-container transition-colors">Đơn hàng của tôi</a>
+        <span>/</span>
+        <span class="text-slate-800 font-semibold">#@Model.OrderID</span>
+    </nav>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+        <div class="mb-5 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold" role="status">
             @TempData["SuccessMessage"]
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+        <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" role="alert">
             @TempData["ErrorMessage"]
         </div>
     }
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Left: Products -->
-    <div class="lg:col-span-2 space-y-4">
-        <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Sản phẩm đã đặt</h2>
-            <div class="space-y-4">
-                @if (Model.OrderDetails != null)
-                {
-                    foreach (var detail in Model.OrderDetails)
-                    {
-                        var product = detail.Product;
-                        <div class="flex gap-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="w-20 h-20 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                @{
-                                    var img = product?.ProductImages?.FirstOrDefault(x => x.IsMain) ?? product?.ProductImages?.FirstOrDefault();
-                                }
-                                @if (img != null)
-                                {
-                                    <img src="@img.ImageURL" alt="@product?.Name" class="w-full h-full object-contain p-1" onerror="this.src='https://placehold.co/80x80/f8faff/0d47a1?text=SP';" />
-                                }
-                                else
-                                {
-                                    <span class="material-symbols-outlined text-2xl text-slate-300">image</span>
-                                }
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-sm text-slate-900 truncate">@(product?.Name ?? "Sản phẩm")</h3>
-                                <p class="text-xs text-slate-500 mt-1">Đơn giá: @string.Format("{0:N0}đ", detail.UnitPrice) × @detail.Quantity</p>
-                                <p class="font-headline font-bold text-sm text-[#0d47a1] mt-1">@string.Format("{0:N0}đ", detail.Subtotal)</p>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <aside class="hidden lg:block lg:col-span-3 space-y-4">
+            @Html.Partial("_AccountSidebar", new ViewDataDictionary { { "AccountActive", "orders" } })
+        </aside>
 
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thanh toán</h2>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Tạm tính</span>
-                        <span class="font-semibold">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
-                    </div>
-                    @if (Model.DiscountAmount > 0)
-                    {
-                        <div class="flex justify-between text-green-600">
-                            <span>Giảm giá</span>
-                            <span class="font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</span>
-                        </div>
-                    }
-                    <div class="border-t border-slate-200 pt-3 flex justify-between">
-                        <span class="font-headline font-bold text-slate-900">Tổng cộng</span>
-                        <span class="font-headline font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
-                    </div>
-                </div>
-            </div>
-
-            @if (canCancel)
-            {
-                using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post, new { id = "cancel-order-box" }))
-                {
-                    @Html.AntiForgeryToken()
-
-                    <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                        <div class="flex items-center gap-2 mb-2 text-rose-600">
-                            <span class="material-symbols-outlined text-xl">cancel</span>
-                            <h2 class="font-headline font-bold text-lg text-slate-900">
-                                Yêu cầu hủy đơn hàng
-                            </h2>
-                        </div>
-
-                        <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                            Đơn hàng đang ở trạng thái <strong>Chờ xử lý (Pending)</strong> nên bạn có thể tự hủy đơn. Vui lòng chọn hoặc nhập lý do hủy:
-                        </p>
-
-                        <!-- Quick Reason Chips -->
-                        <div class="mb-3">
-                            <span class="text-2xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Lý do phổ biến (Bấm để chọn):</span>
-                            <div class="flex flex-wrap gap-1.5">
-                                <button type="button" onclick="setCancelReason('Tôi muốn thay đổi địa chỉ nhận hàng');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Đổi địa chỉ</button>
-                                <button type="button" onclick="setCancelReason('Tôi muốn đổi sản phẩm hoặc số lượng');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Đổi sản phẩm / số lượng</button>
-                                <button type="button" onclick="setCancelReason('Tìm thấy giá tốt hơn ở nơi khác');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Tìm thấy giá tốt hơn</button>
-                                <button type="button" onclick="setCancelReason('Không còn nhu cầu mua nữa');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Không còn nhu cầu</button>
-                            </div>
-                        </div>
-
-                        <label for="cancellationReason"
-                               class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Lý do hủy đơn hàng <span class="text-red-500">*</span>
-                        </label>
-
-                        <textarea id="cancellationReason"
-                                  name="cancellationReason"
-                                  rows="3"
-                                  maxlength="1000"
-                                  required
-                                  placeholder="Ví dụ: Tôi đặt nhầm sản phẩm hoặc muốn đổi địa chỉ..."
-                                  class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm text-slate-800 outline-none focus:border-red-400 resize-y transition-colors"></textarea>
-
-                        <p class="text-2xs text-slate-400 mt-1 mb-4">
-                            Tối đa 1.000 ký tự. Tồn kho và khuyến mãi của bạn sẽ được hoàn lại tự động.
-                        </p>
-
-                        <button type="submit"
-                                onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này? Thao tác này không thể hoàn tác.');"
-                                class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all">
-                            <span class="material-symbols-outlined text-lg">cancel</span>
-                            Xác nhận hủy đơn hàng
-                        </button>
-                    </div>
-                }
-            }
-            else if (Model.Status == "Confirmed" || Model.Status == "Processing" || Model.Status == "Shipped")
-            {
-                <div class="bg-blue-50/70 border-2 border-blue-200/80 rounded-2xl p-5 shadow-xs text-xs text-slate-600">
-                    <div class="flex items-center gap-2 mb-2 text-[#0d47a1]">
-                        <span class="material-symbols-outlined text-xl">support_agent</span>
-                        <h3 class="font-headline font-bold text-sm text-[#0d47a1]">Bạn cần hỗ trợ hủy đơn hàng?</h3>
-                    </div>
-                    <p class="leading-relaxed mb-3">
-                        Đơn hàng hiện <strong>@(Model.Status == "Confirmed" ? "đã được shop xác nhận" : (Model.Status == "Processing" ? "đang chuẩn bị kiện hàng" : "đang trên đường vận chuyển"))</strong> nên bạn không thể tự hủy trực tiếp. Vui lòng liên hệ tổng đài để nhân viên hỗ trợ xử lý kịp thời:
-                    </p>
-                    <div class="p-3 bg-white rounded-xl border border-blue-100 flex items-center justify-between">
-                        <div>
-                            <span class="text-2xs text-slate-400 block uppercase font-bold tracking-wider">Tổng đài CSKH 24/7</span>
-                            <strong class="text-sm text-[#0d47a1] font-mono">1900 8888</strong>
-                        </div>
-                        <a href="tel:19008888" class="px-3.5 py-1.5 rounded-lg bg-[#0d47a1] text-white font-bold text-xs hover:bg-[#0a3880] transition-colors flex items-center gap-1 shadow-2xs">
-                            <span class="material-symbols-outlined text-sm">call</span> Gọi ngay
+        <main class="lg:col-span-9 space-y-4 min-w-0">
+            <!-- Header + tiến trình -->
+            <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100">
+                    <div class="min-w-0">
+                        <a href="@Url.Action("Index", "Order")" class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-primary-container transition-colors mb-1">
+                            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Đơn hàng của tôi
                         </a>
+                        <h1 class="font-headline font-extrabold text-xl sm:text-2xl text-slate-900">Đơn hàng #@Model.OrderID</h1>
+                        <p class="text-xs text-slate-500 mt-0.5">Đặt lúc @Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
                     </div>
-                </div>
-            }
-            else if (Model.Status == "Cancelled")
-            {
-                <div class="bg-rose-50/70 border-2 border-rose-200 rounded-2xl p-5 shadow-xs">
-                    <div class="flex items-center gap-2 mb-3 text-rose-700">
-                        <span class="material-symbols-outlined text-2xl">cancel</span>
-                        <div>
-                            <h3 class="font-headline font-bold text-sm text-rose-800">Đơn hàng đã được hủy</h3>
-                            @if (Model.CancelledAt.HasValue)
-                            {
-                                <span class="text-2xs text-rose-600">Thời gian: @Model.CancelledAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="space-y-2 text-xs">
-                        <div class="bg-white p-3 rounded-xl border border-rose-100">
-                            <span class="text-slate-400 block text-2xs uppercase tracking-wider font-semibold">Bên thực hiện hủy:</span>
-                            <strong class="text-slate-800">@(Model.CancelledBy == "Customer" ? "Khách hàng tự hủy" : (Model.CancelledBy == "Manager" ? "Người bán / Quản lý cửa hàng hủy" : (Model.CancelledBy ?? "Hệ thống")))</strong>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="inline-flex items-center gap-1 text-[13px] font-bold uppercase tracking-wide @info[2]">
+                            <span class="material-symbols-outlined text-[18px]">@info[3]</span>@info[0]
+                        </span>
+                        @if (!isCancelled)
                         {
-                            <div class="bg-white p-3 rounded-xl border border-rose-100">
-                                <span class="text-slate-400 block text-2xs uppercase tracking-wider font-semibold">Lý do hủy đơn:</span>
-                                <p class="text-slate-700 mt-0.5 leading-relaxed">@Model.CancellationReason</p>
-                            </div>
+                            <a href="@Url.Action("Invoice", "Export", new { id = Model.OrderID })"
+                               class="inline-flex items-center gap-1.5 min-h-[40px] px-4 rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-semibold text-sm transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span> Tải hóa đơn PDF
+                            </a>
                         }
                     </div>
                 </div>
-            }
-           
-        </div>
-    </div>
 
-    @if (Model.PaymentMethod == "BankTransfer" && Model.PaymentStatus == "Unpaid")
-    {
-        <div class="bg-gradient-to-br from-blue-900 to-[#0a3880] text-white rounded-3xl p-6 shadow-md">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="material-symbols-outlined text-amber-300 text-2xl">qr_code_scanner</span>
-                <h2 class="font-headline font-bold text-lg text-white">Quét mã VietQR thanh toán</h2>
-            </div>
-            <p class="text-xs text-blue-100 mb-4 leading-relaxed">
-                Mở ứng dụng ngân hàng bất kỳ để quét mã QR và thanh toán tự động với thông tin chính xác.
-            </p>
-
-            <div class="bg-white p-3 rounded-2xl flex justify-center mb-4 shadow-inner">
-                <img src="https://img.vietqr.io/image/VCB-1029384756-compact2.png?amount=@((long)Model.FinalAmount)&addInfo=DH%20@Model.OrderID&accountName=THE%20CHILL%20SHOP"
-                     alt="VietQR Chuyển khoản đơn hàng #@Model.OrderID"
-                     class="max-w-[220px] w-full h-auto object-contain rounded-lg"
-                     onerror="this.src='https://placehold.co/220x220/f8faff/0d47a1?text=VietQR+DH+@Model.OrderID';" />
-            </div>
-
-            <div class="space-y-2 text-xs mb-4">
-                <div class="flex justify-between items-center bg-white/10 p-2.5 rounded-xl">
-                    <span class="text-blue-200">Ngân hàng:</span>
-                    <span class="font-bold text-white">Vietcombank (VCB)</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 p-2.5 rounded-xl">
-                    <span class="text-blue-200">Số tài khoản:</span>
-                    <div class="flex items-center gap-1.5">
-                        <span class="font-mono font-bold text-white">1029384756</span>
-                        <button type="button" onclick="navigator.clipboard.writeText('1029384756'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép số tài khoản vào clipboard.'});" class="text-amber-300 hover:text-white transition-colors" title="Sao chép">
-                            <span class="material-symbols-outlined text-base">content_copy</span>
-                        </button>
+                @if (isCancelled)
+                {
+                    <div class="px-5 py-4 flex items-start gap-3 bg-slate-50 rounded-b-2xl">
+                        <span class="material-symbols-outlined text-slate-400 text-2xl">cancel</span>
+                        <div class="text-sm">
+                            <p class="font-bold text-slate-800">Đơn hàng đã bị hủy@(Model.CancelledAt.HasValue ? " lúc " + Model.CancelledAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "")</p>
+                            <p class="text-slate-500 mt-0.5">Tồn kho và mã giảm giá (nếu có) đã được hoàn lại.</p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 p-2.5 rounded-xl">
-                    <span class="text-blue-200">Nội dung CK:</span>
-                    <div class="flex items-center gap-1.5">
-                        <span class="font-mono font-bold text-amber-300">DH @Model.OrderID</span>
-                        <button type="button" onclick="navigator.clipboard.writeText('DH @Model.OrderID'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép nội dung chuyển khoản.'});" class="text-amber-300 hover:text-white transition-colors" title="Sao chép">
-                            <span class="material-symbols-outlined text-base">content_copy</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                }
+                else if (currentStep >= 0)
+                {
+                    <ol class="px-5 py-6 flex items-start" aria-label="Tiến trình đơn hàng">
+                        @for (var i = 0; i < steps.Length; i++)
+                        {
+                            var stepInfo = statusInfo[steps[i]];
+                            var done = i <= currentStep;
+                            var isCurrent = i == currentStep;
+                            <li class="flex-1 flex flex-col items-center text-center relative min-w-0" @(isCurrent ? "aria-current=step" : "")>
+                                @if (i > 0)
+                                {
+                                    <span class="absolute top-[18px] right-1/2 w-full h-0.5 -translate-y-1/2 @(done ? "bg-primary-container" : "bg-slate-200")" aria-hidden="true"></span>
+                                }
+                                <span class="relative z-10 w-9 h-9 rounded-full flex items-center justify-center border-2 @(done ? "bg-primary-container border-primary-container text-white" : "bg-white border-slate-200 text-slate-400") @(isCurrent ? "ring-4 ring-primary-container/15" : "")">
+                                    <span class="material-symbols-outlined text-[18px]">@stepInfo[3]</span>
+                                </span>
+                                <span class="mt-2 px-0.5 text-[11px] sm:text-xs leading-tight @(isCurrent ? "font-bold text-primary-container" : (done ? "font-semibold text-slate-800" : "text-slate-400"))">@stepInfo[0]</span>
+                            </li>
+                        }
+                    </ol>
+                    <p class="px-5 pb-4 -mt-2 text-xs text-slate-500 text-center">@info[1]</p>
+                }
+            </section>
 
-            <div id="transfer-notif-box" class="hidden mb-3 p-3 rounded-xl bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs">
-                <p class="font-semibold flex items-center gap-1 text-white">
-                    <span class="material-symbols-outlined text-base text-amber-300">hourglass_top</span>
-                    Đã ghi nhận yêu cầu chuyển khoản
-                </p>
-                <p class="text-blue-100 mt-1 text-2xs leading-relaxed">
-                    Shop đang đối soát giao dịch đơn hàng #@Model.OrderID và sẽ cập nhật trạng thái trong 5-15 phút.
-                </p>
-            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start">
+                <!-- Cột trái: sản phẩm, tổng tiền, hủy/hỗ trợ -->
+                <div class="xl:col-span-2 space-y-4 min-w-0">
+                    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                        <h2 class="px-5 pt-4 pb-1 font-headline font-bold text-base text-slate-900">Sản phẩm đã đặt (@details.Sum(d => d.Quantity))</h2>
+                        <div class="px-5 divide-y divide-slate-100">
+                            @foreach (var detail in details)
+                            {
+                                var product = detail.Product;
+                                var img = product?.ProductImages?.FirstOrDefault(x => x.IsMain) ?? product?.ProductImages?.FirstOrDefault();
+                                <div class="flex items-center gap-4 py-3.5">
+                                    <a href="@Url.Action("Details", "Shop", new { id = detail.ProductID })" class="w-20 h-20 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                                        @if (img != null)
+                                        {
+                                            <img src="@img.ImageURL" alt="@product?.Name" loading="lazy" class="w-full h-full object-contain p-1.5" onerror="this.onerror=null;this.src='https://placehold.co/80x80/fef2f2/d70018?text=SP';" />
+                                        }
+                                        else
+                                        {
+                                            <span class="material-symbols-outlined text-3xl text-slate-300">image</span>
+                                        }
+                                    </a>
+                                    <div class="flex-1 min-w-0">
+                                        <a href="@Url.Action("Details", "Shop", new { id = detail.ProductID })" class="text-sm text-slate-900 line-clamp-2 hover:text-primary-container transition-colors">@(product?.Name ?? "Sản phẩm")</a>
+                                        <p class="text-xs text-slate-500 mt-1">@string.Format("{0:N0}đ", detail.UnitPrice) × @(detail.Quantity)</p>
+                                    </div>
+                                    <span class="text-sm font-semibold text-slate-900 whitespace-nowrap">@string.Format("{0:N0}đ", detail.Subtotal)</span>
+                                </div>
+                            }
+                        </div>
 
-            <div class="flex flex-col gap-2 pt-1">
-                <button type="button"
-                        id="btn-confirm-transferred"
-                        onclick="document.getElementById('transfer-notif-box').classList.remove('hidden'); this.classList.add('hidden'); if(window.showToast) showToast({type:'info', title:'Đã ghi nhận chuyển khoản', message:'Shop đang kiểm tra giao dịch đơn hàng #@Model.OrderID. Vui lòng đợi trong giây lát!'});"
-                        class="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs tracking-wide transition-all shadow-md active:scale-[0.98]">
-                    <span class="material-symbols-outlined text-base">task_alt</span>
-                    Tôi đã chuyển khoản xong
-                </button>
-                <button type="button"
-                        onclick="window.location.reload();"
-                        class="w-full min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-colors">
-                    <span class="material-symbols-outlined text-base">refresh</span>
-                    Kiểm tra lại trạng thái
-                </button>
-            </div>
-        </div>
-    }
-    else if (Model.PaymentStatus == "Paid")
-    {
-        <div class="bg-gradient-to-br from-emerald-800 to-teal-900 text-white rounded-3xl p-6 shadow-md">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-emerald-300 text-2xl">verified</span>
-                <h2 class="font-headline font-bold text-lg text-white">Đã thanh toán thành công</h2>
-            </div>
-            <p class="text-xs text-emerald-100 leading-relaxed mb-3">
-                Đơn hàng #@Model.OrderID đã được xác nhận thanh toán an toàn qua @(Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản VietQR" : "Tiền mặt khi nhận hàng (COD)").
-            </p>
-            @if (Model.PaymentDate.HasValue)
-            {
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 text-xs text-emerald-200">
-                    <span class="material-symbols-outlined text-sm">schedule</span>
-                    Thời gian: @Model.PaymentDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                </div>
-            }
-        </div>
-    }
-    else if (Model.PaymentMethod == "COD")
-    {
-        if (Model.Status == "Shipped")
-        {
-            <div class="bg-gradient-to-br from-blue-900 to-[#0a3880] text-white rounded-3xl p-6 shadow-md">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-amber-300 text-2xl">local_shipping</span>
-                    <h2 class="font-headline font-bold text-lg text-white">Đơn hàng đang được giao</h2>
-                </div>
-                <p class="text-xs text-blue-100 leading-relaxed mb-3">
-                    Kiện hàng của bạn đang trên đường vận chuyển. Bạn sẽ thanh toán tiền mặt trực tiếp cho nhân viên giao hàng khi nhận kiện hàng.
-                </p>
-                <div class="bg-white/10 p-3 rounded-2xl flex items-center justify-between text-xs">
-                    <span class="text-blue-200">Tiền mặt cần thanh toán:</span>
-                    <span class="font-extrabold text-base text-amber-300">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="bg-blue-50/80 border border-blue-200 rounded-3xl p-5 shadow-xs">
-                <div class="flex items-center gap-2 mb-1.5 text-[#0d47a1]">
-                    <span class="material-symbols-outlined text-xl">payments</span>
-                    <h2 class="font-headline font-bold text-sm text-[#0d47a1]">Thanh toán khi nhận hàng (COD)</h2>
-                </div>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Bạn sẽ thanh toán <strong>@string.Format("{0:N0}đ", Model.FinalAmount)</strong> bằng tiền mặt cho nhân viên giao hàng khi kiện hàng được giao tới bạn.
-                </p>
-            </div>
-        }
-    }
+                        <dl class="px-5 py-4 border-t border-slate-100 bg-gradient-to-b from-white to-red-50/40 rounded-b-2xl space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <dt class="text-slate-500">Tạm tính</dt>
+                                <dd class="text-slate-800">@string.Format("{0:N0}đ", Model.TotalAmount)</dd>
+                            </div>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <div class="flex justify-between">
+                                    <dt class="text-slate-500">Giảm giá@(Model.PromotionalCode != null ? " (" + Model.PromotionalCode.Code + ")" : "")</dt>
+                                    <dd class="text-emerald-600 font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</dd>
+                                </div>
+                            }
+                            <div class="flex justify-between">
+                                <dt class="text-slate-500">Phí vận chuyển</dt>
+                                <dd class="text-slate-800">Miễn phí</dd>
+                            </div>
+                            <div class="flex items-baseline justify-between pt-2 border-t border-slate-200/70">
+                                <dt class="font-semibold text-slate-900">Thành tiền</dt>
+                                <dd class="font-headline font-extrabold text-xl text-primary-container">@string.Format("{0:N0}đ", Model.FinalAmount)</dd>
+                            </div>
+                        </dl>
+                    </section>
 
-    <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thông tin đơn hàng</h2>
-        <div class="space-y-3 text-sm">
-            <div class="flex justify-between">
-                <span class="text-slate-500">Ngày đặt</span>
-                <span class="font-semibold">@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500">Thanh toán</span>
-                <span class="font-semibold text-slate-800">
-                    @(Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản VietQR" : (Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng (COD)" : Model.PaymentMethod))
-                </span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500">TT thanh toán</span>
-                <div>
-                    @if (Model.PaymentStatus == "Paid")
+                    @if (canCancel)
                     {
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Đã thanh toán
-                        </span>
+                        using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post, new { id = "cancel-order-box" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                                <h2 class="font-headline font-bold text-base text-slate-900">Hủy đơn hàng</h2>
+                                <p class="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">Đơn đang chờ shop xác nhận nên bạn có thể tự hủy. Tồn kho và mã giảm giá sẽ được hoàn lại tự động.</p>
+
+                                <p class="text-xs font-semibold text-slate-500 mb-2" id="cancel-reason-chips-label">Lý do thường gặp:</p>
+                                <div class="flex flex-wrap gap-2 mb-3" role="group" aria-labelledby="cancel-reason-chips-label">
+                                    @foreach (var reason in new[] { "Tôi muốn thay đổi địa chỉ nhận hàng", "Tôi muốn đổi sản phẩm hoặc số lượng", "Tìm thấy giá tốt hơn ở nơi khác", "Không còn nhu cầu mua nữa" })
+                                    {
+                                        <button type="button" data-reason="@reason" onclick="setCancelReason(this.getAttribute('data-reason'));"
+                                                class="min-h-[32px] px-3 rounded-full border border-slate-200 bg-white hover:border-primary-container hover:text-primary-container text-xs text-slate-700 transition-colors">
+                                            @reason
+                                        </button>
+                                    }
+                                </div>
+
+                                <label for="cancellationReason" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Lý do hủy đơn <span class="text-primary-container">*</span>
+                                </label>
+                                <textarea id="cancellationReason" name="cancellationReason" rows="3" maxlength="1000" required
+                                          placeholder="Ví dụ: Tôi đặt nhầm sản phẩm hoặc muốn đổi địa chỉ..."
+                                          class="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-800 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/15 resize-y transition-colors"></textarea>
+                                <p class="text-[11px] text-slate-400 mt-1 mb-4">Tối đa 1.000 ký tự.</p>
+
+                                <button type="submit"
+                                        onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này? Thao tác này không thể hoàn tác.');"
+                                        class="w-full sm:w-auto min-h-[44px] px-6 rounded-lg border border-slate-300 bg-white hover:border-red-300 hover:bg-red-50 hover:text-red-600 text-slate-700 font-semibold text-sm inline-flex items-center justify-center gap-2 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">cancel</span>
+                                    Xác nhận hủy đơn
+                                </button>
+                            </section>
+                        }
                     }
-                    else
+                    else if (Model.Status == "Confirmed" || Model.Status == "Processing" || Model.Status == "Shipped")
                     {
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Chờ thanh toán
-                        </span>
+                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <span class="w-10 h-10 rounded-xl bg-primary-fixed text-primary-container flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined">support_agent</span>
+                            </span>
+                            <div class="flex-1 min-w-0 text-sm">
+                                <p class="font-bold text-slate-900">Cần hủy hoặc thay đổi đơn?</p>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Đơn đã được shop xác nhận nên không thể tự hủy. Gọi tổng đài để nhân viên hỗ trợ.</p>
+                            </div>
+                            <a href="tel:18002097" class="shrink-0 min-h-[44px] px-5 rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">call</span> 1800.2097
+                            </a>
+                        </section>
+                    }
+                    else if (isCancelled)
+                    {
+                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                            <h2 class="font-headline font-bold text-base text-slate-900 mb-3">Thông tin hủy đơn</h2>
+                            <dl class="space-y-3 text-sm">
+                                <div class="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
+                                    <dt class="text-slate-500 shrink-0">Người hủy</dt>
+                                    <dd class="font-semibold text-slate-800 sm:text-right">@(Model.CancelledBy == "Customer" ? "Bạn đã hủy đơn" : (Model.CancelledBy == "Manager" ? "Shop đã hủy đơn" : (Model.CancelledBy ?? "Hệ thống")))</dd>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                                {
+                                    <div class="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
+                                        <dt class="text-slate-500 shrink-0">Lý do</dt>
+                                        <dd class="text-slate-800 sm:text-right leading-relaxed break-words">@Model.CancellationReason</dd>
+                                    </div>
+                                }
+                            </dl>
+                        </section>
                     }
                 </div>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Địa chỉ</span>
-                <span class="font-semibold text-right max-w-[180px]">@Model.ShippingAddress</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">SĐT</span>
-                <span class="font-semibold">@Model.ReceiverPhone</span>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.Notes))
-            {
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Ghi chú</span>
-                    <span class="font-semibold text-right max-w-[180px]">@Model.Notes</span>
-                </div>
-            }
-        </div>
-    </div>
 
+                <!-- Cột phải: thanh toán, giao hàng, đánh giá -->
+                <div class="space-y-4 min-w-0">
+                    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <h2 class="font-headline font-bold text-base text-slate-900">Thanh toán</h2>
+                            @if (isPaid)
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Đã thanh toán
+                                </span>
+                            }
+                            else if (!isCancelled)
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>@(isAwaitingConfirm ? "Chờ xác nhận" : "Chưa thanh toán")
+                                </span>
+                            }
+                        </div>
+                        <p class="text-sm text-slate-800">@paymentText</p>
 
-    @if (Model.Status == "Delivered")
-    {
-        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
-            <div class="flex items-start gap-3">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-amber-600 text-2xl">
-                        star
-                    </span>
-                </div>
+                        @if (isPaid)
+                        {
+                            if (Model.PaymentDate.HasValue)
+                            {
+                                <p class="text-xs text-slate-500 mt-1">Lúc @Model.PaymentDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            }
+                        }
+                        else if (!isCancelled && isAwaitingConfirm)
+                        {
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">Shop đang đối soát giao dịch chuyển khoản của bạn và sẽ cập nhật sớm.</p>
+                        }
+                        else if (!isCancelled && Model.PaymentMethod == "BankTransfer")
+                        {
+                            <p class="text-xs text-slate-500 mt-1 mb-3 leading-relaxed">Mở ứng dụng ngân hàng bất kỳ và quét mã để chuyển khoản đúng số tiền, nội dung.</p>
+                            <div class="p-3 rounded-xl border border-slate-200 flex justify-center mb-3">
+                                <img src="https://img.vietqr.io/image/VCB-1029384756-compact2.png?amount=@((long)Model.FinalAmount)&addInfo=DH%20@Model.OrderID&accountName=THE%20CHILL%20SHOP"
+                                     alt="Mã VietQR chuyển khoản đơn hàng #@Model.OrderID"
+                                     class="max-w-[200px] w-full h-auto object-contain"
+                                     onerror="this.onerror=null;this.src='https://placehold.co/200x200/fef2f2/d70018?text=VietQR+DH+@Model.OrderID';" />
+                            </div>
+                            <dl class="space-y-2 text-xs mb-3">
+                                <div class="flex justify-between items-center gap-2">
+                                    <dt class="text-slate-500">Ngân hàng</dt>
+                                    <dd class="font-semibold text-slate-800">Vietcombank (VCB)</dd>
+                                </div>
+                                <div class="flex justify-between items-center gap-2">
+                                    <dt class="text-slate-500">Số tài khoản</dt>
+                                    <dd class="flex items-center gap-1">
+                                        <span class="font-mono font-semibold text-slate-800">1029384756</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('1029384756'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép số tài khoản vào clipboard.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép số tài khoản">
+                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </dd>
+                                </div>
+                                <div class="flex justify-between items-center gap-2">
+                                    <dt class="text-slate-500">Nội dung</dt>
+                                    <dd class="flex items-center gap-1">
+                                        <span class="font-mono font-bold text-primary-container">DH @Model.OrderID</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('DH @Model.OrderID'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép nội dung chuyển khoản.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép nội dung chuyển khoản">
+                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </dd>
+                                </div>
+                                <div class="flex justify-between items-center gap-2">
+                                    <dt class="text-slate-500">Số tiền</dt>
+                                    <dd class="font-bold text-slate-900">@string.Format("{0:N0}đ", Model.FinalAmount)</dd>
+                                </div>
+                            </dl>
 
-                <div class="flex-1">
-                    <h2 class="font-headline font-bold text-lg text-slate-900 mb-1">
-                        Bạn hài lòng với đơn hàng chứ?
-                    </h2>
+                            <div id="transfer-notif-box" class="hidden mb-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs" role="status">
+                                <p class="font-semibold text-amber-800 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">hourglass_top</span> Đã ghi nhận yêu cầu
+                                </p>
+                                <p class="text-amber-700 mt-1 leading-relaxed">Shop đang đối soát giao dịch đơn #@Model.OrderID và sẽ cập nhật trong 5-15 phút.</p>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button type="button" id="btn-confirm-transferred"
+                                        onclick="document.getElementById('transfer-notif-box').classList.remove('hidden'); this.classList.add('hidden'); if(window.showToast) showToast({type:'info', title:'Đã ghi nhận chuyển khoản', message:'Shop đang kiểm tra giao dịch đơn hàng #@Model.OrderID. Vui lòng đợi trong giây lát!'});"
+                                        class="w-full min-h-[44px] rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">task_alt</span> Tôi đã chuyển khoản
+                                </button>
+                                <button type="button" onclick="window.location.reload();"
+                                        class="w-full min-h-[40px] rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-medium text-xs inline-flex items-center justify-center gap-1.5 transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">refresh</span> Kiểm tra lại trạng thái
+                                </button>
+                            </div>
+                        }
+                        else if (!isCancelled && Model.PaymentMethod == "COD")
+                        {
+                            <div class="mt-3 p-3 rounded-lg bg-badge-discount-bg flex items-center justify-between gap-2 text-xs">
+                                <span class="text-slate-600">@(Model.Status == "Shipped" ? "Chuẩn bị tiền mặt khi nhận" : "Trả tiền mặt khi nhận hàng")</span>
+                                <span class="font-headline font-extrabold text-sm text-primary-container whitespace-nowrap">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                            </div>
+                        }
+                    </section>
 
-                    <p class="text-sm text-slate-600 mb-4">
-                        Hãy chia sẻ trải nghiệm của bạn và đánh giá từng sản phẩm
-                        để giúp The Chill Shop phục vụ tốt hơn.
-                    </p>
+                    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                        <h2 class="font-headline font-bold text-base text-slate-900 mb-3">Giao tới</h2>
+                        <div class="space-y-2.5 text-sm">
+                            <p class="flex items-start gap-2 text-slate-800">
+                                <span class="material-symbols-outlined text-[18px] text-slate-400 shrink-0">location_on</span>
+                                <span class="break-words min-w-0">@Model.ShippingAddress</span>
+                            </p>
+                            <p class="flex items-center gap-2 text-slate-800">
+                                <span class="material-symbols-outlined text-[18px] text-slate-400 shrink-0">call</span>
+                                <span>@Model.ReceiverPhone</span>
+                            </p>
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <p class="flex items-start gap-2 text-slate-600">
+                                    <span class="material-symbols-outlined text-[18px] text-slate-400 shrink-0">sticky_note_2</span>
+                                    <span class="break-words min-w-0">@Model.Notes</span>
+                                </p>
+                            }
+                        </div>
+                    </section>
 
                     @if (Model.Status == "Delivered")
                     {
-                        <a href="@Url.Action("CreateOrderReview", "Review", new { orderId = Model.OrderID })"
-                           class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl @(ViewBag.HasOrderReview == true ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700") text-white font-bold text-sm transition-colors shadow-sm">
-
-                            <span class="material-symbols-outlined text-lg">
-                                rate_review
-                            </span>
-
-                            @(ViewBag.HasOrderReview == true
-            ? "Chỉnh sửa đánh giá"
-            : "Đánh giá đơn hàng")
-                        </a>
+                        var hasReview = ViewBag.HasOrderReview == true;
+                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                            <div class="flex items-center gap-1 text-gold-star mb-2" aria-hidden="true">
+                                @for (var s = 0; s < 5; s++)
+                                {
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">star</span>
+                                }
+                            </div>
+                            <h2 class="font-headline font-bold text-base text-slate-900">@(hasReview ? "Cảm ơn bạn đã đánh giá" : "Bạn hài lòng với đơn hàng?")</h2>
+                            <p class="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">Chia sẻ trải nghiệm về từng sản phẩm để giúp TheChillShop phục vụ tốt hơn.</p>
+                            <a href="@Url.Action("CreateOrderReview", "Review", new { orderId = Model.OrderID })"
+                               class="w-full min-h-[44px] rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-1.5 transition-colors @(hasReview ? "border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700" : "bg-primary-container hover:bg-brand-red-vibrant text-white")">
+                                <span class="material-symbols-outlined text-[18px]">rate_review</span>
+                                @(hasReview ? "Chỉnh sửa đánh giá" : "Đánh giá đơn hàng")
+                            </a>
+                        </section>
                     }
                 </div>
             </div>
-        </div>
-    }
-
-
-    <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thanh toán</h2>
-        <div class="space-y-3 text-sm">
-            <div class="flex justify-between">
-                <span class="text-slate-500">Tạm tính</span>
-                <span class="font-semibold">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
-            </div>
-            @if (Model.DiscountAmount > 0)
-            {
-                <div class="flex justify-between text-green-600">
-                    <span>Giảm giá</span>
-                    <span class="font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</span>
-                </div>
-            }
-            <div class="border-t border-slate-200 pt-3 flex justify-between">
-                <span class="font-headline font-bold text-slate-900">Tổng cộng</span>
-                <span class="font-headline font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
-            </div>
-        </div>
-    </div>
-
-    @if (canCancel)
-    {
-        using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post))
-        {
-            @Html.AntiForgeryToken()
-
-            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="font-headline font-bold text-lg text-slate-900 mb-3">
-                    Hủy đơn hàng
-                </h2>
-
-                <p class="text-sm text-slate-500 mb-4">
-                    Nếu bạn muốn hủy đơn hàng, vui lòng cho chúng tôi biết lý do.
-                </p>
-
-                <label for="cancellationReason"
-                       class="block text-sm font-bold text-slate-700 mb-2">
-                    Lý do hủy đơn hàng <span class="text-red-500">*</span>
-                </label>
-
-                <textarea id="cancellationReason"
-                          name="cancellationReason"
-                          rows="4"
-                          maxlength="1000"
-                          required
-                          placeholder="Ví dụ: Tôi đặt nhầm sản phẩm hoặc muốn thay đổi đơn hàng..."
-                          class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm text-slate-800 outline-none focus:border-[#0d47a1] resize-y"></textarea>
-
-                <p class="text-xs text-slate-400 mt-2 mb-4">
-                    Vui lòng nhập tối đa 1.000 ký tự.
-                </p>
-
-                <button type="submit"
-                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');"
-                        class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                    <span class="material-symbols-outlined text-lg">cancel</span>
-                    Xác nhận hủy đơn hàng
-                </button>
-            </div>
-        }
-    }
-
-
-</div>
+        </main>
     </div>
 </div>
 
@@ -504,4 +392,3 @@
     }
 </script>
 }
-
