@@ -705,7 +705,7 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
 
                 var now = DateTime.UtcNow;
-                if (!promo.IsActive || promo.StartDate > now.AddMinutes(1) || promo.EndDate < now)
+                if (!promo.IsActive || promo.StartDate > now || promo.EndDate < now)
                     return Json(new { success = false, message = "Mã giảm giá đã hết hạn hoặc chưa có hiệu lực." });
 
                 if (promo.CurrentUsage >= promo.MaxUsage)
