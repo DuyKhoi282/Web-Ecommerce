@@ -10,7 +10,7 @@
     string categoryName = Model?.Category?.Name ?? (ViewBag.CardCategory as string ?? "Thiết bị số");
     string imageUrl = Model?.ProductImages?.FirstOrDefault(p => p.IsMain)?.ImageURL 
                       ?? Model?.ProductImages?.FirstOrDefault()?.ImageURL 
-                      ?? (ViewBag.CardImageUrl as string ?? "https://placehold.co/400x400/eef2ff/0d47a1?text=TheChillShop");
+                      ?? (ViewBag.CardImageUrl as string ?? "https://placehold.co/400x400/fef2f2/d70018?text=TheChillShop");
     int stock = Model != null ? Model.StockQuantity : 25;
     
     // Tính phần trăm giảm giá nếu có
@@ -21,7 +21,7 @@
     }
 }
 
-<div class="group bg-white rounded-2xl border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col overflow-hidden relative" data-product-id="@id">
+<div class="group bg-white rounded-2xl border-2 border-slate-300 hover:border-primary-container shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col overflow-hidden relative" data-product-id="@id">
     
     <!-- Image & Badges Container with clear bottom border -->
     <div class="relative aspect-square w-full bg-slate-50 border-b-2 border-slate-200 overflow-hidden">
@@ -35,7 +35,7 @@
             }
             else
             {
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-gradient-to-r from-[#0d47a1] to-[#00b4d8] text-white shadow-md tracking-wider">
+                <span class="px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-gradient-to-r from-primary-container to-brand-red-vibrant text-white shadow-md tracking-wider">
                     Mới
                 </span>
             }
@@ -57,7 +57,7 @@
             <img src="@imageUrl" 
                  alt="@name" 
                  class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 ease-out" 
-                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8faff/0d47a1?text=TheChillShop';" />
+                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/fef2f2/d70018?text=TheChillShop';" />
         </a>
     </div>
 
@@ -65,12 +65,12 @@
     <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between bg-white">
         <div>
             <!-- Category Tag -->
-            <p class="text-[11px] font-black uppercase tracking-wider text-[#00b4d8] mb-1">
+            <p class="text-[11px] font-black uppercase tracking-wider text-text-muted mb-1">
                 @categoryName
             </p>
 
             <!-- Product Title -->
-            <h3 class="font-headline font-bold text-slate-900 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-[#0d47a1] transition-colors duration-200 mb-2">
+            <h3 class="font-headline font-bold text-slate-900 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-primary-container transition-colors duration-200 mb-2">
                 <a href="@(id > 0 ? Url.Action("Details", "Shop", new { id = id }) : "#")" title="@name">
                     @name
                 </a>
@@ -94,7 +94,7 @@
             <div class="flex items-baseline gap-2 mb-4 tabular-nums">
                 @if (discountPrice.HasValue && discountPrice.Value > 0)
                 {
-                    <span class="font-headline font-black text-xl text-[#0d47a1]">
+                    <span class="font-headline font-black text-xl text-primary-container">
                         @string.Format("{0:N0}đ", discountPrice.Value)
                     </span>
                     <span class="text-xs text-slate-400 line-through font-bold">
@@ -103,7 +103,7 @@
                 }
                 else
                 {
-                    <span class="font-headline font-black text-xl text-[#0d47a1]">
+                    <span class="font-headline font-black text-xl text-primary-container">
                         @string.Format("{0:N0}đ", price)
                     </span>
                 }
@@ -112,7 +112,7 @@
             <!-- Action Buttons: Thêm giỏ hàng (Thành viên 3 gắn hàm Ajax) -->
             <div class="flex items-center gap-2">
                 <button type="button" 
-                        class="btn-add-to-cart flex-1 py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-[#0d47a1] text-[#0d47a1] hover:text-white border-2 border-blue-300 hover:border-[#0d47a1] font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
+                        class="btn-add-to-cart flex-1 py-2.5 px-3 rounded-xl bg-badge-discount-bg hover:bg-primary-container text-primary-container hover:text-white border-2 border-red-200 hover:border-primary-container font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
                         data-product-id="@id"
                         onclick="if(window.addToCart) { addToCart(@id); } else { window.location.href = '@Url.Action("Details", "Shop", new { id = id })'; }">
                     <span class="material-symbols-outlined text-base">shopping_cart</span>
@@ -120,7 +120,7 @@
                 </button>
                 
                 <a href="@(id > 0 ? Url.Action("Details", "Shop", new { id = id }) : "#")" 
-                   class="w-10 h-10 rounded-xl border-2 border-slate-300 text-slate-700 hover:text-[#0d47a1] hover:border-[#0d47a1] bg-white flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
+                   class="w-10 h-10 rounded-xl border-2 border-slate-300 text-slate-700 hover:text-primary-container hover:border-primary-container bg-white flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
                    title="Xem chi tiết">
                     <span class="material-symbols-outlined text-lg">visibility</span>
                 </a>
