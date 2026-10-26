@@ -1,5 +1,6 @@
 using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace WebEcommerce.Controllers
                     .ToListAsync();
 
                 var vm = new CartViewModel();
+                var adjustedNames = new List<string>();
 
                 foreach (var ci in cookieItems)
                 {
@@ -50,7 +52,15 @@ namespace WebEcommerce.Controllers
                         continue;
                     }
 
-                    var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, ci.Quantity);
+                    // Kho giảm sau khi khách thêm vào giỏ → hạ số lượng về tồn kho (Checkout cũng chỉ đặt tối đa bằng tồn kho)
+                    var quantity = ci.Quantity;
+                    if (product.StockQuantity > 0 && quantity > product.StockQuantity)
+                    {
+                        quantity = product.StockQuantity;
+                        adjustedNames.Add(product.Name);
+                    }
+
+                    var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, quantity);
                     var image = product.ProductImages?
                         .FirstOrDefault(x => x.IsMain)
                         ?? product.ProductImages?.FirstOrDefault();
@@ -61,8 +71,8 @@ namespace WebEcommerce.Controllers
                         ProductName = product.Name,
                         ImageURL = image?.ImageURL,
                         UnitPrice = unitPrice,
-                        Quantity = ci.Quantity,
-                        ItemTotal = unitPrice * ci.Quantity,
+                        Quantity = quantity,
+                        ItemTotal = unitPrice * quantity,
                         StockQuantity = product.StockQuantity,
                         Status = product.Status
                     });
@@ -71,8 +81,15 @@ namespace WebEcommerce.Controllers
                 // Tổng tiền giỏ hàng chỉ tính các sản phẩm còn hàng
                 vm.CartTotal = vm.AvailableCartTotal;
 
-                // Clean up cookie: remove items whose products no longer exist
-                if (vm.Items.Count < cookieItems.Count)
+                if (adjustedNames.Any())
+                {
+                    ViewBag.StockAdjustedMessage =
+                        "Kho không còn đủ hàng nên số lượng đã được giảm về mức tồn kho cho: "
+                        + string.Join(", ", adjustedNames) + ".";
+                }
+
+                // Clean up cookie: remove items whose products no longer exist or exceed stock
+                if (vm.Items.Count < cookieItems.Count || adjustedNames.Any())
                 {
                     var validItems = vm.Items
                         .Select(i => new CookieCartItem
@@ -89,7 +106,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceError(
                     $"[Cart/Index] {ex}"
                 );
 
@@ -273,7 +290,7 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceError(
                     $"[Cart/AddToCart] {ex}"
                 );
 
@@ -334,55 +351,29 @@ namespace WebEcommerce.Controllers
                 // Update cookie
                 CookieCartHelper.UpdateQuantity(Request, Response, productId, newQuantity);
 
-                // Calculate totals
+                // Giá có thể đổi theo số lượng (hết suất Flash Sale → về giá thường)
                 var unitPrice = FlashSaleHelper.GetUnitPrice(_context, product, newQuantity);
                 var itemTotal = unitPrice * newQuantity;
 
-                // Recalculate cart total (chỉ tính các sản phẩm còn hàng)
-                var allItems = CookieCartHelper.GetCartItems(Request);
                 // Update the in-memory list since Request cookie is stale
-                var itemInList = allItems.FirstOrDefault(i => i.ProductID == productId);
-                if (itemInList != null) itemInList.Quantity = newQuantity;
-
-                // We need product prices for all items to calculate cart total
-                var otherProductIds = allItems
-                    .Where(i => i.ProductID != productId)
-                    .Select(i => i.ProductID)
-                    .ToList();
-
-                decimal cartTotal = (product.Status == 1 && product.StockQuantity > 0) ? itemTotal : 0m;
-                if (otherProductIds.Any())
-                {
-                    var otherProducts = await _context.Products
-                        .Where(p => otherProductIds.Contains(p.ProductID))
-                        .ToListAsync();
-
-                    foreach (var ci in allItems.Where(i => i.ProductID != productId))
-                    {
-                        var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                        if (op != null && op.Status == 1 && op.StockQuantity > 0)
-                        {
-                            cartTotal += FlashSaleHelper.GetUnitPrice(_context, op, ci.Quantity) * ci.Quantity;
-                        }
-                    }
-                }
-
-                var cartItemCount = allItems.Sum(i =>
-                    i.ProductID == productId ? newQuantity : i.Quantity);
+                existing.Quantity = newQuantity;
+                var totals = await CalculateCartTotalsAsync(cookieItems);
 
                 return Json(new
                 {
                     success = true,
                     message = "Đã tăng số lượng.",
                     quantity = newQuantity,
+                    unitPrice = unitPrice,
                     itemTotal = itemTotal,
-                    cartTotal = cartTotal,
-                    cartItemCount = cartItemCount
+                    cartTotal = totals.CartTotal,
+                    availableCount = totals.AvailableCount,
+                    cartItemCount = totals.ItemCount
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Cart/IncreaseQuantity] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Cart/IncreaseQuantity] {ex}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
             }
         }
@@ -417,39 +408,17 @@ namespace WebEcommerce.Controllers
                 {
                     CookieCartHelper.RemoveItem(Request, Response, productId);
 
-                    // Calculate remaining totals
-                    var remainingItems = cookieItems
-                        .Where(i => i.ProductID != productId)
-                        .ToList();
-
-                    decimal remainTotal = 0;
-                    int remainCount = 0;
-
-                    if (remainingItems.Any())
-                    {
-                        var remainIds = remainingItems.Select(i => i.ProductID).ToList();
-                        var remainProducts = await _context.Products
-                            .Where(p => remainIds.Contains(p.ProductID))
-                            .ToListAsync();
-
-                        foreach (var ri in remainingItems)
-                        {
-                            var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
-                            if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
-                            {
-                                remainTotal += FlashSaleHelper.GetUnitPrice(_context, rp, ri.Quantity) * ri.Quantity;
-                            }
-                            remainCount += ri.Quantity;
-                        }
-                    }
+                    var remainTotals = await CalculateCartTotalsAsync(
+                        cookieItems.Where(i => i.ProductID != productId).ToList());
 
                     return Json(new
                     {
                         success = true,
                         removed = true,
                         message = "Đã xóa sản phẩm khỏi giỏ hàng.",
-                        cartTotal = remainTotal,
-                        cartItemCount = remainCount
+                        cartTotal = remainTotals.CartTotal,
+                        availableCount = remainTotals.AvailableCount,
+                        cartItemCount = remainTotals.ItemCount
                     });
                 }
 
@@ -469,34 +438,9 @@ namespace WebEcommerce.Controllers
 
                 var itemTotal = unitPrice * newQuantity;
 
-                // Calculate cart total
-                var allItems = cookieItems.ToList();
-                var itemInList = allItems.FirstOrDefault(i => i.ProductID == productId);
-                if (itemInList != null) itemInList.Quantity = newQuantity;
-
-                var otherProductIds = allItems
-                    .Where(i => i.ProductID != productId)
-                    .Select(i => i.ProductID)
-                    .ToList();
-
-                decimal cartTotal2 = (product != null && product.Status == 1 && product.StockQuantity > 0) ? itemTotal : 0m;
-                if (otherProductIds.Any())
-                {
-                    var otherProducts = await _context.Products
-                        .Where(p => otherProductIds.Contains(p.ProductID))
-                        .ToListAsync();
-
-                    foreach (var ci in allItems.Where(i => i.ProductID != productId))
-                    {
-                        var op = otherProducts.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                        if (op != null && op.Status == 1 && op.StockQuantity > 0)
-                        {
-                            cartTotal2 += FlashSaleHelper.GetUnitPrice(_context, op, ci.Quantity) * ci.Quantity;
-                        }
-                    }
-                }
-
-                var cartItemCount = allItems.Sum(i => i.Quantity);
+                // Update the in-memory list since Request cookie is stale
+                existing.Quantity = newQuantity;
+                var totals = await CalculateCartTotalsAsync(cookieItems);
 
                 return Json(new
                 {
@@ -504,14 +448,16 @@ namespace WebEcommerce.Controllers
                     removed = false,
                     message = "Đã giảm số lượng.",
                     quantity = newQuantity,
+                    unitPrice = unitPrice,
                     itemTotal = itemTotal,
-                    cartTotal = cartTotal2,
-                    cartItemCount = cartItemCount
+                    cartTotal = totals.CartTotal,
+                    availableCount = totals.AvailableCount,
+                    cartItemCount = totals.ItemCount
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Cart/DecreaseQuantity] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Cart/DecreaseQuantity] {ex}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
             }
         }
@@ -542,44 +488,22 @@ namespace WebEcommerce.Controllers
 
                 CookieCartHelper.RemoveItem(Request, Response, productId);
 
-                // Calculate remaining totals
-                var remainingItems = cookieItems
-                    .Where(i => i.ProductID != productId)
-                    .ToList();
-
-                decimal cartTotal = 0;
-                int cartItemCount = 0;
-
-                if (remainingItems.Any())
-                {
-                    var remainIds = remainingItems.Select(i => i.ProductID).ToList();
-                    var remainProducts = await _context.Products
-                        .Where(p => remainIds.Contains(p.ProductID))
-                        .ToListAsync();
-
-                    foreach (var ri in remainingItems)
-                    {
-                        var rp = remainProducts.FirstOrDefault(p => p.ProductID == ri.ProductID);
-                        if (rp != null && rp.Status == 1 && rp.StockQuantity > 0)
-                        {
-                            cartTotal += FlashSaleHelper.GetUnitPrice(_context, rp, ri.Quantity) * ri.Quantity;
-                        }
-                        cartItemCount += ri.Quantity;
-                    }
-                }
+                var totals = await CalculateCartTotalsAsync(
+                    cookieItems.Where(i => i.ProductID != productId).ToList());
 
                 return Json(new
                 {
                     success = true,
                     removed = true,
                     message = "Đã xóa sản phẩm khỏi giỏ hàng.",
-                    cartTotal = cartTotal,
-                    cartItemCount = cartItemCount
+                    cartTotal = totals.CartTotal,
+                    availableCount = totals.AvailableCount,
+                    cartItemCount = totals.ItemCount
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Cart/RemoveItem] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Cart/RemoveItem] {ex}");
                 return Json(new { success = false, message = "Đã xảy ra lỗi. Vui lòng thử lại." });
             }
         }
@@ -603,9 +527,40 @@ namespace WebEcommerce.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Cart/GetCartCount] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Cart/GetCartCount] {ex}");
                 return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        /// <summary>
+        /// Tổng tiền và số lượng khả dụng chỉ tính sản phẩm còn hàng (khớp CartViewModel.AvailableCartTotal/AvailableItemCount);
+        /// ItemCount là tổng số lượng mọi sản phẩm trong giỏ (badge header).
+        /// </summary>
+        private async Task<(decimal CartTotal, int AvailableCount, int ItemCount)> CalculateCartTotalsAsync(
+            List<CookieCartItem> items)
+        {
+            decimal cartTotal = 0m;
+            int availableCount = 0;
+
+            if (items.Any())
+            {
+                var ids = items.Select(i => i.ProductID).ToList();
+                var products = await _context.Products
+                    .Where(p => ids.Contains(p.ProductID))
+                    .ToListAsync();
+
+                foreach (var ci in items)
+                {
+                    var p = products.FirstOrDefault(x => x.ProductID == ci.ProductID);
+                    if (p != null && p.Status == 1 && p.StockQuantity > 0)
+                    {
+                        cartTotal += FlashSaleHelper.GetUnitPrice(_context, p, ci.Quantity) * ci.Quantity;
+                        availableCount += ci.Quantity;
+                    }
+                }
+            }
+
+            return (cartTotal, availableCount, items.Sum(i => i.Quantity));
         }
 
         protected override void Dispose(bool disposing)

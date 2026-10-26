@@ -44,6 +44,14 @@
         </div>
     }
 
+    @if (ViewBag.StockAdjustedMessage != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-sm font-medium flex items-center gap-2" role="status">
+            <span class="material-symbols-outlined text-lg text-amber-700">info</span>
+            <span>@ViewBag.StockAdjustedMessage</span>
+        </div>
+    }
+
     @if (Model != null && Model.HasOutOfStockItems)
     {
         <div class="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 text-sm font-medium flex items-start gap-3 shadow-2xs">
@@ -195,7 +203,7 @@
                                 <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
                                     <div>
                                         <span class="text-xs text-slate-400 block mb-0.5">Đơn giá</span>
-                                        <span class="text-sm font-bold text-slate-800">
+                                        <span class="cart-item-unit-price text-sm font-bold text-slate-800">
                                             @string.Format("{0:N0}đ", item.UnitPrice)
                                         </span>
                                     </div>
@@ -359,7 +367,7 @@
                             <span class="material-symbols-outlined text-xl">
                                 credit_card
                             </span>
-                            Tiến hành thanh toán (@Model.AvailableItemCount món)
+                            Tiến hành thanh toán (<span id="checkout-item-count">@Model.AvailableItemCount</span> món)
                         </a>
                     }
                     else
@@ -432,8 +440,8 @@
                     itemEl.style.transform = 'translateY(-10px)';
                     setTimeout(function () {
                         itemEl.remove();
-                        // If cart empty, reload to show empty state
-                        if (data.cartItemCount === 0 || document.querySelectorAll('.cart-item').length === 0) {
+                        // Cart empty or only sold-out items left: reload so the server renders the right state/checkout button
+                        if (data.cartItemCount === 0 || data.availableCount === 0 || document.querySelectorAll('.cart-item').length === 0) {
                             window.location.reload();
                         }
                     }, 300);
@@ -442,8 +450,12 @@
                 const itemEl = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
                 if (itemEl) {
                     const qtyEl = itemEl.querySelector('.cart-item-quantity');
+                    const unitPriceEl = itemEl.querySelector('.cart-item-unit-price');
                     const itemTotalEl = itemEl.querySelector('.cart-item-total');
                     if (qtyEl && data.quantity !== undefined) qtyEl.innerText = data.quantity;
+                    if (unitPriceEl && data.unitPrice !== undefined) {
+                        unitPriceEl.innerText = new Intl.NumberFormat('vi-VN').format(data.unitPrice) + 'đ';
+                    }
                     if (itemTotalEl && data.itemTotal !== undefined) {
                         itemTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.itemTotal) + 'đ';
                     }
@@ -454,7 +466,8 @@
             const totalEl = document.getElementById('cart-total');
             const badge = document.getElementById('cartBadgeCount');
             const countHeader = document.getElementById('cart-item-count-badge');
-            
+            const checkoutCount = document.getElementById('checkout-item-count');
+
             if (subtotalEl && data.cartTotal !== undefined) {
                 subtotalEl.innerText = new Intl.NumberFormat('vi-VN').format(data.cartTotal) + 'đ';
             }
@@ -464,8 +477,12 @@
             if (badge && data.cartItemCount !== undefined) {
                 badge.innerText = data.cartItemCount;
             }
-            if (countHeader && data.cartItemCount !== undefined) {
-                countHeader.innerText = data.cartItemCount;
+            // "khả dụng" và nút thanh toán chỉ đếm sản phẩm còn hàng; badge header (cartBadgeCount) đếm cả giỏ
+            if (countHeader && data.availableCount !== undefined) {
+                countHeader.innerText = data.availableCount;
+            }
+            if (checkoutCount && data.availableCount !== undefined) {
+                checkoutCount.innerText = data.availableCount;
             }
         }
 
