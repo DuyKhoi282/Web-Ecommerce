@@ -1,11 +1,11 @@
 @model WebEcommerce.Models.Product
 @{
-    ViewBag.Title = Model.Name + " - ShopeChill";
+    ViewBag.Title = Model.Name + " - TheChillShop";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var relatedProducts = ViewBag.RelatedProducts as List<WebEcommerce.Models.Product>;
     var mainImage = Model.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL 
                     ?? Model.ProductImages.FirstOrDefault()?.ImageURL 
-                    ?? "https://placehold.co/800x800/f8faff/d70018?text=ShopeChill";
+                    ?? "https://placehold.co/800x800/f8faff/d70018?text=TheChillShop";
     
     int discountPercent = 0;
     decimal savedAmount = 0;
@@ -73,7 +73,7 @@
 
                     <img id="mainProductImage" src="@mainImage" alt="@Model.Name" 
                          class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300 ease-out" 
-                         onerror="this.onerror=null; this.src='https://placehold.co/800x800/f8faff/d70018?text=ShopeChill';" />
+                         onerror="this.onerror=null; this.src='https://placehold.co/800x800/f8faff/d70018?text=TheChillShop';" />
                 </div>
                 
                 <!-- Thumbnails Carousel -->
@@ -192,7 +192,7 @@
                 <div class="mb-6 rounded-2xl border border-red-200 bg-red-50/30 p-4 relative overflow-hidden">
                     <div class="flex items-center gap-2 mb-3 text-primary font-bold text-xs sm:text-sm uppercase tracking-wide">
                         <span class="material-symbols-outlined text-[18px]">featured_seasonal_and_gifts</span>
-                        <span>Khuyến mại đặc quyền ShopeChill</span>
+                        <span>Khuyến mại đặc quyền TheChillShop</span>
                     </div>
                     <ul class="space-y-2 text-xs text-slate-700">
                         <li class="flex items-start gap-2">
@@ -571,7 +571,7 @@
                         <span class="w-2.5 h-6 rounded-full bg-primary inline-block"></span>
                         <span>Sản phẩm tương tự có thể bạn quan tâm</span>
                     </h3>
-                    <p class="text-xs text-slate-500 mt-1">Các sản phẩm cùng danh mục đang được ưa chuộng tại ShopeChill</p>
+                    <p class="text-xs text-slate-500 mt-1">Các sản phẩm cùng danh mục đang được ưa chuộng tại TheChillShop</p>
                 </div>
                 <a href="@Url.Action("Category", "Shop", new { id = Model.CategoryID })" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
                     <span>Xem tất cả</span>

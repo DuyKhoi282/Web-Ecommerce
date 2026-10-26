@@ -6,8 +6,14 @@
     var featuredProducts = ViewBag.FeaturedProducts as List<Product> ?? new List<Product>();
     var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
     var allProducts = ViewBag.AllProducts as List<Product> ?? new List<Product>();
-
-
+    var flashSales = ViewBag.FlashSales as List<FlashSale> ?? new List<FlashSale>();
+    var activeFlashSale = ViewBag.ActiveFlashSale as FlashSale;
+    if (activeFlashSale == null && flashSales.Any())
+    {
+        activeFlashSale = flashSales.FirstOrDefault();
+    }
+    var activeFlashSaleId = activeFlashSale != null ? activeFlashSale.FlashSaleID : 0;
+    var hasActiveFlashSale = flashSales.Any(fs => fs.FlashSaleItems != null && fs.FlashSaleItems.Any(fsi => fsi.Product != null && fsi.Product.Status != 3));
 }
 
 
@@ -174,83 +180,211 @@
 </div>
 </section>
 <!-- FLASH SALE & HOT DEALS SECTION (HIGH VELOCITY RED THEME) -->
-<section class="w-full py-8 bg-gradient-to-b from-rose-50/90 via-white to-slate-100/90 border-y border-rose-200/80 shadow-sm">
+<section class="w-full py-8 bg-gradient-to-b from-rose-50/90 via-white to-slate-100/90 border-y border-rose-200/80 shadow-sm" id="flash-sale-section">
 <div class="max-w-[1280px] mx-auto px-4 space-y-4">
-<!-- Flash Sale Header with Animated Flame & Countdown -->
-<div class="bg-gradient-to-r from-primary-container via-brand-red-vibrant to-primary rounded-2xl p-4 sm:p-5 text-on-primary shadow-lg border border-red-500/40 flex flex-wrap items-center justify-between gap-4 reveal-on-scroll">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-xl bg-surface-card/20 backdrop-blur-md flex items-center justify-center animate-bounce shadow-sm">
-<span class="material-symbols-outlined text-[26px] text-gold-star">local_fire_department</span>
-</div>
-<div>
-<div class="flex items-center gap-2">
-<h2 class="font-headline-lg text-headline-lg font-extrabold uppercase tracking-tight">FLASH SALE TỰU TRƯỜNG</h2>
-<span class="px-2 py-0.5 rounded bg-surface-card text-primary-container font-badge-label text-badge-label font-bold uppercase shadow-sm">Giảm Tới 50%</span>
-</div>
-<p class="font-caption-sm text-caption-sm text-on-primary-container text-xs">Số lượng có hạn • Tự động kết thúc khi hết suất</p>
-</div>
-</div>
-<!-- Interactive Countdown -->
-<div class="flex items-center gap-2 font-headline-md text-headline-md">
-<span class="text-xs uppercase tracking-wider font-semibold opacity-90 hidden sm:inline">Kết thúc sau:</span>
-<div class="flex items-center gap-1.5 text-on-surface">
-<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="hoursBox">02</div>
-<span class="text-on-primary font-bold">:</span>
-<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="minsBox">45</div>
-<span class="text-on-primary font-bold">:</span>
-<div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow" id="secsBox">18</div>
-</div>
-</div>
-</div>
-<!-- Flash Sale 5-Card Product Grid -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 reveal-stagger">
-@foreach (var product in featuredProducts)
+@if (hasActiveFlashSale)
 {
-    var mainImage = product.ProductImages != null && product.ProductImages.Count > 0 
-        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
-        : "https://via.placeholder.com/400x400";
-    <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90 hover:border-red-500 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-        <div class="flex items-center justify-between">
-            @if (product.DiscountPrice.HasValue && product.Price > 0)
+    <!-- FLASH SALE TIMELINE TABS (SHOPEE / LAZADA STYLE) -->
+    <div class="flex items-center justify-between gap-3 flex-wrap border-b border-rose-200/80 pb-3">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+            @foreach (var fs in flashSales)
             {
-                var discount = Math.Round((1 - (product.DiscountPrice.Value / product.Price)) * 100);
-                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Giảm @discount%</span>
+                var isLive = fs.StartTime <= DateTime.UtcNow && fs.EndTime > DateTime.UtcNow;
+                var isSelected = fs.FlashSaleID == activeFlashSaleId;
+                var startTimeLocal = fs.StartTime.ToLocalTime();
+                var isToday = startTimeLocal.Date == DateTime.Now.Date;
+                var timeLabel = isToday ? startTimeLocal.ToString("HH:mm") : startTimeLocal.ToString("dd/MM HH:mm");
+                
+                <button type="button" 
+                        onclick="switchFlashSaleTab(@fs.FlashSaleID)"
+                        id="fs-tab-btn-@fs.FlashSaleID"
+                        class="fs-slot-tab px-4 py-2.5 rounded-xl text-left transition-all duration-200 flex flex-col items-center justify-center min-w-[130px] border @(isSelected ? "bg-gradient-to-r from-red-600 via-brand-red-vibrant to-rose-600 text-white shadow-md border-red-600 scale-[1.02]" : "bg-white text-slate-700 hover:bg-rose-50/50 hover:text-red-600 border-slate-200/90")">
+                    <span class="font-black text-base leading-tight font-jakarta tracking-tight">@timeLabel</span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5 opacity-90">
+                        @if (isLive)
+                        {
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-ping"></span>
+                            <span>Đang diễn ra</span>
+                        }
+                        else
+                        {
+                            <span>Sắp diễn ra</span>
+                        }
+                    </span>
+                </button>
             }
-            else
-            {
-                <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Hot Deal</span>
-            }
-            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
         </div>
-        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-2 border border-slate-100 group-hover:border-slate-200 transition-colors">
-            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImage"/>
+
+        <a href="@Url.Action("Live", "FlashSale")" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-brand-red-vibrant hover:text-red-700 transition-colors bg-white px-3.5 py-2 rounded-xl border border-red-200 shadow-sm hover:shadow shrink-0 ml-auto group">
+            <span>Xem tất cả Flash Sale</span>
+            <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
         </a>
-        <div class="space-y-1.5">
-            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
-                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
-            </h3>
-            <div class="flex flex-wrap gap-1">
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-slate-200/60">@(product.Category?.Name ?? "Sản phẩm")</span>
+    </div>
+
+    <!-- FLASH SALE PANELS FOR EACH SALE -->
+    foreach (var fs in flashSales)
+    {
+        var isTabVisible = fs.FlashSaleID == activeFlashSaleId;
+        var isLive = fs.StartTime <= DateTime.UtcNow && fs.EndTime > DateTime.UtcNow;
+        var targetTimeIso = (isLive ? fs.EndTime : fs.StartTime).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var items = fs.FlashSaleItems?.Where(i => i.Product != null && i.Product.Status != 3).ToList() ?? new List<FlashSaleItem>();
+        if (!items.Any()) { continue; }
+
+        <div id="fs-panel-@fs.FlashSaleID" class="fs-slot-panel space-y-4 @(isTabVisible ? "" : "hidden")">
+            <!-- Flash Sale Header with Animated Flame & Countdown -->
+            <div class="bg-gradient-to-r from-primary-container via-brand-red-vibrant to-primary rounded-2xl p-4 sm:p-5 text-on-primary shadow-lg border border-red-500/40 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-surface-card/20 backdrop-blur-md flex items-center justify-center animate-bounce shadow-sm">
+                        <span class="material-symbols-outlined text-[26px] text-gold-star">local_fire_department</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-headline-lg text-headline-lg font-extrabold uppercase tracking-tight">@fs.Title</h2>
+                            <span class="px-2 py-0.5 rounded bg-surface-card text-primary-container font-badge-label text-badge-label font-bold uppercase shadow-sm">Giảm Sốc Tới 50%</span>
+                        </div>
+                        <p class="font-caption-sm text-caption-sm text-on-primary-container text-xs">
+                            @(string.IsNullOrWhiteSpace(fs.Description) ? "Số lượng có hạn • Tự động kết thúc khi hết suất" : fs.Description)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Countdown Timer -->
+                <div class="flex items-center gap-2 font-headline-md text-headline-md fs-timer-instance" 
+                     data-targettime="@targetTimeIso" 
+                     data-islive="@(isLive ? "true" : "false")">
+                    <span class="text-xs uppercase tracking-wider font-semibold opacity-90 hidden sm:inline fs-timer-label">
+                        @(isLive ? "Kết thúc sau:" : "Bắt đầu sau:")
+                    </span>
+                    <div class="flex items-center gap-1.5 text-on-surface">
+                        <div class="hidden items-center gap-1 fs-days-container">
+                            <div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow text-sm sm:text-base fs-days-box">00</div>
+                            <span class="text-on-primary font-bold">d</span>
+                        </div>
+                        <div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow text-sm sm:text-base fs-hours-box">00</div>
+                        <span class="text-on-primary font-bold">:</span>
+                        <div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow text-sm sm:text-base fs-mins-box">00</div>
+                        <span class="text-on-primary font-bold">:</span>
+                        <div class="bg-surface-card rounded-lg px-2.5 py-1 text-primary-container font-black shadow text-sm sm:text-base fs-secs-box">00</div>
+                    </div>
+                </div>
             </div>
-            <div class="pt-1">
-                @if (product.DiscountPrice.HasValue)
+
+            <!-- Flash Sale Product Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 reveal-stagger">
+                @foreach (var fsi in items)
                 {
-                    <div class="font-price-headline text-price-headline text-primary-container font-bold">@string.Format("{0:N0}₫", product.DiscountPrice)</div>
-                    <div class="font-price-original text-price-original text-text-muted line-through text-xs">@string.Format("{0:N0}₫", product.Price)</div>
-                }
-                else
-                {
-                    <div class="font-price-headline text-price-headline text-primary-container font-bold">@string.Format("{0:N0}₫", product.Price)</div>
+                    var product = fsi.Product;
+                    var mainImage = product.ProductImages != null && product.ProductImages.Count > 0 
+                        ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+                        : "https://via.placeholder.com/400x400";
+
+                    var discountPct = product.Price > 0 
+                        ? Math.Round((1 - (fsi.FlashSalePrice / product.Price)) * 100) 
+                        : 0;
+
+                    var soldPercent = fsi.MaxQuantity > 0 
+                        ? (int)((double)fsi.SoldQuantity / fsi.MaxQuantity * 100) 
+                        : 0;
+                    if (soldPercent > 100) { soldPercent = 100; }
+                    var isSoldOut = fsi.SoldQuantity >= fsi.MaxQuantity || product.StockQuantity <= 0;
+
+                    <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90 hover:border-red-500 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                        <!-- Badges -->
+                        <div class="flex items-center justify-between">
+                            <span class="bg-gradient-to-r from-red-600 to-rose-600 text-white font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-[12px]">bolt</span>
+                                -@discountPct%
+                            </span>
+                            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
+                        </div>
+
+                        <!-- Product Image -->
+                        <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-2 border border-slate-100 group-hover:border-slate-200 transition-colors">
+                            <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImage" onerror="this.src='https://placehold.co/400x400?text=SP';" />
+                            @if (isSoldOut)
+                            {
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex items-center justify-center">
+                                    <span class="bg-red-600 text-white text-xs font-black uppercase px-2.5 py-1 rounded-md shadow">Hết suất sale</span>
+                                </div>
+                            }
+                        </a>
+
+                        <!-- Product Info -->
+                        <div class="space-y-1.5">
+                            <h3 class="font-title-sm text-title-sm text-on-surface text-sm font-semibold line-clamp-2 group-hover:text-primary-container transition-colors">
+                                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a>
+                            </h3>
+                            <div class="flex flex-wrap gap-1">
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-slate-200/60">@(product.Category?.Name ?? "Sản phẩm")</span>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="pt-1">
+                                <div class="font-price-headline text-price-headline text-primary-container font-black text-base sm:text-lg">
+                                    @string.Format("{0:N0}₫", fsi.FlashSalePrice)
+                                </div>
+                                <div class="font-price-original text-price-original text-text-muted line-through text-xs">
+                                    @string.Format("{0:N0}₫", product.Price)
+                                </div>
+                            </div>
+
+                            <!-- Flash Sale Progress Bar (Đã bán) -->
+                            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative border border-slate-200/60 mt-1.5">
+                                <div class="bg-gradient-to-r from-brand-red-vibrant to-primary-container h-full rounded-full transition-all duration-500" style="width: @soldPercent%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-on-primary drop-shadow">
+                                    @if (isSoldOut)
+                                    {
+                                        <span>Cháy hàng (@fsi.SoldQuantity/@fsi.MaxQuantity)</span>
+                                    }
+                                    else if (soldPercent >= 75)
+                                    {
+                                        <span>🔥 Sắp hết • Đã bán @fsi.SoldQuantity/@fsi.MaxQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Đã bán @fsi.SoldQuantity/@fsi.MaxQuantity</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 }
             </div>
-            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative border border-slate-200/60">
-                <div class="bg-gradient-to-r from-brand-red-vibrant to-primary-container h-full rounded-full" style="width: 80%"></div>
-                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-on-primary drop-shadow">Đã bán 80/100</span>
+        </div>
+    }
+}
+else
+{
+    <!-- Fallback nếu tạm thời chưa có đợt Flash Sale nào đang kích hoạt -->
+    <div class="bg-gradient-to-r from-primary-container via-brand-red-vibrant to-primary rounded-2xl p-4 sm:p-5 text-on-primary shadow-lg border border-red-500/40 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-surface-card/20 backdrop-blur-md flex items-center justify-center">
+                <span class="material-symbols-outlined text-[26px] text-gold-star">local_fire_department</span>
+            </div>
+            <div>
+                <h2 class="font-headline-lg text-headline-lg font-extrabold uppercase tracking-tight">HOT DEALS NỔI BẬT HÔM NAY</h2>
+                <p class="font-caption-sm text-caption-sm text-on-primary-container text-xs">Sản phẩm công nghệ chính hãng giá tốt nhất - Đợt Flash Sale tiếp theo sẽ sớm bắt đầu!</p>
             </div>
         </div>
     </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        @foreach (var product in featuredProducts.Take(5))
+        {
+            var mainImage = product.ProductImages != null && product.ProductImages.Count > 0 
+                ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
+                : "https://via.placeholder.com/400x400";
+            <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90 flex flex-col justify-between group">
+                <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="aspect-square flex items-center justify-center rounded-xl bg-slate-50 p-2">
+                    <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="@mainImage" />
+                </a>
+                <div class="space-y-1 mt-2">
+                    <h3 class="text-sm font-semibold truncate"><a href="@Url.Action("Details", "Shop", new { id = product.ProductID })">@product.Name</a></h3>
+                    <div class="font-bold text-primary-container">@string.Format("{0:N0}₫", product.DiscountPrice ?? product.Price)</div>
+                </div>
+            </div>
+        }
+    </div>
 }
-</div>
 </div>
 </section>
 <!-- B2B CORPORATE & TRADE-IN CAMPAIGN BANNER -->
@@ -943,23 +1077,75 @@ Marshall Acoustic
   // Start auto play on page load
   resetAutoPlay();
 
-  // Flash Sale Timer Countdown Simulation
-  let totalSeconds = 2 * 3600 + 45 * 60 + 18;
-  const hoursBox = document.getElementById('hoursBox');
-  const minsBox = document.getElementById('minsBox');
-  const secsBox = document.getElementById('secsBox');
+  // Flash Sale Tab Switching & Countdown Timers
+  function switchFlashSaleTab(saleId) {
+    // 1. Update Tab button styles
+    const allTabs = document.querySelectorAll('.fs-slot-tab');
+    allTabs.forEach(tab => {
+      tab.classList.remove('bg-gradient-to-r', 'from-red-600', 'via-brand-red-vibrant', 'to-rose-600', 'text-white', 'shadow-md', 'border-red-600', 'scale-[1.02]');
+      tab.classList.add('bg-white', 'text-slate-700', 'hover:bg-rose-50/50', 'hover:text-red-600', 'border-slate-200/90');
+    });
 
-  setInterval(() => {
-    if (totalSeconds > 0) {
-      totalSeconds--;
-      const hrs = Math.floor(totalSeconds / 3600);
-      const mns = Math.floor((totalSeconds % 3600) / 60);
-      const scs = totalSeconds % 60;
+    const activeTab = document.getElementById('fs-tab-btn-' + saleId);
+    if (activeTab) {
+      activeTab.classList.remove('bg-white', 'text-slate-700', 'hover:bg-rose-50/50', 'hover:text-red-600', 'border-slate-200/90');
+      activeTab.classList.add('bg-gradient-to-r', 'from-red-600', 'via-brand-red-vibrant', 'to-rose-600', 'text-white', 'shadow-md', 'border-red-600', 'scale-[1.02]');
+    }
+
+    // 2. Switch Flash Sale panel
+    const allPanels = document.querySelectorAll('.fs-slot-panel');
+    allPanels.forEach(panel => {
+      panel.classList.add('hidden');
+    });
+
+    const activePanel = document.getElementById('fs-panel-' + saleId);
+    if (activePanel) {
+      activePanel.classList.remove('hidden');
+    }
+  }
+
+  // Real Multi-Slot Flash Sale Countdown
+  function updateAllFlashSaleTimers() {
+    const timerElements = document.querySelectorAll('.fs-timer-instance');
+    const now = new Date().getTime();
+
+    timerElements.forEach(timerEl => {
+      const targetTimeStr = timerEl.getAttribute('data-targettime');
+      if (!targetTimeStr) return;
+
+      const targetTime = new Date(targetTimeStr).getTime();
+      const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+
+      const days = Math.floor(diff / 86400);
+      const hrs = Math.floor((diff % 86400) / 3600);
+      const mns = Math.floor((diff % 3600) / 60);
+      const scs = diff % 60;
+
+      const daysContainer = timerEl.querySelector('.fs-days-container');
+      const daysBox = timerEl.querySelector('.fs-days-box');
+      const hoursBox = timerEl.querySelector('.fs-hours-box');
+      const minsBox = timerEl.querySelector('.fs-mins-box');
+      const secsBox = timerEl.querySelector('.fs-secs-box');
+
+      if (daysContainer && daysBox) {
+        if (days > 0) {
+          daysContainer.classList.remove('hidden');
+          daysContainer.classList.add('flex');
+          daysBox.innerText = String(days).padStart(2, '0');
+        } else {
+          daysContainer.classList.remove('flex');
+          daysContainer.classList.add('hidden');
+        }
+      }
+
       if (hoursBox) hoursBox.innerText = String(hrs).padStart(2, '0');
       if (minsBox) minsBox.innerText = String(mns).padStart(2, '0');
       if (secsBox) secsBox.innerText = String(scs).padStart(2, '0');
-    }
-  }, 1000);
+    });
+  }
+
+  updateAllFlashSaleTimers();
+  setInterval(updateAllFlashSaleTimers, 1000);
 
   function submitNewsletter(form) {
     const input = document.getElementById('newsletter-email');

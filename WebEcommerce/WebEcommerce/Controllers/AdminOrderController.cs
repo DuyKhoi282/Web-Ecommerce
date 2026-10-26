@@ -143,9 +143,11 @@ namespace WebEcommerce.Controllers
                 {
                     try
                     {
-                        // Nếu cancel bởi Manager -> restore stock
+                        // Nếu cancel bởi Manager -> restore stock, flash sale, voucher
                         if (newStatus == "Cancelled" && order.Status != "Cancelled")
                         {
+                            var now = DateTime.UtcNow;
+
                             foreach (var detail in order.OrderDetails)
                             {
                                 if (detail.Product != null)
@@ -155,6 +157,29 @@ namespace WebEcommerce.Controllers
                                     {
                                         detail.Product.Status = 1;
                                     }
+
+                                    // Hoàn lại số lượng đã bán của Flash Sale nếu có
+                                    var activeFsItem = await _context.FlashSaleItems
+                                        .Include(f => f.FlashSale)
+                                        .FirstOrDefaultAsync(f => f.ProductID == detail.Product.ProductID
+                                                               && f.FlashSale != null
+                                                               && f.FlashSale.IsActive
+                                                               && f.FlashSale.StartTime <= now
+                                                               && f.FlashSale.EndTime > now);
+                                    if (activeFsItem != null && activeFsItem.SoldQuantity > 0)
+                                    {
+                                        activeFsItem.SoldQuantity = Math.Max(0, activeFsItem.SoldQuantity - detail.Quantity);
+                                    }
+                                }
+                            }
+
+                            // Hoàn lại lượt sử dụng mã giảm giá (voucher) nếu có
+                            if (order.PromoCodeID.HasValue)
+                            {
+                                var promo = await _context.PromotionalCodes.FindAsync(order.PromoCodeID.Value);
+                                if (promo != null && promo.CurrentUsage > 0)
+                                {
+                                    promo.CurrentUsage -= 1;
                                 }
                             }
                         }
@@ -668,8 +693,8 @@ namespace WebEcommerce.Controllers
 
         /// <summary>
         /// Kiểm tra transition hợp lệ
-        /// Pending -> Confirmed -> Shipped -> Delivered
-        /// Pending/Confirmed/Shipped -> Cancelled
+        /// Pending -> Confirmed -> (Processing) -> Shipped -> Delivered
+        /// Pending/Confirmed/Processing/Shipped -> Cancelled
         /// </summary>
         private bool IsValidTransition(string currentStatus, string newStatus)
         {
@@ -678,6 +703,8 @@ namespace WebEcommerce.Controllers
                 case "Pending":
                     return newStatus == "Confirmed" || newStatus == "Cancelled";
                 case "Confirmed":
+                    return newStatus == "Processing" || newStatus == "Shipped" || newStatus == "Cancelled";
+                case "Processing":
                     return newStatus == "Shipped" || newStatus == "Cancelled";
                 case "Shipped":
                     return newStatus == "Delivered" || newStatus == "Cancelled";

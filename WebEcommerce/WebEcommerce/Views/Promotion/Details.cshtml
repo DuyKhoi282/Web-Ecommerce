@@ -1,0 +1,218 @@
+@model WebEcommerce.Models.PromotionDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Báo cáo Mã giảm giá #" + Model.Promotion.Code;
+    var promo = Model.Promotion;
+    var now = DateTime.UtcNow;
+    var isExpired = promo.EndDate < now;
+}
+
+<div class="max-w-6xl mx-auto mb-10">
+    <!-- Header -->
+    <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <a href="@Url.Action("Index", "Promotion")" class="text-xs font-bold text-chill-primary hover:underline flex items-center gap-1 mb-2">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Quay lại danh sách mã giảm giá
+            </a>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-chill-primary text-3xl">insights</span>
+                    Báo cáo Voucher: <span class="font-mono text-[#0d47a1]">@promo.Code</span>
+                </h1>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @(promo.IsActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600")">
+                    <span class="w-1.5 h-1.5 rounded-full @(promo.IsActive ? "bg-emerald-600" : "bg-slate-500")"></span>
+                    @(promo.IsActive ? "Đang kích hoạt" : "Vô hiệu hóa")
+                </span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="@Url.Action("Edit", "Promotion", new { id = promo.PromoCodeID })" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">edit</span>
+                Chỉnh sửa voucher
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Thẻ KPI của Voucher -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                <span class="material-symbols-outlined text-2xl">confirmation_number</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Lượt áp dụng</span>
+                <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@promo.CurrentUsage / @promo.MaxUsage</span>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                <span class="material-symbols-outlined text-2xl">savings</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Tổng tiền đã giảm</span>
+                <span class="text-xl sm:text-2xl font-headline font-black text-emerald-600">@string.Format("{0:N0}đ", Model.TotalDiscountGiven)</span>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+                <span class="material-symbols-outlined text-2xl">point_of_sale</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Doanh thu thu về</span>
+                <span class="text-xl sm:text-2xl font-headline font-black text-purple-600">@string.Format("{0:N0}đ", Model.TotalRevenueGenerated)</span>
+            </div>
+        </div>
+
+        <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+                <span class="material-symbols-outlined text-2xl">schedule</span>
+            </div>
+            <div>
+                <span class="text-xs font-semibold text-slate-500 block">Hạn sử dụng</span>
+                <span class="text-sm font-headline font-bold text-slate-800">
+                    @promo.EndDate.ToLocalTime().ToString("dd/MM/yyyy")
+                </span>
+                <span class="text-2xs block @(isExpired ? "text-red-500 font-bold" : "text-emerald-600 font-semibold")">
+                    @(isExpired ? "Đã kết thúc" : "Còn hiệu lực")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin chi tiết cấu hình Voucher -->
+    <div class="admin-card rounded-2xl p-6 sm:p-7 mb-6">
+        <h2 class="font-headline font-bold text-base text-slate-900 mb-4 border-b border-slate-100 pb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-chill-primary">settings</span>
+            Chi tiết cấu hình chương trình ưu đãi
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+            <div>
+                <span class="text-xs text-slate-400 block mb-1">Mã Voucher:</span>
+                <span class="font-mono font-bold text-slate-900 text-base px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
+                    @promo.Code
+                </span>
+            </div>
+
+            <div>
+                <span class="text-xs text-slate-400 block mb-1">Loại & Mức giảm giá:</span>
+                <strong class="text-chill-primary font-bold text-base">
+                    @(promo.DiscountType == "Percentage" ? $"Giảm {promo.DiscountValue:N0}%" : $"Giảm {promo.DiscountValue:N0}đ")
+                </strong>
+            </div>
+
+            <div>
+                <span class="text-xs text-slate-400 block mb-1">Điều kiện đơn tối thiểu:</span>
+                <strong class="text-slate-800">
+                    @(promo.MinOrderAmount > 0 ? $"{promo.MinOrderAmount:N0}đ" : "Không giới hạn")
+                </strong>
+            </div>
+
+            <div>
+                <span class="text-xs text-slate-400 block mb-1">Thời gian áp dụng:</span>
+                <span class="text-slate-700 font-semibold">
+                    @promo.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ➔ @promo.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                </span>
+            </div>
+
+            <div class="md:col-span-2">
+                <span class="text-xs text-slate-400 block mb-1">Mô tả ưu đãi:</span>
+                <p class="text-slate-700">
+                    @(string.IsNullOrEmpty(promo.Description) ? "Không có mô tả chi tiết." : promo.Description)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách các đơn hàng đã áp dụng mã này -->
+    <div class="admin-card rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-chill-primary">receipt_long</span>
+                Danh sách Đơn hàng đã áp dụng mã (@Model.RelatedOrders.Count đơn)
+            </h2>
+        </div>
+
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm min-w-[850px]">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b-2 border-slate-200 text-slate-700">
+                        <th class="text-left px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Mã đơn</th>
+                        <th class="text-left px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Khách hàng</th>
+                        <th class="text-left px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Thời gian đặt</th>
+                        <th class="text-right px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Giá gốc</th>
+                        <th class="text-right px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Số tiền giảm</th>
+                        <th class="text-right px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Thực thu</th>
+                        <th class="text-center px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Trạng thái</th>
+                        <th class="text-center px-5 py-3.5 font-bold uppercase text-2xs tracking-wider">Xem</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @if (Model.RelatedOrders == null || !Model.RelatedOrders.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="py-10 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">shopping_bag</span>
+                                <span>Chưa có đơn hàng nào áp dụng mã voucher này.</span>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var order in Model.RelatedOrders)
+                        {
+                            var statusColor = "bg-slate-100 text-slate-700";
+                            switch (order.Status)
+                            {
+                                case "Pending": statusColor = "bg-amber-100 text-amber-700"; break;
+                                case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; break;
+                                case "Processing": statusColor = "bg-sky-100 text-sky-700"; break;
+                                case "Shipped": statusColor = "bg-purple-100 text-purple-700"; break;
+                                case "Delivered": statusColor = "bg-green-100 text-green-700"; break;
+                                case "Cancelled": statusColor = "bg-red-100 text-red-700"; break;
+                            }
+
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="px-5 py-3.5 font-bold font-headline text-slate-900">
+                                    #@order.OrderID
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-semibold text-slate-800">@(order.User?.FullName ?? "Khách vãng lai")</div>
+                                    <span class="text-2xs text-slate-400">@order.ReceiverPhone</span>
+                                </td>
+                                <td class="px-5 py-3.5 text-xs text-slate-600">
+                                    @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="px-5 py-3.5 text-right text-slate-600">
+                                    @string.Format("{0:N0}đ", order.TotalAmount)
+                                </td>
+                                <td class="px-5 py-3.5 text-right font-bold text-emerald-600">
+                                    -@string.Format("{0:N0}đ", order.DiscountAmount)
+                                </td>
+                                <td class="px-5 py-3.5 text-right font-extrabold text-[#0d47a1]">
+                                    @string.Format("{0:N0}đ", order.FinalAmount)
+                                </td>
+                                <td class="px-5 py-3.5 text-center">
+                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold @statusColor">
+                                        @order.Status
+                                    </span>
+                                </td>
+                                <td class="px-5 py-3.5 text-center">
+                                    <a href="@Url.Action("Detail", "AdminOrder", new { id = order.OrderID })"
+                                       class="p-1.5 rounded-lg text-slate-500 hover:text-chill-primary hover:bg-red-50 transition-colors inline-block"
+                                       title="Xem chi tiết đơn hàng">
+                                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

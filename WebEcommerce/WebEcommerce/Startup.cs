@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
@@ -36,7 +37,26 @@ namespace WebEcommerce
                             ""UserId"" VARCHAR(128) NOT NULL REFERENCES ""AspNetUsers""(""Id"") ON DELETE CASCADE,
                             PRIMARY KEY (""LoginProvider"", ""ProviderKey"", ""UserId"")
                         );
+                        CREATE TABLE IF NOT EXISTS ""FlashSales"" (
+                            ""FlashSaleID"" SERIAL PRIMARY KEY,
+                            ""Title"" VARCHAR(200) NOT NULL,
+                            ""Description"" TEXT,
+                            ""StartTime"" TIMESTAMP NOT NULL,
+                            ""EndTime"" TIMESTAMP NOT NULL,
+                            ""IsActive"" BOOLEAN NOT NULL DEFAULT TRUE,
+                            ""CreatedAt"" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                        );
+                        CREATE TABLE IF NOT EXISTS ""FlashSaleItems"" (
+                            ""FlashSaleItemID"" SERIAL PRIMARY KEY,
+                            ""FlashSaleID"" INT NOT NULL REFERENCES ""FlashSales""(""FlashSaleID"") ON DELETE CASCADE,
+                            ""ProductID"" INT NOT NULL REFERENCES ""Products""(""ProductID"") ON DELETE CASCADE,
+                            ""FlashSalePrice"" NUMERIC(18, 2) NOT NULL,
+                            ""MaxQuantity"" INT NOT NULL DEFAULT 50,
+                            ""SoldQuantity"" INT NOT NULL DEFAULT 0
+                        );
                     ");
+
+                    SeedDefaultFlashSale(context);
 
                     var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
                     var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
@@ -139,6 +159,73 @@ namespace WebEcommerce
             catch (Exception)
             {
                 // Bỏ qua nếu user đã tồn tại hoặc DB chưa sẵn sàng
+            }
+        }
+
+        /// <summary>
+        /// Khởi tạo đợt Flash Sale mẫu nếu CSDL chưa có hoặc gia hạn nếu đã hết hạn
+        /// </summary>
+        private void SeedDefaultFlashSale(ApplicationDbContext context)
+        {
+            try
+            {
+                var now = DateTime.UtcNow;
+                var hasActiveFlashSale = context.FlashSales.Any(fs => fs.IsActive && fs.EndTime > now);
+                if (!hasActiveFlashSale)
+                {
+                    var existing = context.FlashSales.OrderByDescending(fs => fs.FlashSaleID).FirstOrDefault();
+                    if (existing != null)
+                    {
+                        existing.IsActive = true;
+                        existing.StartTime = now.AddHours(-1);
+                        existing.EndTime = now.AddHours(28);
+                        context.SaveChanges();
+                    }
+                    else
+                    {
+                        var sampleProducts = context.Products
+                            .Where(p => p.Status != 3)
+                            .OrderBy(p => p.ProductID)
+                            .Take(5)
+                            .ToList();
+
+                        if (sampleProducts.Any())
+                        {
+                            var fs = new FlashSale
+                            {
+                                Title = "FLASH SALE TỰU TRƯỜNG - GIẢM SỐC TỚI 50%",
+                                Description = "Ưu đãi độc quyền chớp nhoáng! Số lượng có hạn, tự động kết thúc khi hết thời gian!",
+                                StartTime = now.AddHours(-1),
+                                EndTime = now.AddHours(28),
+                                IsActive = true,
+                                CreatedAt = now
+                            };
+                            context.FlashSales.Add(fs);
+                            context.SaveChanges();
+
+                            foreach (var p in sampleProducts)
+                            {
+                                decimal fsPrice = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0
+                                    ? Math.Round(p.DiscountPrice.Value * 0.85m)
+                                    : Math.Round(p.Price * 0.7m);
+
+                                context.FlashSaleItems.Add(new FlashSaleItem
+                                {
+                                    FlashSaleID = fs.FlashSaleID,
+                                    ProductID = p.ProductID,
+                                    FlashSalePrice = fsPrice,
+                                    MaxQuantity = 30,
+                                    SoldQuantity = 12
+                                });
+                            }
+                            context.SaveChanges();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Startup/SeedDefaultFlashSale] {ex.Message}");
             }
         }
     }

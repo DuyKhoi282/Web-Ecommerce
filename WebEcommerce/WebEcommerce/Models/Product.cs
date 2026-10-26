@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -53,5 +53,6 @@ namespace WebEcommerce.Models
         public virtual ICollection<CartItem> CartItems { get; set; } = new HashSet<CartItem>();
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<Wishlist> Wishlists { get; set; } = new HashSet<Wishlist>();
+        public virtual ICollection<FlashSaleItem> FlashSaleItems { get; set; } = new HashSet<FlashSaleItem>();
     }
 }

@@ -29,9 +29,9 @@
 
         @if (Model != null && Model.Items != null && Model.Items.Any())
         {
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold self-start sm:self-auto">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold self-start sm:self-auto">
                 <span class="material-symbols-outlined text-base text-[#0d47a1]">inventory_2</span>
-                <span><strong class="text-slate-900" id="cart-item-count-badge">@Model.Items.Sum(i => i.Quantity)</strong> sản phẩm</span>
+                <span><strong class="text-slate-900" id="cart-item-count-badge">@Model.AvailableItemCount</strong> sản phẩm khả dụng</span>
             </div>
         }
     </div>
@@ -41,6 +41,19 @@
         <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2">
             <span class="material-symbols-outlined text-lg">error</span>
             <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    @if (Model != null && Model.HasOutOfStockItems)
+    {
+        <div class="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 text-sm font-medium flex items-start gap-3 shadow-2xs">
+            <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span class="material-symbols-outlined text-lg">inventory_2</span>
+            </div>
+            <div class="flex-1">
+                <div class="font-bold text-amber-950 mb-0.5">Lưu ý giỏ hàng:</div>
+                <div>Có <strong class="text-amber-950">@Model.OutOfStockCount</strong> sản phẩm tạm thời hết hàng (đã được làm mờ). Các sản phẩm này sẽ <strong class="text-amber-950">không được tính tiền</strong> và <strong class="text-amber-950">tự động loại khỏi đơn thanh toán</strong>. Bạn có thể bấm biểu tượng thùng rác để xóa sản phẩm khỏi giỏ.</div>
+            </div>
         </div>
     }
 
@@ -92,8 +105,9 @@
             <div class="lg:col-span-2 space-y-4">
                 @foreach (var item in Model.Items)
                 {
-                    <div class="cart-item bg-white border border-slate-200/90 hover:border-slate-300
-                                rounded-2xl p-4 sm:p-6 shadow-xs hover:shadow-sm transition-all duration-200"
+                    var isOut = item.IsOutOfStock;
+                    <div class="cart-item bg-white border @(isOut ? "border-slate-300 bg-slate-100/70 opacity-60 grayscale-[35%] hover:opacity-85 hover:grayscale-0" : "border-slate-200/90 hover:border-slate-300")
+                                rounded-2xl p-4 sm:p-6 shadow-xs hover:shadow-sm transition-all duration-200 relative"
                          data-product-id="@item.ProductID">
 
                         <div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
@@ -102,12 +116,12 @@
                             <a href="@Url.Action("Details", "Shop", new { id = item.ProductID })"
                                class="w-full sm:w-28 h-28 flex-shrink-0
                                       rounded-xl bg-slate-50 border border-slate-200/80
-                                      flex items-center justify-center overflow-hidden group">
+                                      flex items-center justify-center overflow-hidden group relative">
                                 @if (!string.IsNullOrEmpty(item.ImageURL))
                                 {
                                     <img src="@item.ImageURL"
                                          alt="@item.ProductName"
-                                         class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200"
+                                         class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200 @(isOut ? "grayscale" : "")"
                                          onerror="this.onerror=null; this.src='https://placehold.co/200x200/f8faff/0d47a1?text=TheChillShop';" />
                                 }
                                 else
@@ -115,6 +129,14 @@
                                     <span class="material-symbols-outlined text-4xl text-slate-300">
                                         image
                                     </span>
+                                }
+                                @if (isOut)
+                                {
+                                    <div class="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
+                                        <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-2xs uppercase tracking-wider shadow">
+                                            Hết hàng
+                                        </span>
+                                    </div>
                                 }
                             </a>
 
@@ -127,39 +149,41 @@
                                             @item.ProductName
                                         </a>
 
-                                        <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
+                                        <div class="flex items-center gap-2 mt-1.5 text-xs text-slate-500 flex-wrap">
                                             <span>Mã SP: #@item.ProductID</span>
                                             <span>•</span>
-                                            @if (item.StockQuantity > 0)
+                                            @if (!isOut)
                                             {
                                                 <span class="text-emerald-600 font-semibold flex items-center gap-1">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Còn hàng
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Còn hàng (@item.StockQuantity)
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span class="text-rose-600 font-semibold flex items-center gap-1">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Hết hàng
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold text-xs">
+                                                    <span class="material-symbols-outlined text-sm">remove_shopping_cart</span> Hết hàng
                                                 </span>
+                                                <span class="text-xs text-rose-600 font-medium italic">Không thể thanh toán</span>
                                             }
                                         </div>
                                     </div>
 
-                                    <!-- Remove Button (Touch Target >= 44x44px) -->
+                                    <!-- Remove Button (Always enabled to allow removing sold-out items) -->
                                     <button type="button"
                                             class="btn-remove-cart-item flex-shrink-0
                                                    w-11 h-11 rounded-xl
-                                                   border border-slate-200
+                                                   border border-slate-200 bg-white
                                                    text-slate-400
                                                    hover:text-red-600
                                                    hover:border-red-300
                                                    hover:bg-red-50
                                                    active:scale-95
                                                    flex items-center justify-center
+                                                   shadow-2xs
                                                    transition-all"
                                             data-product-id="@item.ProductID"
                                             data-product-name="@item.ProductName"
-                                            aria-label="Xóa sản phẩm @item.ProductName"
+                                            aria-label="Xóa sản phẩm @item.ProductName khỏi giỏ hàng"
                                             title="Xóa sản phẩm">
                                         <span class="material-symbols-outlined text-xl">
                                             delete_outline
@@ -176,52 +200,72 @@
                                         </span>
                                     </div>
 
-                                    <!-- Quantity Selector (Touch Target >= 44x44px) -->
+                                    <!-- Quantity Selector -->
                                     <div class="flex items-center">
-                                        <div class="inline-flex items-center rounded-xl border border-slate-300 bg-slate-50 p-0.5 shadow-2xs">
-                                            <button type="button"
-                                                    class="btn-decrease-cart
-                                                           w-10 h-10 sm:w-11 sm:h-11 rounded-lg
-                                                           bg-white hover:bg-slate-100 active:scale-95
-                                                           text-slate-700 disabled:opacity-40
-                                                           flex items-center justify-center transition-all"
-                                                    data-product-id="@item.ProductID"
-                                                    aria-label="Giảm số lượng">
-                                                <span class="material-symbols-outlined text-lg">
-                                                    remove
-                                                </span>
-                                            </button>
+                                        @if (isOut)
+                                        {
+                                            <div class="inline-flex items-center rounded-xl border border-slate-300 bg-slate-200/70 px-3 py-2 text-slate-500 text-xs font-semibold cursor-not-allowed select-none">
+                                                <span class="material-symbols-outlined text-sm mr-1.5 text-slate-400">block</span>
+                                                Tạm khóa (SL: @item.Quantity)
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="inline-flex items-center rounded-xl border border-slate-300 bg-slate-50 p-0.5 shadow-2xs">
+                                                <button type="button"
+                                                        class="btn-decrease-cart
+                                                               w-10 h-10 sm:w-11 sm:h-11 rounded-lg
+                                                               bg-white hover:bg-slate-100 active:scale-95
+                                                               text-slate-700 disabled:opacity-40
+                                                               flex items-center justify-center transition-all"
+                                                        data-product-id="@item.ProductID"
+                                                        aria-label="Giảm số lượng">
+                                                    <span class="material-symbols-outlined text-lg">
+                                                        remove
+                                                    </span>
+                                                </button>
 
-                                            <span class="cart-item-quantity
-                                                         min-w-[44px] h-10 sm:h-11
-                                                         flex items-center justify-center
-                                                         text-sm font-bold text-slate-900 px-2 select-none">
-                                                @item.Quantity
-                                            </span>
-
-                                            <button type="button"
-                                                    class="btn-increase-cart
-                                                           w-10 h-10 sm:w-11 sm:h-11 rounded-lg
-                                                           bg-white hover:bg-slate-100 active:scale-95
-                                                           text-slate-700 disabled:opacity-40
-                                                           flex items-center justify-center transition-all"
-                                                    data-product-id="@item.ProductID"
-                                                    aria-label="Tăng số lượng">
-                                                <span class="material-symbols-outlined text-lg">
-                                                    add
+                                                <span class="cart-item-quantity
+                                                             min-w-[44px] h-10 sm:h-11
+                                                             flex items-center justify-center
+                                                             text-sm font-bold text-slate-900 px-2 select-none">
+                                                    @item.Quantity
                                                 </span>
-                                            </button>
-                                        </div>
+
+                                                <button type="button"
+                                                        class="btn-increase-cart
+                                                               w-10 h-10 sm:w-11 sm:h-11 rounded-lg
+                                                               bg-white hover:bg-slate-100 active:scale-95
+                                                               text-slate-700 disabled:opacity-40
+                                                               flex items-center justify-center transition-all"
+                                                        data-product-id="@item.ProductID"
+                                                        aria-label="Tăng số lượng">
+                                                    <span class="material-symbols-outlined text-lg">
+                                                        add
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        }
                                     </div>
 
                                     <!-- Item Total -->
                                     <div class="text-right">
                                         <span class="text-xs text-slate-400 block mb-0.5">Thành tiền</span>
-                                        <span class="cart-item-total
-                                                     font-headline font-extrabold
-                                                     text-base sm:text-lg text-[#0d47a1]">
-                                            @string.Format("{0:N0}đ", item.ItemTotal)
-                                        </span>
+                                        @if (isOut)
+                                        {
+                                            <span class="font-headline font-bold text-sm text-slate-400 line-through">
+                                                @string.Format("{0:N0}đ", item.ItemTotal)
+                                            </span>
+                                            <span class="block text-2xs text-rose-600 font-bold uppercase tracking-wider">0đ (Không tính)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="cart-item-total
+                                                         font-headline font-extrabold
+                                                         text-base sm:text-lg text-[#0d47a1]">
+                                                @string.Format("{0:N0}đ", item.ItemTotal)
+                                            </span>
+                                        }
                                     </div>
                                 </div>
 
@@ -257,7 +301,13 @@
                     <!-- Price Calculations -->
                     <div class="space-y-3.5 text-sm">
                         <div class="flex items-center justify-between text-slate-600">
-                            <span>Tạm tính</span>
+                            <div>
+                                <span>Tạm tính</span>
+                                @if (Model.HasOutOfStockItems)
+                                {
+                                    <span class="text-2xs text-amber-600 block font-medium">(Đã trừ các sản phẩm hết hàng)</span>
+                                }
+                            </div>
                             <span id="cart-subtotal"
                                   class="font-bold text-slate-900 text-base">
                                 @string.Format("{0:N0}đ", Model.CartTotal)
@@ -296,19 +346,41 @@
                         </span>
                     </div>
 
-                    <!-- Checkout Button -->
-                    <a href="@Url.Action("Checkout", "Order")"
-                       class="w-full py-4 rounded-xl
-                              bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
-                              text-white font-bold text-base
-                              flex items-center justify-center gap-2
-                              shadow-lg shadow-blue-900/15 hover:shadow-xl hover:shadow-blue-900/25
-                              transition-all">
-                        <span class="material-symbols-outlined text-xl">
-                            credit_card
-                        </span>
-                        Tiến hành thanh toán
-                    </a>
+                    <!-- Checkout Button: Active only if CanCheckout -->
+                    @if (Model.CanCheckout)
+                    {
+                        <a href="@Url.Action("Checkout", "Order")"
+                           class="w-full py-4 rounded-xl
+                                  bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
+                                  text-white font-bold text-base
+                                  flex items-center justify-center gap-2
+                                  shadow-lg shadow-blue-900/15 hover:shadow-xl hover:shadow-blue-900/25
+                                  transition-all">
+                            <span class="material-symbols-outlined text-xl">
+                                credit_card
+                            </span>
+                            Tiến hành thanh toán (@Model.AvailableItemCount món)
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="space-y-2">
+                            <button type="button"
+                                    disabled="disabled"
+                                    class="w-full py-4 rounded-xl
+                                           bg-slate-200 text-slate-400 font-bold text-base
+                                           flex items-center justify-center gap-2
+                                           cursor-not-allowed select-none opacity-80">
+                                <span class="material-symbols-outlined text-xl">
+                                    block
+                                </span>
+                                Không thể thanh toán
+                            </button>
+                            <p class="text-xs text-center text-rose-600 font-semibold leading-relaxed">
+                                Tất cả sản phẩm trong giỏ hàng đều đã hết hàng. Vui lòng xóa bớt hoặc chọn sản phẩm khác để đặt hàng.
+                            </p>
+                        </div>
+                    }
 
                     <!-- Value Props / Guarantees -->
                     <div class="pt-4 border-t border-slate-100 space-y-2.5">

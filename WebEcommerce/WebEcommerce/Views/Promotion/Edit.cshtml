@@ -1,0 +1,375 @@
+@model WebEcommerce.Models.PromotionFormViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chỉnh sửa Mã giảm giá";
+}
+
+<div class="max-w-6xl mx-auto mb-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <a href="@Url.Action("Index", "Promotion")" class="text-xs font-bold text-chill-primary hover:underline flex items-center gap-1 mb-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Quay lại danh sách mã giảm giá
+        </a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-chill-primary text-3xl">edit_note</span>
+                    Chỉnh Sửa Mã Giảm Giá: <span class="font-mono text-chill-primary">@Model.Code</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Cập nhật thời hạn, tỷ lệ ưu đãi hoặc kích hoạt lại chương trình khuyến mãi.
+                </p>
+            </div>
+
+            <a href="@Url.Action("Details", "Promotion", new { id = Model.PromoCodeID })" class="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200 transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">visibility</span>
+                Xem báo cáo
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">error</span>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    @if (Model.CurrentUsage > 0)
+    {
+        <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-amber-900 text-xs leading-relaxed">
+            <span class="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5">info</span>
+            <div>
+                <strong class="font-bold">Lưu ý về số lượt đã sử dụng:</strong>
+                Mã này đã được khách hàng sử dụng <strong>@Model.CurrentUsage lượt</strong>. Nếu thay đổi mức giảm giá hoặc điều kiện áp dụng, các đơn hàng trong tương lai sẽ tuân theo quy tắc mới. Lịch sử các đơn hàng cũ đã chốt vẫn được giữ nguyên vẹn.
+            </div>
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "Promotion", FormMethod.Post, new { id = "promoForm", @class = "space-y-6" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.PromoCodeID)
+        @Html.HiddenFor(m => m.CurrentUsage)
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Cột trái: Form nhập liệu (7/12 cột trên lg, 8/12 trên xl) -->
+            <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+
+                <!-- 1. Thông tin cơ bản -->
+                <div class="admin-card rounded-2xl p-6 sm:p-7 space-y-4">
+                    <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <span class="material-symbols-outlined text-chill-primary">sell</span>
+                        1. Thông tin định danh Voucher
+                    </h2>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="Code">
+                            Mã Voucher <span class="text-red-500">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.Code, new {
+                            @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-mono font-bold uppercase tracking-wider transition-all",
+                            placeholder = "Ví dụ: SALE10, FREESHIP...",
+                            id = "inputCode",
+                            required = "required"
+                        })
+                        @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="Description">
+                            Mô tả voucher
+                        </label>
+                        @Html.TextAreaFor(m => m.Description, new {
+                            @class = "w-full px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm transition-all resize-y",
+                            rows = 2,
+                            placeholder = "Ví dụ: Giảm 10% áp dụng cho mọi đơn hàng công nghệ...",
+                            id = "inputDescription"
+                        })
+                        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                    </div>
+                </div>
+
+                <!-- 2. Mức giảm giá & Điều kiện -->
+                <div class="admin-card rounded-2xl p-6 sm:p-7 space-y-4">
+                    <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <span class="material-symbols-outlined text-chill-primary">percent</span>
+                        2. Cấu hình giảm giá & Điều kiện áp dụng
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Loại giảm giá <span class="text-red-500">*</span>
+                            </label>
+                            @Html.DropDownListFor(m => m.DiscountType, new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "Giảm theo phần trăm (%)", Value = "Percentage" },
+                                new SelectListItem { Text = "Giảm số tiền cố định (VNĐ)", Value = "Fixed" }
+                            }, new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold transition-all",
+                                id = "selectDiscountType"
+                            })
+                            @Html.ValidationMessageFor(m => m.DiscountType, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" id="labelDiscountValue">
+                                Mức giảm <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                @Html.TextBoxFor(m => m.DiscountValue, new {
+                                    @class = "w-full pl-4 pr-10 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-bold text-slate-900 transition-all",
+                                    type = "number",
+                                    step = "any",
+                                    id = "inputDiscountValue",
+                                    required = "required"
+                                })
+                                <span class="absolute right-3.5 top-3.5 text-xs font-bold text-slate-500" id="unitDiscount">
+                                    @(Model.DiscountType == "Percentage" ? "%" : "đ")
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.DiscountValue, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Đơn hàng tối thiểu (VNĐ)
+                            </label>
+                            @Html.TextBoxFor(m => m.MinOrderAmount, new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold transition-all",
+                                type = "number",
+                                step = "1000",
+                                id = "inputMinOrder"
+                            })
+                            @Html.ValidationMessageFor(m => m.MinOrderAmount, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Số lượt dùng tối đa <span class="text-red-500">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.MaxUsage, new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold transition-all",
+                                type = "number",
+                                min = Model.CurrentUsage.ToString(),
+                                id = "inputMaxUsage",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.MaxUsage, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                            <p class="text-2xs text-slate-400 mt-1">Đã dùng: @Model.CurrentUsage lượt. Giới hạn tối thiểu phải &ge; @Model.CurrentUsage.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Thời gian hiệu lực -->
+                <div class="admin-card rounded-2xl p-6 sm:p-7 space-y-4">
+                    <h2 class="font-headline font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <span class="material-symbols-outlined text-chill-primary">date_range</span>
+                        3. Thời gian hiệu lực & Kích hoạt
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Ngày bắt đầu <span class="text-red-500">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-ddTHH:mm}", new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold transition-all",
+                                type = "datetime-local",
+                                id = "inputStartDate",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Ngày kết thúc <span class="text-red-500">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-ddTHH:mm}", new {
+                                @class = "w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-chill-primary focus:bg-white outline-none text-sm font-semibold transition-all",
+                                type = "datetime-local",
+                                id = "inputEndDate",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-red-500 text-xs mt-1 block font-semibold" })
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 bg-slate-50 cursor-pointer transition-all">
+                            @Html.CheckBoxFor(m => m.IsActive, new { @class = "w-5 h-5 text-chill-primary rounded focus:ring-chill-primary", id = "checkActive" })
+                            <div>
+                                <span class="font-bold text-sm text-slate-900 block">Kích hoạt voucher</span>
+                                <span class="text-xs text-slate-500">Bỏ chọn nếu bạn muốn tạm ngưng áp dụng mã này cho khách hàng ngay lập tức.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nút Submit -->
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit" class="bg-chill-primary hover:bg-chill-primaryDark active:scale-95 text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-900/15 hover:shadow-xl transition-all">
+                        <span class="material-symbols-outlined text-xl">save</span>
+                        Lưu thay đổi
+                    </button>
+                    <a href="@Url.Action("Index", "Promotion")" class="px-6 py-3.5 rounded-xl border-2 border-slate-300 hover:border-slate-400 text-slate-700 font-bold text-sm transition-all">
+                        Quay lại
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Cột phải: Live Preview Card (5/12 cột trên lg, 4/12 trên xl) -->
+            <div class="lg:col-span-5 xl:col-span-4 space-y-4 lg:sticky lg:top-24">
+                <div class="admin-card rounded-2xl p-5 space-y-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Xem trước thẻ Voucher</span>
+
+                    <!-- Thẻ voucher mô phỏng phong cách Digital Ticket -->
+                    <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#0a2540] via-[#0d3b66] to-[#0d47a1] text-white shadow-xl relative overflow-hidden border border-white/10">
+                        <div class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-blue-400/10 blur-2xl pointer-events-none"></div>
+
+                        <!-- Header thẻ: Brand + Icon + Badge (Không bao giờ tràn) -->
+                        <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-300 flex items-center justify-center shrink-0 shadow-inner">
+                                    <span class="material-symbols-outlined text-base">confirmation_number</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="text-xs font-headline font-black text-white block tracking-tight truncate">
+                                        TheChillShop
+                                    </span>
+                                    <span class="text-[10px] font-semibold text-blue-200/90 uppercase tracking-wider block truncate">
+                                        Mã giảm giá
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 shrink-0">
+                                Ưu đãi
+                            </span>
+                        </div>
+
+                        <!-- Thân thẻ: Mức giảm & Mã Code -->
+                        <div class="my-2">
+                            <div class="text-2xl sm:text-3xl font-black font-headline text-amber-300 tracking-tight leading-tight" id="previewDiscount">
+                                GIẢM 10%
+                            </div>
+                            <div class="mt-2">
+                                <span class="inline-block px-3 py-1 rounded-lg bg-white/15 border border-dashed border-white/30 text-xs font-mono font-bold tracking-wider text-white" id="previewCode">
+                                    MÃ: @Model.Code
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Mô tả -->
+                        <p class="text-2xs text-blue-100/90 leading-relaxed line-clamp-2 mt-2" id="previewDesc">
+                            @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả ưu đãi." : Model.Description)
+                        </p>
+
+                        <!-- Chân thẻ: Chỉ số rõ ràng -->
+                        <div class="border-t border-white/10 pt-3 mt-3.5 space-y-1.5 text-xs text-blue-200">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-blue-200/80 text-2xs uppercase tracking-wider">Đơn tối thiểu</span>
+                                <span id="previewMinOrder" class="font-bold text-white text-xs">@string.Format("{0:N0}đ", Model.MinOrderAmount)</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-blue-200/80 text-2xs uppercase tracking-wider">Trạng thái</span>
+                                <span id="previewStatus" class="font-bold text-xs @(Model.IsActive ? "text-emerald-300" : "text-slate-300")">
+                                    @(Model.IsActive ? "Đang bật" : "Đang tắt")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Stats Widget -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+                        <span class="font-bold text-slate-800 block text-2xs uppercase tracking-wider">Tiến độ sử dụng</span>
+                        <div class="flex justify-between items-center text-slate-700">
+                            <span>Lượt dùng hiện tại:</span>
+                            <strong class="text-purple-700 font-bold">@Model.CurrentUsage / @Model.MaxUsage</strong>
+                        </div>
+                        @{
+                            var percent = Model.MaxUsage > 0 ? (int)((double)Model.CurrentUsage / Model.MaxUsage * 100) : 0;
+                            if (percent > 100) { percent = 100; }
+                        }
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div class="h-full rounded-full @(percent >= 100 ? "bg-red-500" : "bg-purple-600")" style="width: @percent%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var inputCode = document.getElementById("inputCode");
+            var inputDesc = document.getElementById("inputDescription");
+            var selectType = document.getElementById("selectDiscountType");
+            var inputVal = document.getElementById("inputDiscountValue");
+            var inputMin = document.getElementById("inputMinOrder");
+            var checkActive = document.getElementById("checkActive");
+
+            var previewCode = document.getElementById("previewCode");
+            var previewDesc = document.getElementById("previewDesc");
+            var previewDiscount = document.getElementById("previewDiscount");
+            var previewMinOrder = document.getElementById("previewMinOrder");
+            var previewStatus = document.getElementById("previewStatus");
+            var labelDiscountValue = document.getElementById("labelDiscountValue");
+            var unitDiscount = document.getElementById("unitDiscount");
+
+            function updatePreview() {
+                var code = (inputCode.value || "VOUCHER").trim().toUpperCase();
+                previewCode.innerText = "MÃ: " + code;
+
+                var desc = (inputDesc.value || "Chưa có mô tả ưu đãi.").trim();
+                previewDesc.innerText = desc;
+
+                var type = selectType.value;
+                var val = parseFloat(inputVal.value) || 0;
+
+                if (type === "Percentage") {
+                    labelDiscountValue.innerHTML = 'Mức giảm (%) <span class="text-red-500">*</span>';
+                    unitDiscount.innerText = "%";
+                    previewDiscount.innerText = "GIẢM " + val + "%";
+                } else {
+                    labelDiscountValue.innerHTML = 'Mức giảm (VNĐ) <span class="text-red-500">*</span>';
+                    unitDiscount.innerText = "đ";
+                    previewDiscount.innerText = "GIẢM " + val.toLocaleString("vi-VN") + "đ";
+                }
+
+                var minOrder = parseFloat(inputMin.value) || 0;
+                previewMinOrder.innerText = minOrder > 0 ? minOrder.toLocaleString("vi-VN") + "đ" : "0đ";
+
+                if (checkActive.checked) {
+                    previewStatus.innerText = "Đang bật";
+                    previewStatus.className = "font-bold text-emerald-300";
+                } else {
+                    previewStatus.innerText = "Đang tắt";
+                    previewStatus.className = "font-bold text-slate-300";
+                }
+            }
+
+            inputCode.addEventListener("input", function () {
+                this.value = this.value.toUpperCase();
+                updatePreview();
+            });
+            inputDesc.addEventListener("input", updatePreview);
+            selectType.addEventListener("change", updatePreview);
+            inputVal.addEventListener("input", updatePreview);
+            inputMin.addEventListener("input", updatePreview);
+            checkActive.addEventListener("change", updatePreview);
+
+            updatePreview();
+        });
+    </script>
+}

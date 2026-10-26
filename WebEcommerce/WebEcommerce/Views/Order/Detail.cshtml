@@ -8,11 +8,12 @@
     {
         case "Pending": statusColor = "bg-amber-100 text-amber-700"; statusIcon = "schedule"; break;
         case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; statusIcon = "check_circle"; break;
+        case "Processing": statusColor = "bg-sky-100 text-sky-700"; statusIcon = "inventory_2"; break;
         case "Shipped": statusColor = "bg-purple-100 text-purple-700"; statusIcon = "local_shipping"; break;
         case "Delivered": statusColor = "bg-green-100 text-green-700"; statusIcon = "verified"; break;
         case "Cancelled": statusColor = "bg-red-100 text-red-700"; statusIcon = "cancel"; break;
     }
-    var canCancel = (Model.Status == "Pending" || Model.Status == "Confirmed");
+    var canCancel = (Model.Status == "Pending");
 }
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -77,6 +78,133 @@
                     }
                 }
             </div>
+
+            <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="font-headline font-bold text-lg text-slate-900 mb-4">Thanh toán</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Tạm tính</span>
+                        <span class="font-semibold">@string.Format("{0:N0}đ", Model.TotalAmount)</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="flex justify-between text-green-600">
+                            <span>Giảm giá</span>
+                            <span class="font-semibold">-@string.Format("{0:N0}đ", Model.DiscountAmount)</span>
+                        </div>
+                    }
+                    <div class="border-t border-slate-200 pt-3 flex justify-between">
+                        <span class="font-headline font-bold text-slate-900">Tổng cộng</span>
+                        <span class="font-headline font-extrabold text-xl text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (canCancel)
+            {
+                using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post, new { id = "cancel-order-box" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-2 text-rose-600">
+                            <span class="material-symbols-outlined text-xl">cancel</span>
+                            <h2 class="font-headline font-bold text-lg text-slate-900">
+                                Yêu cầu hủy đơn hàng
+                            </h2>
+                        </div>
+
+                        <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                            Đơn hàng đang ở trạng thái <strong>Chờ xử lý (Pending)</strong> nên bạn có thể tự hủy đơn. Vui lòng chọn hoặc nhập lý do hủy:
+                        </p>
+
+                        <!-- Quick Reason Chips -->
+                        <div class="mb-3">
+                            <span class="text-2xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Lý do phổ biến (Bấm để chọn):</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="setCancelReason('Tôi muốn thay đổi địa chỉ nhận hàng');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Đổi địa chỉ</button>
+                                <button type="button" onclick="setCancelReason('Tôi muốn đổi sản phẩm hoặc số lượng');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Đổi sản phẩm / số lượng</button>
+                                <button type="button" onclick="setCancelReason('Tìm thấy giá tốt hơn ở nơi khác');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Tìm thấy giá tốt hơn</button>
+                                <button type="button" onclick="setCancelReason('Không còn nhu cầu mua nữa');" class="text-2xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Không còn nhu cầu</button>
+                            </div>
+                        </div>
+
+                        <label for="cancellationReason"
+                               class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Lý do hủy đơn hàng <span class="text-red-500">*</span>
+                        </label>
+
+                        <textarea id="cancellationReason"
+                                  name="cancellationReason"
+                                  rows="3"
+                                  maxlength="1000"
+                                  required
+                                  placeholder="Ví dụ: Tôi đặt nhầm sản phẩm hoặc muốn đổi địa chỉ..."
+                                  class="w-full rounded-xl border-2 border-slate-200 p-3 text-sm text-slate-800 outline-none focus:border-red-400 resize-y transition-colors"></textarea>
+
+                        <p class="text-2xs text-slate-400 mt-1 mb-4">
+                            Tối đa 1.000 ký tự. Tồn kho và khuyến mãi của bạn sẽ được hoàn lại tự động.
+                        </p>
+
+                        <button type="submit"
+                                onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này? Thao tác này không thể hoàn tác.');"
+                                class="w-full py-3 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all">
+                            <span class="material-symbols-outlined text-lg">cancel</span>
+                            Xác nhận hủy đơn hàng
+                        </button>
+                    </div>
+                }
+            }
+            else if (Model.Status == "Confirmed" || Model.Status == "Processing" || Model.Status == "Shipped")
+            {
+                <div class="bg-blue-50/70 border-2 border-blue-200/80 rounded-2xl p-5 shadow-xs text-xs text-slate-600">
+                    <div class="flex items-center gap-2 mb-2 text-[#0d47a1]">
+                        <span class="material-symbols-outlined text-xl">support_agent</span>
+                        <h3 class="font-headline font-bold text-sm text-[#0d47a1]">Bạn cần hỗ trợ hủy đơn hàng?</h3>
+                    </div>
+                    <p class="leading-relaxed mb-3">
+                        Đơn hàng hiện <strong>@(Model.Status == "Confirmed" ? "đã được shop xác nhận" : (Model.Status == "Processing" ? "đang chuẩn bị kiện hàng" : "đang trên đường vận chuyển"))</strong> nên bạn không thể tự hủy trực tiếp. Vui lòng liên hệ tổng đài để nhân viên hỗ trợ xử lý kịp thời:
+                    </p>
+                    <div class="p-3 bg-white rounded-xl border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-2xs text-slate-400 block uppercase font-bold tracking-wider">Tổng đài CSKH 24/7</span>
+                            <strong class="text-sm text-[#0d47a1] font-mono">1900 8888</strong>
+                        </div>
+                        <a href="tel:19008888" class="px-3.5 py-1.5 rounded-lg bg-[#0d47a1] text-white font-bold text-xs hover:bg-[#0a3880] transition-colors flex items-center gap-1 shadow-2xs">
+                            <span class="material-symbols-outlined text-sm">call</span> Gọi ngay
+                        </a>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Cancelled")
+            {
+                <div class="bg-rose-50/70 border-2 border-rose-200 rounded-2xl p-5 shadow-xs">
+                    <div class="flex items-center gap-2 mb-3 text-rose-700">
+                        <span class="material-symbols-outlined text-2xl">cancel</span>
+                        <div>
+                            <h3 class="font-headline font-bold text-sm text-rose-800">Đơn hàng đã được hủy</h3>
+                            @if (Model.CancelledAt.HasValue)
+                            {
+                                <span class="text-2xs text-rose-600">Thời gian: @Model.CancelledAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-white p-3 rounded-xl border border-rose-100">
+                            <span class="text-slate-400 block text-2xs uppercase tracking-wider font-semibold">Bên thực hiện hủy:</span>
+                            <strong class="text-slate-800">@(Model.CancelledBy == "Customer" ? "Khách hàng tự hủy" : (Model.CancelledBy == "Manager" ? "Người bán / Quản lý cửa hàng hủy" : (Model.CancelledBy ?? "Hệ thống")))</strong>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                        {
+                            <div class="bg-white p-3 rounded-xl border border-rose-100">
+                                <span class="text-slate-400 block text-2xs uppercase tracking-wider font-semibold">Lý do hủy đơn:</span>
+                                <p class="text-slate-700 mt-0.5 leading-relaxed">@Model.CancellationReason</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+           
         </div>
     </div>
 
@@ -357,3 +485,16 @@
 </div>
     </div>
 </div>
+
+@section scripts {
+<script>
+    function setCancelReason(reason) {
+        var el = document.getElementById('cancellationReason');
+        if (el) {
+            el.value = reason;
+            el.focus();
+        }
+    }
+</script>
+}
+

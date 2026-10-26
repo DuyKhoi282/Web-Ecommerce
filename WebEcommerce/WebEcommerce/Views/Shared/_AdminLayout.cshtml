@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "Quản trị" : ViewBag.Title) - ShopeChill Admin</title>
+    <title>@(string.IsNullOrEmpty(ViewBag.Title) ? "Quản trị" : ViewBag.Title) - TheChillShop Admin</title>
 
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,6 +143,20 @@
                         <span class="material-symbols-outlined text-xl @(currentController == "AdminOrder" ? "text-[#ff4d4d]" : "")">receipt_long</span>
                         <span>Quản lý đơn hàng</span>
                     </a>
+
+                    <!-- Quản lý mã giảm giá (Voucher) -->
+                    <a href="@Url.Action("Index", "Promotion")" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "Promotion" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                        <span class="material-symbols-outlined text-xl @(currentController == "Promotion" ? "text-[#ff4d4d]" : "")">confirmation_number</span>
+                        <span>Mã giảm giá (Voucher)</span>
+                    </a>
+
+                    <!-- Quản lý sự kiện Flash Sale -->
+                    <a href="@Url.Action("Index", "FlashSale")" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all @(currentController == "FlashSale" ? "bg-white/20 text-white shadow-md border-l-4 border-[#ff4d4d]" : "text-blue-100/80 hover:bg-white/10 hover:text-white")">
+                        <span class="material-symbols-outlined text-xl @(currentController == "FlashSale" ? "text-[#ff4d4d]" : "")">bolt</span>
+                        <span>Sự kiện Flash Sale</span>
+                    </a>
                 }
 
                 <div class="pt-4 pb-2 px-4 text-[11px] font-bold text-blue-300/60 uppercase tracking-wider">Hệ thống</div>
@@ -234,7 +248,7 @@
 
         <!-- Admin Footer -->
         <footer class="bg-white border-t-2 border-slate-300 px-6 py-4 text-xs text-slate-600 flex items-center justify-between">
-            <span class="font-medium">&copy; @DateTime.Now.Year ShopeChill Ecommerce • Hệ thống hoạt động ổn định</span>
+            <span class="font-medium">&copy; @DateTime.Now.Year TheChillShop Ecommerce • Hệ thống hoạt động ổn định</span>
             <span class="font-semibold text-[#d70018]">Hệ thống phân quyền RBAC • Phiên bản 1.0</span>
         </footer>
     </div>

@@ -44,12 +44,28 @@ namespace WebEcommerce.Controllers
                     .Where(p => productIds.Contains(p.ProductID))
                     .ToListAsync();
 
-                // Build cart view model for the checkout page
+                // Build cart view model for the checkout page - Chỉ lấy các sản phẩm còn hàng
                 var cartVm = new CartViewModel();
+                int outOfStockCount = 0;
+
                 foreach (var ci in cookieItems)
                 {
                     var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
                     if (product == null) continue;
+
+                    // Nếu sản phẩm hết hàng hoặc ngừng kinh doanh -> loại bỏ khỏi danh sách thanh toán
+                    if (product.Status != 1 || product.StockQuantity <= 0)
+                    {
+                        outOfStockCount++;
+                        continue;
+                    }
+
+                    var checkoutQty = Math.Min(ci.Quantity, product.StockQuantity);
+                    if (checkoutQty <= 0)
+                    {
+                        outOfStockCount++;
+                        continue;
+                    }
 
                     var unitPrice = GetCurrentProductPrice(product);
                     var image = product.ProductImages?
@@ -62,17 +78,23 @@ namespace WebEcommerce.Controllers
                         ProductName = product.Name,
                         ImageURL = image?.ImageURL,
                         UnitPrice = unitPrice,
-                        Quantity = ci.Quantity,
-                        ItemTotal = unitPrice * ci.Quantity,
-                        StockQuantity = product.StockQuantity
+                        Quantity = checkoutQty,
+                        ItemTotal = unitPrice * checkoutQty,
+                        StockQuantity = product.StockQuantity,
+                        Status = product.Status
                     });
                 }
                 cartVm.CartTotal = cartVm.Items.Sum(i => i.ItemTotal);
 
                 if (!cartVm.Items.Any())
                 {
-                    TempData["ErrorMessage"] = "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                    TempData["ErrorMessage"] = "Tất cả sản phẩm trong giỏ hàng hiện đã hết hàng hoặc không khả dụng để thanh toán.";
                     return RedirectToAction("Index", "Cart");
+                }
+
+                if (outOfStockCount > 0)
+                {
+                    TempData["InfoMessage"] = $"Đã tự động loại bỏ {outOfStockCount} sản phẩm tạm hết hàng khỏi đơn thanh toán.";
                 }
 
                 // Lấy thông tin user để pre-fill
@@ -144,36 +166,32 @@ namespace WebEcommerce.Controllers
                 }
 
                 // ========================================
-                // RE-CHECK STOCK tại thời điểm checkout
+                // LỌC SẢN PHẨM KHẢ DỤNG TẠI THỜI ĐIỂM CHECKOUT
                 // ========================================
+                var orderItems = new List<(Product Product, int Quantity, decimal CurrentPrice)>();
+                decimal totalAmount = 0;
+
                 foreach (var ci in cookieItems)
                 {
                     var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                    if (product == null || product.Status != 1)
+                    // Bỏ qua sản phẩm không tồn tại, hết hàng hoặc ngừng kinh doanh
+                    if (product == null || product.Status != 1 || product.StockQuantity <= 0)
                     {
-                        TempData["ErrorMessage"] = $"Sản phẩm \"{product?.Name ?? "không xác định"}\" không còn kinh doanh.";
-                        return RedirectToAction("Index", "Cart");
+                        continue;
                     }
-                    if (ci.Quantity > product.StockQuantity)
-                    {
-                        TempData["ErrorMessage"] = $"Sản phẩm \"{product.Name}\" chỉ còn {product.StockQuantity} trong kho, nhưng giỏ hàng có {ci.Quantity}.";
-                        return RedirectToAction("Index", "Cart");
-                    }
+
+                    var purchaseQty = Math.Min(ci.Quantity, product.StockQuantity);
+                    if (purchaseQty <= 0) continue;
+
+                    var currentPrice = GetCurrentProductPrice(product);
+                    totalAmount += currentPrice * purchaseQty;
+                    orderItems.Add((product, purchaseQty, currentPrice));
                 }
 
-                // ========================================
-                // TÍNH TOÁN SERVER-SIDE (không tin client)
-                // ========================================
-                decimal totalAmount = 0;
-                // Build a lookup: ProductID → (Product, Quantity, CurrentPrice)
-                var orderItems = new List<(Product Product, int Quantity, decimal CurrentPrice)>();
-                foreach (var ci in cookieItems)
+                if (!orderItems.Any())
                 {
-                    var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                    if (product == null) continue;
-                    var currentPrice = GetCurrentProductPrice(product);
-                    totalAmount += currentPrice * ci.Quantity;
-                    orderItems.Add((product, ci.Quantity, currentPrice));
+                    TempData["ErrorMessage"] = "Các sản phẩm trong giỏ hàng hiện đã hết hàng hoặc không khả dụng. Vui lòng kiểm tra lại giỏ hàng.";
+                    return RedirectToAction("Index", "Cart");
                 }
 
                 decimal discountAmount = 0;
@@ -184,8 +202,9 @@ namespace WebEcommerce.Controllers
                 // ========================================
                 if (!string.IsNullOrWhiteSpace(model.PromoCode))
                 {
+                    var cleanPromo = model.PromoCode.Trim().ToUpper();
                     var promo = await _context.PromotionalCodes
-                        .FirstOrDefaultAsync(p => p.Code == model.PromoCode.Trim());
+                        .FirstOrDefaultAsync(p => p.Code.ToUpper() == cleanPromo || p.Code.Trim().ToUpper() == cleanPromo);
 
                     if (promo == null)
                     {
@@ -288,6 +307,20 @@ namespace WebEcommerce.Controllers
                                 item.Product.StockQuantity = 0;
                                 item.Product.Status = 2; // Out of stock
                             }
+
+                            // Cập nhật số lượng đã bán của Flash Sale nếu có
+                            var now = DateTime.UtcNow;
+                            var activeFsItem = await _context.FlashSaleItems
+                                .Include(f => f.FlashSale)
+                                .FirstOrDefaultAsync(f => f.ProductID == item.Product.ProductID
+                                                       && f.FlashSale != null
+                                                       && f.FlashSale.IsActive
+                                                       && f.FlashSale.StartTime <= now
+                                                       && f.FlashSale.EndTime > now);
+                            if (activeFsItem != null)
+                            {
+                                activeFsItem.SoldQuantity += item.Quantity;
+                            }
                         }
 
                         // 3. Update promo usage
@@ -303,8 +336,12 @@ namespace WebEcommerce.Controllers
                         await _context.SaveChangesAsync();
                         transaction.Commit();
 
-                        // 4. Clear cart cookie after successful order
-                        CookieCartHelper.ClearCart(Response);
+                        // 4. Chỉ xóa khỏi cookie những sản phẩm đã được đặt mua thành công
+                        // Các sản phẩm hết hàng còn lại trong giỏ sẽ giữ nguyên để người dùng theo dõi hoặc xóa thủ công
+                        var remainingCookieItems = cookieItems
+                            .Where(ci => !orderItems.Any(oi => oi.Product.ProductID == ci.ProductID))
+                            .ToList();
+                        CookieCartHelper.SaveCartItems(Response, remainingCookieItems);
 
                         TempData["SuccessMessage"] = "Đặt hàng thành công! Mã đơn hàng: #" + order.OrderID;
                         return RedirectToAction("Detail", new { id = order.OrderID });
@@ -427,24 +464,28 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     return RedirectToAction("Index");
                 }
 
-                // 3. Chỉ được hủy đơn Pending hoặc Confirmed
-                if (order.Status != "Pending" && order.Status != "Confirmed")
+                // 3. Khách hàng CHỈ được tự hủy đơn khi đơn ở trạng thái Pending (Chờ xử lý)
+                if (order.Status != "Pending")
                 {
-                    TempData["ErrorMessage"] =
-                        $"Không thể hủy đơn hàng ở trạng thái \"{order.Status}\".";
+                    TempData["ErrorMessage"] = order.Status == "Confirmed"
+                        ? "Đơn hàng đã được xác nhận và đang được chuẩn bị. Quý khách không thể tự hủy trực tiếp, vui lòng liên hệ tổng đài CSKH 1900 8888 để được hỗ trợ."
+                        : $"Không thể hủy đơn hàng ở trạng thái \"{order.Status}\".";
 
                     return RedirectToAction("Detail", new { id = id });
                 }
 
-                // 4. Cập nhật đơn hàng và hoàn trả tồn kho trong transaction
+                // 4. Cập nhật đơn hàng và hoàn trả tồn kho, flash sale, voucher trong transaction
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     try
                     {
+                        var now = DateTime.UtcNow;
+
                         foreach (var detail in order.OrderDetails)
                         {
                             if (detail.Product != null)
                             {
+                                // Hoàn lại tồn kho
                                 detail.Product.StockQuantity += detail.Quantity;
 
                                 if (detail.Product.Status == 2 &&
@@ -452,6 +493,29 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                                 {
                                     detail.Product.Status = 1;
                                 }
+
+                                // Hoàn lại số lượng đã bán của Flash Sale nếu có
+                                var activeFsItem = await _context.FlashSaleItems
+                                    .Include(f => f.FlashSale)
+                                    .FirstOrDefaultAsync(f => f.ProductID == detail.Product.ProductID
+                                                           && f.FlashSale != null
+                                                           && f.FlashSale.IsActive
+                                                           && f.FlashSale.StartTime <= now
+                                                           && f.FlashSale.EndTime > now);
+                                if (activeFsItem != null && activeFsItem.SoldQuantity > 0)
+                                {
+                                    activeFsItem.SoldQuantity = Math.Max(0, activeFsItem.SoldQuantity - detail.Quantity);
+                                }
+                            }
+                        }
+
+                        // Hoàn lại lượt sử dụng mã giảm giá (voucher) nếu có
+                        if (order.PromoCodeID.HasValue)
+                        {
+                            var promo = await _context.PromotionalCodes.FindAsync(order.PromoCodeID.Value);
+                            if (promo != null && promo.CurrentUsage > 0)
+                            {
+                                promo.CurrentUsage -= 1;
                             }
                         }
 
@@ -626,14 +690,15 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     return Json(new { success = false, message = "Vui lòng nhập mã giảm giá." });
                 }
 
+                var cleanCode = code.Trim().ToUpper();
                 var promo = await _context.PromotionalCodes
-                    .FirstOrDefaultAsync(p => p.Code == code.Trim());
+                    .FirstOrDefaultAsync(p => p.Code.ToUpper() == cleanCode || p.Code.Trim().ToUpper() == cleanCode);
 
                 if (promo == null)
                     return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
 
                 var now = DateTime.UtcNow;
-                if (!promo.IsActive || promo.StartDate > now || promo.EndDate < now)
+                if (!promo.IsActive || promo.StartDate > now.AddMinutes(1) || promo.EndDate < now)
                     return Json(new { success = false, message = "Mã giảm giá đã hết hạn hoặc chưa có hiệu lực." });
 
                 if (promo.CurrentUsage >= promo.MaxUsage)
@@ -654,9 +719,10 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                 foreach (var ci in cookieItems)
                 {
                     var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
-                    if (product != null)
+                    if (product != null && product.Status == 1 && product.StockQuantity > 0)
                     {
-                        serverTotal += GetCurrentProductPrice(product) * ci.Quantity;
+                        var qty = Math.Min(ci.Quantity, product.StockQuantity);
+                        serverTotal += GetCurrentProductPrice(product) * qty;
                     }
                 }
 
@@ -700,6 +766,15 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                 var product = products.FirstOrDefault(p => p.ProductID == ci.ProductID);
                 if (product == null) continue;
 
+                // Chỉ đưa vào danh sách thanh toán các sản phẩm còn hàng
+                if (product.Status != 1 || product.StockQuantity <= 0)
+                {
+                    continue;
+                }
+
+                var qty = Math.Min(ci.Quantity, product.StockQuantity);
+                if (qty <= 0) continue;
+
                 var unitPrice = GetCurrentProductPrice(product);
                 var image = product.ProductImages?
                     .FirstOrDefault(x => x.IsMain)
@@ -711,9 +786,10 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     ProductName = product.Name,
                     ImageURL = image?.ImageURL,
                     UnitPrice = unitPrice,
-                    Quantity = ci.Quantity,
-                    ItemTotal = unitPrice * ci.Quantity,
-                    StockQuantity = product.StockQuantity
+                    Quantity = qty,
+                    ItemTotal = unitPrice * qty,
+                    StockQuantity = product.StockQuantity,
+                    Status = product.Status
                 });
             }
             vm.CartTotal = vm.Items.Sum(i => i.ItemTotal);
@@ -722,6 +798,26 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
 
         private decimal GetCurrentProductPrice(Product product)
         {
+            // 1. Kiểm tra nếu sản phẩm đang thuộc Flash Sale đang diễn ra và còn suất
+            try
+            {
+                var now = DateTime.UtcNow;
+                var flashItem = _context.FlashSaleItems
+                    .AsNoTracking()
+                    .Include(f => f.FlashSale)
+                    .FirstOrDefault(f => f.ProductID == product.ProductID
+                                      && f.FlashSale != null
+                                      && f.FlashSale.IsActive
+                                      && f.FlashSale.StartTime <= now
+                                      && f.FlashSale.EndTime > now
+                                      && f.SoldQuantity < f.MaxQuantity);
+                if (flashItem != null)
+                {
+                    return flashItem.FlashSalePrice;
+                }
+            }
+            catch {}
+
             if (product.DiscountPrice.HasValue && product.DiscountPrice.Value > 0)
                 return product.DiscountPrice.Value;
             return product.Price;

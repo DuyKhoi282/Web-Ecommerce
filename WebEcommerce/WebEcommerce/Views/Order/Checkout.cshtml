@@ -40,6 +40,14 @@
         </div>
     }
 
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium flex items-center gap-2.5 shadow-2xs">
+            <span class="material-symbols-outlined text-xl text-amber-600">info</span>
+            <span>@TempData["InfoMessage"]</span>
+        </div>
+    }
+
     @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkout-form", @class = "grid grid-cols-1 lg:grid-cols-3 gap-8 items-start" }))
     {
         @Html.AntiForgeryToken()
@@ -242,7 +250,7 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-slate-900 font-bold text-xs truncate leading-snug">@item.ProductName</h3>
                                     <div class="flex items-center justify-between text-2xs text-slate-500 mt-1">
-                                        <span>x@item.Quantity</span>
+                                        <span>x@(item.Quantity)</span>
                                         <span class="font-bold text-slate-800 text-xs">@string.Format("{0:N0}đ", item.ItemTotal)</span>
                                     </div>
                                 </div>
@@ -354,15 +362,22 @@
             if (bankRadio) bankRadio.addEventListener("change", updatePaymentStyle);
 
             // Promo Code Apply
+            var codeInput = document.getElementById("promo-code-input");
+            if (codeInput) {
+                codeInput.addEventListener("input", function () {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+
             var btnApplyPromo = document.getElementById("btn-apply-promo");
             if (btnApplyPromo) {
                 btnApplyPromo.addEventListener("click", function () {
-                    var codeInput = document.getElementById("promo-code-input");
-                    var code = codeInput ? codeInput.value.trim() : "";
+                    var code = codeInput ? codeInput.value.trim().toUpperCase() : "";
                     if (!code) {
                         notify("warning", "Mã giảm giá", "Vui lòng nhập mã giảm giá trước khi áp dụng.");
                         return;
                     }
+                    if (codeInput) codeInput.value = code;
 
                     var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
                     var formData = new URLSearchParams();
@@ -422,6 +437,7 @@
             var btnSubmit = document.getElementById("btn-submit-order");
             if (form && btnSubmit) {
                 form.addEventListener("submit", function () {
+                    if (codeInput) codeInput.value = codeInput.value.trim().toUpperCase();
                     btnSubmit.disabled = true;
                     btnSubmit.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">refresh</span> Đang khởi tạo đơn hàng...';
                 });

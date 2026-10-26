@@ -1,3 +1,4 @@
+using Microsoft.AspNet.Identity;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,16 @@ namespace WebEcommerce.Helpers
     /// <summary>
     /// Helper class for reading and writing cart data to/from an HTTP cookie.
     /// The cookie stores a JSON array of <see cref="CookieCartItem"/> objects.
-    /// Cookie name: "ShoppingCart", expires in 30 days, HttpOnly for security.
+    /// Cookie name: "ShoppingCart_{userId}", expires in 30 days, HttpOnly for security.
     /// </summary>
     public static class CookieCartHelper
     {
-        private const string CookieName = "ShoppingCart";
+        private const string CookieNamePrefix = "ShoppingCart_";
         private const int CookieExpiryDays = 30;
+
+        // Mỗi tài khoản một cookie riêng: nhiều người dùng chung trình duyệt không thấy giỏ của nhau
+        private static string CookieName =>
+            CookieNamePrefix + HttpContext.Current?.User?.Identity?.GetUserId();
 
         // ==================================================
         // READ: Get the cart items list from the cookie
