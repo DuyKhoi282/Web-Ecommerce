@@ -252,9 +252,11 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
    | :--- | :--- | :--- |
    | `admin@thechillshop.vn` | `Admin@123456` | Administrator |
    | `manager@thechillshop.vn` | `Manager@123456` | StoreManager |
+   | `manager2@thechillshop.vn` | `Manager@123456` | StoreManager |
    | `customer1@gmail.com` | `Customer@123456` | Customer |
    | `customer2@gmail.com` | `Customer@123456` | Customer |
    | `customer3@gmail.com` | `Customer@123456` | Customer |
+   | `customer4@gmail.com` … `customer10@gmail.com` | `Customer@123456` | Customer |
 
 8. **Bơm dữ liệu mẫu đầy đủ:**
    - Sau khi app đã chạy thành công, mở **pgAdmin** &rarr; chạy lần lượt các script trong `Database/Scripts/`:
@@ -262,6 +264,7 @@ Cú pháp chuẩn: `<type>(<scope>): <mô tả ngắn bằng tiếng Việt ho�
      2. `03_FlashSale_Tables.sql`: tạo bảng `FlashSales`, `FlashSaleItems` và đợt Flash Sale mẫu (dùng sản phẩm từ bước 1).
      3. `04_Update_Orders_Cancellation.sql`: chỉ cần với CSDL tạo từ bản `01` cũ (thiếu cột lý do hủy đơn); chạy lại cũng không sao.
      4. `05_Update_Authentic_Product_Images.sql`: thay ảnh placeholder bằng ảnh sản phẩm thật.
+     5. `09_Seed_Demo_Data.sql`: đợt Flash Sale thứ 2 (sắp diễn ra), ảnh thứ 3 cho 7 sản phẩm, 1 sản phẩm hết hàng (Ghế DXRacer). Chạy lại không nhân bản dữ liệu.
 
 ### 8.3. Reset Dữ Liệu (Môi Trường Development)
 

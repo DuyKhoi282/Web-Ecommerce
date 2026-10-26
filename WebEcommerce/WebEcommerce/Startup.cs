@@ -83,9 +83,41 @@ namespace WebEcommerce
                         fullName: "Phạm Thị Hoa",          phone: "0923456783",
                         address: "789 Nguyễn Trãi, Q7, TP.HCM", role: "Customer");
 
+                    SeedUser(userManager, "customer4@gmail.com", "Customer@123456",
+                        fullName: "Hoàng Văn Nam",         phone: "0945678125",
+                        address: "12 Võ Văn Tần, Q3, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "customer5@gmail.com", "Customer@123456",
+                        fullName: "Đỗ Thị Mai",            phone: "0956781236",
+                        address: "34 Phan Xích Long, Phú Nhuận, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "customer6@gmail.com", "Customer@123456",
+                        fullName: "Vũ Đức Anh",            phone: "0967812347",
+                        address: "56 Cầu Giấy, Cầu Giấy, Hà Nội", role: "Customer");
+
+                    SeedUser(userManager, "customer7@gmail.com", "Customer@123456",
+                        fullName: "Bùi Thị Thu",           phone: "0978123458",
+                        address: "78 Nguyễn Văn Linh, Hải Châu, Đà Nẵng", role: "Customer");
+
+                    SeedUser(userManager, "customer8@gmail.com", "Customer@123456",
+                        fullName: "Ngô Quốc Bảo",          phone: "0989234569",
+                        address: "90 Quang Trung, Gò Vấp, TP.HCM", role: "Customer");
+
+                    SeedUser(userManager, "customer9@gmail.com", "Customer@123456",
+                        fullName: "Lý Thị Ngọc",           phone: "0390345670",
+                        address: "21 Trần Phú, Ninh Kiều, Cần Thơ", role: "Customer");
+
+                    SeedUser(userManager, "customer10@gmail.com", "Customer@123456",
+                        fullName: "Đặng Minh Khoa",        phone: "0381456781",
+                        address: "43 Lê Duẩn, Q1, TP.HCM", role: "Customer");
+
                     SeedUser(userManager, "manager@thechillshop.vn", "Manager@123456",
                         fullName: "Lê Quản Lý",            phone: "0934567894",
                         address: "TheChillShop HQ, Q3, TP.HCM", role: "StoreManager");
+
+                    SeedUser(userManager, "manager2@thechillshop.vn", "Manager@123456",
+                        fullName: "Trương Thị Kho",        phone: "0935678905",
+                        address: "TheChillShop Kho Thủ Đức, TP.HCM", role: "StoreManager");
                 }
             }
             catch (Exception)
