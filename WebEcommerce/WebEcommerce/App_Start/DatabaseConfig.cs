@@ -32,6 +32,7 @@ namespace WebEcommerce
                     }
 
                     // 3. Script idempotent (chạy lại nhiều lần không lỗi) nên chạy mỗi lần khởi động
+                    RunScriptFile(db, "06_Create_OrderReviews.sql");
                     RunScriptFile(db, "07_Add_OrderDetails_FlashSaleItemID.sql");
                 }
             }
