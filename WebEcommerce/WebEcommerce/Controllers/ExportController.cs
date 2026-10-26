@@ -189,6 +189,12 @@ namespace WebEcommerce.Controllers
                     doc.Add(notes);
                 }
 
+                // --- Ô ký tên, giữ liền một khối để không bị tách sang trang sau
+                var signatures = new PdfPTable(2) { WidthPercentage = 100, SpacingBefore = 28, KeepTogether = true };
+                signatures.AddCell(SignatureCell("NGƯỜI MUA HÀNG", order.User?.FullName, bold, small, normal));
+                signatures.AddCell(SignatureCell("NGƯỜI BÁN HÀNG", "TheChillShop", bold, small, normal));
+                doc.Add(signatures);
+
                 doc.Close();
                 return ms.ToArray();
             }
@@ -224,6 +230,15 @@ namespace WebEcommerce.Controllers
             var box = new PdfPCell { BackgroundColor = BoxBackground, Border = Rectangle.NO_BORDER, Padding = 10 };
             box.AddElement(table);
             return box;
+        }
+
+        private static PdfPCell SignatureCell(string title, string name, Font titleFont, Font hintFont, Font nameFont)
+        {
+            var cell = new PdfPCell { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_CENTER };
+            cell.AddElement(new Paragraph(title, titleFont) { Alignment = Element.ALIGN_CENTER });
+            cell.AddElement(new Paragraph("(Ký, ghi rõ họ tên)", hintFont) { Alignment = Element.ALIGN_CENTER, SpacingAfter = 48 });
+            cell.AddElement(new Paragraph(name ?? "", nameFont) { Alignment = Element.ALIGN_CENTER });
+            return cell;
         }
 
         private static PdfPCell ItemCell(string text, Font font, int align, BaseColor background) =>
