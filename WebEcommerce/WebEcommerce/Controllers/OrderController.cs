@@ -384,25 +384,89 @@ namespace WebEcommerce.Controllers
         // ==============================================
         // GET: /Order (Order History)
         // ==============================================
+        private static readonly string[] OrderStatuses = { "Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled" };
+        private static readonly string[] OrderRanges = { "30d", "6m", "1y" };
+        private static readonly string[] OrderSorts = { "oldest", "amount_desc", "amount_asc" };
+
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string status, string q, string range, string sort)
         {
+            // Query string do người dùng gõ được: chỉ nhận giá trị trong whitelist, còn lại về mặc định
+            status = OrderStatuses.Contains(status) ? status : null;
+            range = OrderRanges.Contains(range) ? range : null;
+            sort = OrderSorts.Contains(sort) ? sort : null;
+            q = (q ?? "").Trim();
+            if (q.Length > 100) q = q.Substring(0, 100);
+
+            ViewBag.Status = status;
+            ViewBag.Q = q;
+            ViewBag.Range = range;
+            ViewBag.Sort = sort;
+            ViewBag.StatusCounts = new Dictionary<string, int>();
+            ViewBag.HasAnyOrder = false;
+
             try
             {
                 var userId = User.Identity.GetUserId();
-                var orders = await _context.Orders
-                    .Include(o => o.OrderDetails.Select(od => od.Product))
-                    .Where(o => o.UserID == userId)
-                    .OrderByDescending(o => o.OrderDate)
+                var userOrders = _context.Orders.Where(o => o.UserID == userId);
+                ViewBag.HasAnyOrder = await userOrders.AnyAsync();
+
+                var filtered = userOrders;
+                if (range != null)
+                {
+                    var from = range == "30d" ? DateTime.UtcNow.AddDays(-30)
+                             : range == "6m" ? DateTime.UtcNow.AddMonths(-6)
+                             : DateTime.UtcNow.AddYears(-1);
+                    filtered = filtered.Where(o => o.OrderDate >= from);
+                }
+                if (q != "")
+                {
+                    // "#27" chỉ tìm mã đơn; "27" tìm cả mã đơn lẫn tên sản phẩm (vd "iPhone 15")
+                    int orderId;
+                    var isId = int.TryParse(q.TrimStart('#'), out orderId);
+                    if (q.StartsWith("#"))
+                    {
+                        filtered = filtered.Where(o => isId && o.OrderID == orderId);
+                    }
+                    else
+                    {
+                        // PostgreSQL LIKE phân biệt hoa/thường nên hạ cả hai về chữ thường
+                        var keyword = q.ToLower();
+                        filtered = filtered.Where(o => (isId && o.OrderID == orderId)
+                            || o.OrderDetails.Any(od => od.Product.Name.ToLower().Contains(keyword)));
+                    }
+                }
+
+                // Số trên tab tính theo từ khóa + thời gian đang chọn, chưa lọc trạng thái
+                ViewBag.StatusCounts = await filtered
+                    .GroupBy(o => o.Status)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.Status, x => x.Count);
+
+                if (status != null)
+                {
+                    filtered = filtered.Where(o => o.Status == status);
+                }
+
+                switch (sort)
+                {
+                    case "oldest": filtered = filtered.OrderBy(o => o.OrderDate); break;
+                    case "amount_desc": filtered = filtered.OrderByDescending(o => o.FinalAmount); break;
+                    case "amount_asc": filtered = filtered.OrderBy(o => o.FinalAmount); break;
+                    default: filtered = filtered.OrderByDescending(o => o.OrderDate); break;
+                }
+
+                var orders = await filtered
+                    .Include(o => o.OrderDetails.Select(od => od.Product.ProductImages))
                     .ToListAsync();
 
                 return View(orders);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Order/Index] {ex}");
+                System.Diagnostics.Trace.TraceError($"[Order/Index] {ex}");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải đơn hàng.";
-                return View(new System.Collections.Generic.List<Order>());
+                return View(new List<Order>());
             }
         }
 

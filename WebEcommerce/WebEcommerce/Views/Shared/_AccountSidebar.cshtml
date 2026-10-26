@@ -1,0 +1,77 @@
+@using Microsoft.AspNet.Identity
+@*
+    Sidebar khu Tài khoản, dùng chung cho Manage/Profile, Manage/ChangePassword, Order/Index.
+    ViewData: "AccountActive" = profile | password | orders; "AccountAvatar" = URL ảnh (chỉ Profile truyền, kèm nút đổi ảnh).
+*@
+@{
+    var active = ViewData["AccountActive"] as string;
+    var avatarUrl = ViewData["AccountAvatar"] as string;
+    var userName = User.Identity.GetUserName() ?? "";
+    var fullName = (User.Identity as System.Security.Claims.ClaimsIdentity)?.FindFirst("FullName")?.Value;
+    var displayName = string.IsNullOrWhiteSpace(fullName) ? (userName == "" ? "Khách hàng" : userName) : fullName;
+    var links = new[]
+    {
+        new { Key = "profile", Url = Url.Action("Profile", "Manage"), Icon = "person", Label = "Thông tin tài khoản" },
+        new { Key = "orders", Url = Url.Action("Index", "Order"), Icon = "receipt_long", Label = "Đơn hàng của tôi" },
+        new { Key = "wishlist", Url = Url.Action("Index", "Wishlist"), Icon = "favorite", Label = "Sản phẩm yêu thích" },
+        new { Key = "password", Url = Url.Action("ChangePassword", "Manage"), Icon = "lock_reset", Label = "Đổi mật khẩu & Bảo mật" }
+    };
+}
+
+<div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center gap-4">
+    <div class="relative shrink-0 group">
+        @if (avatarUrl != null)
+        {
+            <img id="avatar-preview-sidebar" src="@avatarUrl" alt="@displayName" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
+            <label for="AvatarFile" class="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-primary-container hover:bg-brand-red-vibrant text-white flex items-center justify-center cursor-pointer shadow-md transition-all group-hover:scale-110" title="Đổi ảnh đại diện">
+                <span class="material-symbols-outlined text-sm">photo_camera</span>
+            </label>
+        }
+        else
+        {
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-primary-container to-brand-red-vibrant text-white flex items-center justify-center font-bold text-xl shadow-md">
+                @displayName.Substring(0, 1).ToUpper()
+            </div>
+        }
+    </div>
+    <div class="min-w-0">
+        <p class="text-xs text-slate-500">Xin chào,</p>
+        <h2 class="font-headline font-bold text-base text-slate-900 leading-tight truncate" title="@displayName">@displayName</h2>
+        <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-badge-discount-bg text-primary-container text-[11px] font-semibold">
+            <span class="material-symbols-outlined text-[14px] text-gold-star">workspace_premium</span>
+            Thành viên TheChillShop
+        </span>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-slate-200/80 p-2.5 shadow-sm">
+    <nav class="space-y-0.5" aria-label="Tài khoản">
+        @foreach (var link in links)
+        {
+            var isActive = link.Key == active;
+            <a href="@link.Url" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors @(isActive ? "bg-badge-discount-bg text-primary-container font-bold" : "text-slate-700 font-medium hover:bg-slate-50 hover:text-primary-container")" @(isActive ? "aria-current=page" : "")>
+                <span class="material-symbols-outlined text-lg @(isActive ? "" : "text-slate-400")">@link.Icon</span>
+                <span>@link.Label</span>
+            </a>
+        }
+        <div class="border-t border-slate-100 my-1.5"></div>
+        @using (Html.BeginForm("LogOff", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600 text-left transition-colors">
+                <span class="material-symbols-outlined text-lg text-slate-400">logout</span>
+                <span>Đăng xuất</span>
+            </button>
+        }
+    </nav>
+</div>
+
+<div class="rounded-2xl bg-white border border-slate-200/80 p-4 shadow-sm flex items-center gap-3">
+    <span class="w-10 h-10 rounded-xl bg-primary-fixed text-primary-container flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">support_agent</span>
+    </span>
+    <div class="min-w-0 text-sm">
+        <p class="font-bold text-slate-900">Cần hỗ trợ đơn hàng?</p>
+        <p class="text-xs text-slate-500">Hotline 24/7: <a href="tel:18002097" class="font-bold text-primary-container hover:underline">1800.2097</a></p>
+    </div>
+</div>

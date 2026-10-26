@@ -1,94 +1,229 @@
 @model List<WebEcommerce.Models.Order>
 @{
-    ViewBag.Title = "Lịch sử đơn hàng";
+    ViewBag.Title = "Đơn hàng của tôi";
+    var status = ViewBag.Status as string;
+    var q = ViewBag.Q as string ?? "";
+    var range = ViewBag.Range as string;
+    var sort = ViewBag.Sort as string;
+    var statusCounts = ViewBag.StatusCounts as Dictionary<string, int> ?? new Dictionary<string, int>();
+    var hasAnyOrder = ViewBag.HasAnyOrder == true;
+    var hasFilter = status != null || q != "" || range != null || sort != null;
+
+    // Key = giá trị Status trong DB; null = tab "Tất cả"
+    var tabs = new[]
+    {
+        new { Key = (string)null, Label = "Tất cả" },
+        new { Key = "Pending", Label = "Chờ xác nhận" },
+        new { Key = "Confirmed", Label = "Đã xác nhận" },
+        new { Key = "Processing", Label = "Đang xử lý" },
+        new { Key = "Shipped", Label = "Đang giao" },
+        new { Key = "Delivered", Label = "Đã giao" },
+        new { Key = "Cancelled", Label = "Đã hủy" }
+    };
+    // Nhãn, câu mô tả cho khách, màu chữ, icon
+    var statusInfo = new Dictionary<string, string[]>
+    {
+        { "Pending", new[] { "Chờ xác nhận", "Đang chờ shop xác nhận đơn", "text-primary-container", "schedule" } },
+        { "Confirmed", new[] { "Đã xác nhận", "Shop đang chuẩn bị hàng", "text-primary-container", "task_alt" } },
+        { "Processing", new[] { "Đang xử lý", "Đơn hàng đang được đóng gói", "text-primary-container", "inventory_2" } },
+        { "Shipped", new[] { "Đang giao", "Đơn hàng đang trên đường đến bạn", "text-primary-container", "local_shipping" } },
+        { "Delivered", new[] { "Đã giao", "Giao hàng thành công", "text-emerald-600", "verified" } },
+        { "Cancelled", new[] { "Đã hủy", "Đơn hàng đã bị hủy", "text-slate-500", "cancel" } }
+    };
 }
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="material-symbols-outlined text-3xl text-[#0d47a1]">receipt_long</span>
-            <h1 class="font-headline font-extrabold text-3xl text-[#1a1a2e]">Lịch sử đơn hàng</h1>
-        </div>
-        <p class="text-sm text-slate-500">Theo dõi trạng thái và chi tiết các đơn hàng của bạn.</p>
-    </div>
+<div class="max-w-[1280px] mx-auto px-4 py-6 w-full">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-5" aria-label="Breadcrumb">
+        <a href="@Url.Action("Index", "Home")" class="hover:text-primary-container transition-colors">Trang chủ</a>
+        <span>/</span>
+        <a href="@Url.Action("Profile", "Manage")" class="hover:text-primary-container transition-colors">Tài khoản</a>
+        <span>/</span>
+        <span class="text-slate-800 font-semibold">Đơn hàng của tôi</span>
+    </nav>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold">
+        <div class="mb-5 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold" role="status">
             @TempData["SuccessMessage"]
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold">
+        <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold" role="alert">
             @TempData["ErrorMessage"]
         </div>
     }
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="bg-white border-2 border-slate-200 rounded-2xl p-10 text-center shadow-sm">
-            <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
-                <span class="material-symbols-outlined text-4xl text-[#0d47a1]">shopping_bag</span>
-            </div>
-            <h2 class="font-headline font-bold text-xl text-slate-900 mb-2">Chưa có đơn hàng</h2>
-            <p class="text-sm text-slate-500 mb-6">Bạn chưa đặt đơn hàng nào.</p>
-            <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0d47a1] hover:bg-[#0a3880] text-white font-bold text-sm transition-colors">
-                <span class="material-symbols-outlined text-lg">shopping_bag</span>
-                Bắt đầu mua sắm
-            </a>
-        </div>
-    }
-    else
-    {
-        <div class="space-y-4">
-            @foreach (var order in Model)
-            {
-                var statusColor = "bg-slate-100 text-slate-700";
-                var statusIcon = "schedule";
-                switch (order.Status)
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <aside class="hidden lg:block lg:col-span-3 space-y-4">
+            @Html.Partial("_AccountSidebar", new ViewDataDictionary { { "AccountActive", "orders" } })
+        </aside>
+
+        <main class="lg:col-span-9 space-y-3 min-w-0">
+            <!-- Tab trạng thái -->
+            <nav class="bg-white rounded-2xl border border-slate-200/80 shadow-sm flex overflow-x-auto" aria-label="Lọc theo trạng thái">
+                @foreach (var tab in tabs)
                 {
-                    case "Pending": statusColor = "bg-amber-100 text-amber-700"; statusIcon = "schedule"; break;
-                    case "Confirmed": statusColor = "bg-blue-100 text-blue-700"; statusIcon = "check_circle"; break;
-                    case "Processing": statusColor = "bg-sky-100 text-sky-700"; statusIcon = "inventory_2"; break;
-                    case "Shipped": statusColor = "bg-purple-100 text-purple-700"; statusIcon = "local_shipping"; break;
-                    case "Delivered": statusColor = "bg-green-100 text-green-700"; statusIcon = "verified"; break;
-                    case "Cancelled": statusColor = "bg-red-100 text-red-700"; statusIcon = "cancel"; break;
+                    var isActive = tab.Key == status;
+                    var count = tab.Key == null ? 0 : (statusCounts.ContainsKey(tab.Key) ? statusCounts[tab.Key] : 0);
+                    <a href="@Url.Action("Index", new { status = tab.Key, q = q == "" ? null : q, range, sort })"
+                       class="flex-1 shrink-0 text-center px-4 py-3.5 text-sm border-b-2 transition-colors whitespace-nowrap @(isActive ? "border-primary-container text-primary-container font-bold" : "border-transparent text-slate-600 font-medium hover:text-primary-container")"
+                       @(isActive ? "aria-current=page" : "")>
+                        @tab.Label@(count > 0 ? " (" + count + ")" : "")
+                    </a>
                 }
+            </nav>
 
-                <div class="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                        <div class="flex items-center gap-3">
-                            <span class="font-headline font-bold text-base text-slate-900">Đơn hàng #@order.OrderID</span>
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @statusColor">
-                                <span class="material-symbols-outlined text-sm">@statusIcon</span>
-                                @order.Status
-                            </span>
-                        </div>
-                        <span class="text-xs text-slate-500">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+            <!-- Tìm kiếm + thời gian + sắp xếp -->
+            <form method="get" action="@Url.Action("Index")"
+                  onsubmit="Array.prototype.forEach.call(this.elements, function (el) { if (el.name && !el.value) el.disabled = true; })"
+                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                @if (status != null)
+                {
+                    <input type="hidden" name="status" value="@status" />
+                }
+                <div class="relative flex-1">
+                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                    <label for="order-search" class="sr-only">Tìm đơn hàng</label>
+                    <input id="order-search" type="search" name="q" value="@q" maxlength="100"
+                           placeholder="Tìm theo mã đơn hoặc tên sản phẩm"
+                           class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200/80 bg-white shadow-sm text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/15" />
+                </div>
+                <div class="flex items-center gap-4 text-sm shrink-0 px-1">
+                    <label class="inline-flex items-center gap-1 text-slate-500">
+                        <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                        <span class="sr-only">Khoảng thời gian</span>
+                        <select name="range" onchange="this.form.requestSubmit()" class="bg-transparent border-0 py-1 pl-0 pr-1 font-semibold text-slate-700 cursor-pointer focus:outline-none focus:ring-0 hover:text-primary-container">
+                            <option value="" @(range == null ? "selected" : "")>Mọi thời gian</option>
+                            <option value="30d" @(range == "30d" ? "selected" : "")>30 ngày qua</option>
+                            <option value="6m" @(range == "6m" ? "selected" : "")>6 tháng qua</option>
+                            <option value="1y" @(range == "1y" ? "selected" : "")>1 năm qua</option>
+                        </select>
+                    </label>
+                    <label class="inline-flex items-center gap-1 text-slate-500">
+                        <span class="material-symbols-outlined text-[18px]">swap_vert</span>
+                        <span class="sr-only">Sắp xếp</span>
+                        <select name="sort" onchange="this.form.requestSubmit()" class="bg-transparent border-0 py-1 pl-0 pr-1 font-semibold text-slate-700 cursor-pointer focus:outline-none focus:ring-0 hover:text-primary-container">
+                            <option value="" @(sort == null ? "selected" : "")>Mới nhất</option>
+                            <option value="oldest" @(sort == "oldest" ? "selected" : "")>Cũ nhất</option>
+                            <option value="amount_desc" @(sort == "amount_desc" ? "selected" : "")>Giá cao nhất</option>
+                            <option value="amount_asc" @(sort == "amount_asc" ? "selected" : "")>Giá thấp nhất</option>
+                        </select>
+                    </label>
+                </div>
+            </form>
+
+            @if (!Model.Any())
+            {
+                <div class="bg-white border border-slate-200/80 rounded-2xl py-14 px-6 text-center shadow-sm">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-badge-discount-bg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-primary-container">@(hasAnyOrder ? "search_off" : "receipt_long")</span>
                     </div>
-
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="text-sm text-slate-600">
-                            <span>@(order.OrderDetails?.Count ?? 0) sản phẩm</span>
-                            <span class="mx-2">•</span>
-                            <span>@order.PaymentMethod</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="font-headline font-extrabold text-lg text-[#0d47a1]">@string.Format("{0:N0}đ", order.FinalAmount)</span>
-                            @if (order.Status == "Pending")
-                            {
-                                <a href="@Url.Action("Detail", "Order", new { id = order.OrderID })#cancel-order-box" class="px-3.5 py-2 rounded-lg bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-bold text-xs border border-red-200 hover:border-red-600 transition-all">
-                                    Hủy đơn
-                                </a>
-                            }
-                            <a href="@Url.Action("Detail", "Order", new { id = order.OrderID })" class="px-4 py-2 rounded-lg bg-blue-50 hover:bg-[#0d47a1] text-[#0d47a1] hover:text-white font-bold text-xs border border-blue-200 hover:border-[#0d47a1] transition-all">
-                                Chi tiết
+                    @if (!hasAnyOrder)
+                    {
+                        <h2 class="font-headline font-bold text-lg text-slate-900 mb-1">Bạn chưa có đơn hàng nào</h2>
+                        <p class="text-sm text-slate-500 mb-5">Khám phá hàng ngàn sản phẩm công nghệ chính hãng ngay hôm nay.</p>
+                        <a href="@Url.Action("Index", "Home")" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-container hover:bg-brand-red-vibrant text-white font-bold text-sm transition-colors">
+                            Mua sắm ngay
+                        </a>
+                    }
+                    else
+                    {
+                        <h2 class="font-headline font-bold text-lg text-slate-900 mb-1">Không có đơn hàng nào ở đây</h2>
+                        <p class="text-sm text-slate-500 mb-5">Thử đổi từ khóa, trạng thái hoặc khoảng thời gian.</p>
+                        if (hasFilter)
+                        {
+                            <a href="@Url.Action("Index")" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 hover:border-primary-container hover:text-primary-container text-slate-700 font-bold text-sm transition-colors">
+                                Xem tất cả đơn hàng
                             </a>
-                        </div>
-                    </div>
+                        }
+                    }
                 </div>
             }
-        </div>
-    }
+
+            @foreach (var order in Model)
+            {
+                var info = statusInfo.ContainsKey(order.Status ?? "") ? statusInfo[order.Status] : new[] { order.Status, "", "text-slate-500", "help" };
+                var details = order.OrderDetails?.ToList() ?? new List<WebEcommerce.Models.OrderDetail>();
+                var detailUrl = Url.Action("Detail", "Order", new { id = order.OrderID });
+                var paymentText = order.PaymentMethod == "BankTransfer" ? "Chuyển khoản" : order.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : order.PaymentMethod;
+                var paidText = order.PaymentStatus == "Paid" ? "Đã thanh toán" : order.PaymentStatus == "PendingConfirmation" ? "Chờ xác nhận thanh toán" : "Chưa thanh toán";
+
+                <article class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="px-5 py-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="font-bold text-slate-900">Đơn #@order.OrderID</span>
+                            <span class="text-slate-300">|</span>
+                            <span class="text-xs text-slate-500">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-flex items-center gap-1 text-xs @info[2]">
+                                <span class="material-symbols-outlined text-[16px]">@info[3]</span>@info[1]
+                            </span>
+                            <span class="hidden sm:inline text-slate-300">|</span>
+                            <span class="text-[13px] font-bold uppercase tracking-wide @info[2]">@info[0]</span>
+                        </div>
+                    </div>
+
+                    <a href="@detailUrl" class="block px-5 divide-y divide-slate-100 hover:bg-slate-50/60 transition-colors">
+                        @foreach (var detail in details.Take(3))
+                        {
+                            var product = detail.Product;
+                            var img = product?.ProductImages?.FirstOrDefault(x => x.IsMain) ?? product?.ProductImages?.FirstOrDefault();
+                            <div class="flex items-center gap-4 py-3.5">
+                                <div class="w-20 h-20 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                                    @if (img != null)
+                                    {
+                                        <img src="@img.ImageURL" alt="@product?.Name" loading="lazy" class="w-full h-full object-contain p-1.5" onerror="this.onerror=null;this.src='https://placehold.co/80x80/fef2f2/d70018?text=SP';" />
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined text-3xl text-slate-300">image</span>
+                                    }
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 line-clamp-2">@(product?.Name ?? "Sản phẩm")</p>
+                                    <p class="text-xs text-slate-500 mt-1">x@(detail.Quantity)</p>
+                                </div>
+                                <span class="text-sm text-slate-800 whitespace-nowrap">@string.Format("{0:N0}đ", detail.UnitPrice)</span>
+                            </div>
+                        }
+                        @if (details.Count > 3)
+                        {
+                            <p class="py-2.5 text-center text-xs text-slate-500">Xem thêm @(details.Count - 3) sản phẩm khác</p>
+                        }
+                    </a>
+
+                    <div class="px-5 py-4 border-t border-slate-100 bg-gradient-to-b from-white to-red-50/40">
+                        <div class="flex items-baseline justify-end gap-2 mb-3">
+                            <span class="text-sm text-slate-600">Thành tiền:</span>
+                            <span class="font-headline font-extrabold text-xl text-primary-container">@string.Format("{0:N0}đ", order.FinalAmount)</span>
+                        </div>
+                        <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
+                            <p class="text-xs text-slate-500">@paymentText · @paidText</p>
+                            <div class="flex items-center justify-end gap-2">
+                                @switch (order.Status)
+                                {
+                                    case "Pending":
+                                        <a href="@detailUrl" class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:border-red-300 hover:text-red-600 text-slate-700 font-semibold text-sm transition-colors">Hủy đơn</a>
+                                        <a href="@detailUrl" class="px-5 py-2 rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm transition-colors">Xem chi tiết</a>
+                                        break;
+                                    case "Shipped":
+                                        <a href="@detailUrl" class="px-5 py-2 rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm transition-colors">Theo dõi đơn</a>
+                                        break;
+                                    case "Delivered":
+                                        <a href="@detailUrl" class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-semibold text-sm transition-colors">Xem chi tiết</a>
+                                        <a href="@Url.Action("CreateOrderReview", "Review", new { orderId = order.OrderID })" class="px-5 py-2 rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm transition-colors">Đánh giá</a>
+                                        break;
+                                    default:
+                                        <a href="@detailUrl" class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-semibold text-sm transition-colors">Xem chi tiết</a>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            }
+        </main>
+    </div>
 </div>
