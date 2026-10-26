@@ -31,6 +31,10 @@ namespace WebEcommerce.Models
         [Column("Subtotal")]
         public decimal Subtotal { get; set; }
 
+        // Suất Flash Sale đã dùng khi đặt; NULL = giá thường hoặc đơn cũ
+        [Column("FlashSaleItemID")]
+        public int? FlashSaleItemID { get; set; }
+
         // Navigation properties
         [ForeignKey("OrderID")]
         public virtual Order Order { get; set; }

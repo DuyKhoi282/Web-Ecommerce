@@ -297,7 +297,8 @@ namespace WebEcommerce.Controllers
                                 ProductID = item.Product.ProductID,
                                 Quantity = item.Quantity,
                                 UnitPrice = item.CurrentPrice,
-                                Subtotal = item.CurrentPrice * item.Quantity
+                                Subtotal = item.CurrentPrice * item.Quantity,
+                                FlashSaleItemID = item.FlashSaleItemId
                             };
                             _context.OrderDetails.Add(orderDetail);
 
@@ -475,8 +476,6 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                 {
                     try
                     {
-                        var now = DateTime.UtcNow;
-
                         foreach (var detail in order.OrderDetails)
                         {
                             if (detail.Product != null)
@@ -490,17 +489,10 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                                     detail.Product.Status = 1;
                                 }
 
-                                // Hoàn lại số lượng đã bán của Flash Sale nếu có
-                                var activeFsItem = await _context.FlashSaleItems
-                                    .Include(f => f.FlashSale)
-                                    .FirstOrDefaultAsync(f => f.ProductID == detail.Product.ProductID
-                                                           && f.FlashSale != null
-                                                           && f.FlashSale.IsActive
-                                                           && f.FlashSale.StartTime <= now
-                                                           && f.FlashSale.EndTime > now);
-                                if (activeFsItem != null && activeFsItem.SoldQuantity > 0)
+                                // Hoàn lại suất Flash Sale mà dòng đơn này đã giữ (nếu có)
+                                if (detail.FlashSaleItemID.HasValue)
                                 {
-                                    activeFsItem.SoldQuantity = Math.Max(0, activeFsItem.SoldQuantity - detail.Quantity);
+                                    FlashSaleHelper.Release(_context, detail.FlashSaleItemID.Value, detail.Quantity);
                                 }
                             }
                         }

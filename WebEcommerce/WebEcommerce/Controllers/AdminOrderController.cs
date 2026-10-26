@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using WebEcommerce.Filters;
+using WebEcommerce.Helpers;
 using WebEcommerce.Models;
 
 namespace WebEcommerce.Controllers
@@ -146,8 +147,6 @@ namespace WebEcommerce.Controllers
                         // Nếu cancel bởi Manager -> restore stock, flash sale, voucher
                         if (newStatus == "Cancelled" && order.Status != "Cancelled")
                         {
-                            var now = DateTime.UtcNow;
-
                             foreach (var detail in order.OrderDetails)
                             {
                                 if (detail.Product != null)
@@ -158,17 +157,10 @@ namespace WebEcommerce.Controllers
                                         detail.Product.Status = 1;
                                     }
 
-                                    // Hoàn lại số lượng đã bán của Flash Sale nếu có
-                                    var activeFsItem = await _context.FlashSaleItems
-                                        .Include(f => f.FlashSale)
-                                        .FirstOrDefaultAsync(f => f.ProductID == detail.Product.ProductID
-                                                               && f.FlashSale != null
-                                                               && f.FlashSale.IsActive
-                                                               && f.FlashSale.StartTime <= now
-                                                               && f.FlashSale.EndTime > now);
-                                    if (activeFsItem != null && activeFsItem.SoldQuantity > 0)
+                                    // Hoàn lại suất Flash Sale mà dòng đơn này đã giữ (nếu có)
+                                    if (detail.FlashSaleItemID.HasValue)
                                     {
-                                        activeFsItem.SoldQuantity = Math.Max(0, activeFsItem.SoldQuantity - detail.Quantity);
+                                        FlashSaleHelper.Release(_context, detail.FlashSaleItemID.Value, detail.Quantity);
                                     }
                                 }
                             }

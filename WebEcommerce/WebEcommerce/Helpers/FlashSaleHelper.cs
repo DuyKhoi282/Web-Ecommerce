@@ -53,5 +53,16 @@ namespace WebEcommerce.Helpers
                   WHERE ""FlashSaleItemID"" = {0} AND ""SoldQuantity"" + {1} <= ""MaxQuantity""",
                 flashSaleItemId, quantity) == 1;
         }
+
+        /// <summary>
+        /// Hoàn suất flash khi hủy đơn, vào đúng FlashSaleItem đơn đã giữ (không âm); gọi trong transaction hủy đơn.
+        /// </summary>
+        public static void Release(ApplicationDbContext db, int flashSaleItemId, int quantity)
+        {
+            db.Database.ExecuteSqlCommand(
+                @"UPDATE ""FlashSaleItems"" SET ""SoldQuantity"" = GREATEST(""SoldQuantity"" - {1}, 0)
+                  WHERE ""FlashSaleItemID"" = {0}",
+                flashSaleItemId, quantity);
+        }
     }
 }
