@@ -49,50 +49,28 @@
     </a>
 </div>
 
-<!-- 4 Thẻ KPI thống kê -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
-            <span class="material-symbols-outlined text-2xl">loyalty</span>
+<!-- KPI Cards: gọn 1 dòng, cùng kiểu với trang Kho -->
+@{
+    var kpis = new[] {
+        new { Icon = "loyalty", Tone = "bg-blue-50 text-blue-600", Num = "text-slate-900", Value = Model.TotalCount.ToString(), Label = "Tổng số mã" },
+        new { Icon = "verified", Tone = "bg-emerald-50 text-emerald-600", Num = "text-emerald-600", Value = Model.ActiveCount.ToString(), Label = "Đang hoạt động (" + Model.InDateActiveCount + " trong hạn)" },
+        new { Icon = "hourglass_disabled", Tone = "bg-amber-50 text-amber-600", Num = "text-amber-600", Value = Model.ExpiredCount.ToString(), Label = "Đã hết hạn" },
+        new { Icon = "shopping_cart_checkout", Tone = "bg-purple-50 text-purple-600", Num = "text-purple-600", Value = Model.TotalUsageCount.ToString(), Label = "Tổng lượt đã dùng" }
+    };
+}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    @foreach (var k in kpis)
+    {
+        <div class="admin-card rounded-xl px-[0.875rem] py-[0.625rem] flex items-center gap-3">
+            <span class="w-9 h-9 rounded-lg @k.Tone flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">@k.Icon</span>
+            </span>
+            <span class="leading-tight min-w-0">
+                <span class="block text-lg font-extrabold @k.Num">@k.Value</span>
+                <span class="block text-xs text-slate-500 font-medium">@k.Label</span>
+            </span>
         </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Tổng số mã</span>
-            <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@Model.TotalCount</span>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-            <span class="material-symbols-outlined text-2xl">verified</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Đang hoạt động</span>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-xl sm:text-2xl font-headline font-black text-emerald-600">@Model.ActiveCount</span>
-                <span class="text-2xs text-slate-400 font-medium">(@Model.InDateActiveCount trong hạn)</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
-            <span class="material-symbols-outlined text-2xl">hourglass_disabled</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Đã hết hạn</span>
-            <span class="text-xl sm:text-2xl font-headline font-black text-amber-600">@Model.ExpiredCount</span>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
-            <span class="material-symbols-outlined text-2xl">shopping_cart_checkout</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Tổng lượt đã dùng</span>
-            <span class="text-xl sm:text-2xl font-headline font-black text-purple-600">@Model.TotalUsageCount</span>
-        </div>
-    </div>
+    }
 </div>
 
 <!-- Thanh tìm kiếm & Bộ lọc -->

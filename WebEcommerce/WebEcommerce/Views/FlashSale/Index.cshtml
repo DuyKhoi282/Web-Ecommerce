@@ -49,58 +49,28 @@
     </a>
 </div>
 
-<!-- 4 Thẻ KPI thống kê -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-100">
-            <span class="material-symbols-outlined text-2xl">bolt</span>
+<!-- KPI Cards: gọn 1 dòng, cùng kiểu với trang Kho -->
+@{
+    var kpis = new[] {
+        new { Icon = "bolt", Tone = "bg-red-50 text-red-600", Num = "text-slate-900", Value = Model.TotalCount.ToString(), Label = "Tổng số đợt" },
+        new { Icon = "local_fire_department", Tone = "bg-emerald-50 text-emerald-600", Num = "text-emerald-600", Value = Model.LiveCount.ToString(), Label = "Đang diễn ra (Live)" },
+        new { Icon = "schedule", Tone = "bg-blue-50 text-blue-600", Num = "text-blue-600", Value = Model.UpcomingCount.ToString(), Label = "Sắp diễn ra" },
+        new { Icon = "shopping_cart_checkout", Tone = "bg-purple-50 text-purple-600", Num = "text-purple-600", Value = Model.TotalSoldQuantity.ToString(), Label = "Suất đã bán ra" }
+    };
+}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    @foreach (var k in kpis)
+    {
+        <div class="admin-card rounded-xl px-[0.875rem] py-[0.625rem] flex items-center gap-3">
+            <span class="w-9 h-9 rounded-lg @k.Tone flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">@k.Icon</span>
+            </span>
+            <span class="leading-tight min-w-0">
+                <span class="block text-lg font-extrabold @k.Num">@k.Value</span>
+                <span class="block text-xs text-slate-500 font-medium">@k.Label</span>
+            </span>
         </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Tổng số đợt</span>
-            <span class="text-xl sm:text-2xl font-headline font-black text-slate-900">@Model.TotalCount</span>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-            <span class="material-symbols-outlined text-2xl">local_fire_department</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Đang diễn ra (Live)</span>
-            <div class="flex items-center gap-2">
-                <span class="text-xl sm:text-2xl font-headline font-black text-emerald-600">@Model.LiveCount</span>
-                @if (Model.LiveCount > 0)
-                {
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 animate-pulse">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Trang chủ
-                    </span>
-                }
-            </div>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
-            <span class="material-symbols-outlined text-2xl">schedule</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Sắp diễn ra</span>
-            <span class="text-xl sm:text-2xl font-headline font-black text-blue-600">@Model.UpcomingCount</span>
-        </div>
-    </div>
-
-    <div class="admin-card rounded-2xl p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
-            <span class="material-symbols-outlined text-2xl">shopping_cart_checkout</span>
-        </div>
-        <div>
-            <span class="text-xs font-semibold text-slate-500 block">Suất đã bán ra</span>
-            <div class="flex items-baseline gap-1">
-                <span class="text-xl sm:text-2xl font-headline font-black text-purple-600">@Model.TotalSoldQuantity</span>
-                <span class="text-2xs text-slate-400 font-semibold">suất</span>
-            </div>
-        </div>
-    </div>
+    }
 </div>
 
 <!-- Thanh tìm kiếm & Bộ lọc -->

@@ -38,56 +38,28 @@
     </div>
 }
 
-<!-- 4 KPI Metric Cards -->
-@* p-/gap-[1.25rem] thay p-5/gap-5 vì bootstrap.css có .p-5/.gap-5 { 3rem !important }; 4 cột từ 2xl để số tiền không tràn đè icon *@
-<div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-[1.25rem] mb-8">
-    <!-- Card 1: Total Users -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#0d47a1] hover:border-[#0d47a1] p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
-        <div>
-            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng người dùng</span>
-            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalUsers.ToString("N0")</span>
-            <span class="block text-[11px] text-emerald-600 font-bold mt-1">Toàn bộ tài khoản</span>
+<!-- KPI Cards: gọn 1 dòng, cùng kiểu với trang Kho -->
+@{
+    var kpis = new[] {
+        new { Icon = "group", Tone = "bg-blue-50 text-blue-600", Num = "text-slate-900", Value = Model.TotalUsers.ToString("N0"), Label = "Tổng người dùng" },
+        new { Icon = "shopping_bag", Tone = "bg-cyan-50 text-cyan-600", Num = "text-slate-900", Value = Model.TotalCustomers.ToString("N0"), Label = "Khách hàng" },
+        new { Icon = "badge", Tone = "bg-purple-50 text-purple-600", Num = "text-slate-900", Value = Model.TotalStaff.ToString("N0"), Label = "Quản trị & nhân viên" },
+        new { Icon = "block", Tone = "bg-red-50 text-red-600", Num = "text-red-600", Value = Model.TotalLocked.ToString("N0"), Label = "Tài khoản bị khóa" }
+    };
+}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    @foreach (var k in kpis)
+    {
+        <div class="admin-card rounded-xl px-[0.875rem] py-[0.625rem] flex items-center gap-3">
+            <span class="w-9 h-9 rounded-lg @k.Tone flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">@k.Icon</span>
+            </span>
+            <span class="leading-tight min-w-0">
+                <span class="block text-lg font-extrabold @k.Num">@k.Value</span>
+                <span class="block text-xs text-slate-500 font-medium">@k.Label</span>
+            </span>
         </div>
-        <div class="w-13 h-13 rounded-2xl bg-blue-50 text-[#0d47a1] border border-blue-200 flex items-center justify-center p-3 shadow-xs">
-            <span class="material-symbols-outlined text-2xl font-bold">group</span>
-        </div>
-    </div>
-
-    <!-- Card 2: Customers -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-[#00b4d8] hover:border-[#00b4d8] p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
-        <div>
-            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Khách hàng</span>
-            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalCustomers.ToString("N0")</span>
-            <span class="block text-[11px] text-[#00b4d8] font-bold mt-1">Khách mua hàng</span>
-        </div>
-        <div class="w-13 h-13 rounded-2xl bg-cyan-50 text-[#00b4d8] border border-cyan-200 flex items-center justify-center p-3 shadow-xs">
-            <span class="material-symbols-outlined text-2xl font-bold">shopping_bag</span>
-        </div>
-    </div>
-
-    <!-- Card 3: Staff & Managers -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-purple-600 hover:border-purple-600 p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
-        <div>
-            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Quản trị & Nhân viên</span>
-            <span class="block text-2xl font-black font-headline text-slate-900 mt-1">@Model.TotalStaff.ToString("N0")</span>
-            <span class="block text-[11px] text-purple-600 font-bold mt-1">Vận hành hệ thống</span>
-        </div>
-        <div class="w-13 h-13 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center p-3 shadow-xs">
-            <span class="material-symbols-outlined text-2xl font-bold">badge</span>
-        </div>
-    </div>
-
-    <!-- Card 4: Locked Users -->
-    <div class="bg-white rounded-2xl border border-slate-300 border-t-4 border-t-rose-500 hover:border-rose-500 p-[1.25rem] shadow-[0_4px_16px_-2px_rgba(15,23,42,0.08)] hover:shadow-lg transition-all flex items-center justify-between">
-        <div>
-            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tài khoản bị khóa</span>
-            <span class="block text-2xl font-black font-headline text-red-600 mt-1">@Model.TotalLocked.ToString("N0")</span>
-            <span class="block text-[11px] text-red-500 font-bold mt-1">Đang tạm ngưng</span>
-        </div>
-        <div class="w-13 h-13 rounded-2xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center p-3 shadow-xs">
-            <span class="material-symbols-outlined text-2xl font-bold">block</span>
-        </div>
-    </div>
+    }
 </div>
 
 <!-- Search & Filter Bar -->
