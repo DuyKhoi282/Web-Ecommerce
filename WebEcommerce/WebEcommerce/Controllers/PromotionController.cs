@@ -282,6 +282,15 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
+                var entity = await _context.PromotionalCodes.FindAsync(model.PromoCodeID);
+                if (entity == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá trong cơ sở dữ liệu.";
+                    return RedirectToAction("Index");
+                }
+
+                // Số lượt đã dùng lấy từ DB, không tin hidden field của form
+                model.CurrentUsage = entity.CurrentUsage;
                 model.Code = model.Code?.Trim().ToUpper();
 
                 // Kiểm tra trùng lặp mã (loại trừ chính id đang sửa)
@@ -312,6 +321,10 @@ namespace WebEcommerce.Controllers
                         ModelState.AddModelError("DiscountValue", "Số tiền giảm cố định phải lớn hơn 0đ.");
                     }
                 }
+                else
+                {
+                    ModelState.AddModelError("DiscountType", "Loại giảm giá không hợp lệ.");
+                }
 
                 if (model.MaxUsage < model.CurrentUsage)
                 {
@@ -321,13 +334,6 @@ namespace WebEcommerce.Controllers
                 if (!ModelState.IsValid)
                 {
                     return View(model);
-                }
-
-                var entity = await _context.PromotionalCodes.FindAsync(model.PromoCodeID);
-                if (entity == null)
-                {
-                    TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá trong cơ sở dữ liệu.";
-                    return RedirectToAction("Index");
                 }
 
                 entity.Code = model.Code;
