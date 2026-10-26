@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 card-hover-smooth hover-lift cursor-default">
-            <span class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary shrink-0 shadow-sm">
+            <span class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container shrink-0 shadow-sm">
                 <span class="material-symbols-outlined text-[20px]">bolt</span>
             </span>
             <div class="min-w-0">
@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 card-hover-smooth hover-lift cursor-default">
-            <span class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0 shadow-sm">
+            <span class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container shrink-0 shadow-sm">
                 <span class="material-symbols-outlined text-[20px]">currency_exchange</span>
             </span>
             <div class="min-w-0">
@@ -48,7 +48,7 @@
             </div>
         </div>
         <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 card-hover-smooth hover-lift cursor-default">
-            <span class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0 shadow-sm">
+            <span class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container shrink-0 shadow-sm">
                 <span class="material-symbols-outlined text-[20px]">published_with_changes</span>
             </span>
             <div class="min-w-0">
@@ -131,6 +131,25 @@
 <p class="hero-tab-title font-title-sm text-title-sm text-on-surface text-xs font-bold truncate">TUẦN LỄ ASUS</p>
 <p class="hero-tab-sub font-caption-sm text-caption-sm text-text-muted text-[11px] truncate">Ưu đãi ChillStudent tới 1 Triệu</p>
 </button>
+</div>
+<!-- CENTER AD BANNERS: flex-1 để lấp phần cao còn lại so với 2 cột bên -->
+<div class="flex-1 grid grid-cols-2 gap-3 min-h-[120px]">
+<a class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 relative group bg-slate-900 block" href="@Url.Action("Index", "Search", new { q = "Tai nghe" })">
+    <img alt="Tai nghe chống ồn chính hãng" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=300&auto=format&fit=crop&q=80"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-3">
+        <span class="inline-block px-2 py-0.5 rounded bg-primary-container text-white text-[9px] font-black uppercase tracking-wider w-fit">Âm thanh đỉnh cao</span>
+        <h4 class="text-white font-extrabold text-sm mt-1 leading-tight">Tai nghe chống ồn</h4>
+        <p class="text-slate-300 text-[11px] truncate">Giảm đến 30% • Tặng hộp đựng</p>
+    </div>
+</a>
+<a class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 relative group bg-slate-900 block" href="@Url.Action("Index", "Search", new { q = "Đồng hồ" })">
+    <img alt="Đồng hồ thông minh" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&h=300&auto=format&fit=crop&q=80"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-3">
+        <span class="inline-block px-2 py-0.5 rounded bg-primary-container text-white text-[9px] font-black uppercase tracking-wider w-fit">Smartwatch</span>
+        <h4 class="text-white font-extrabold text-sm mt-1 leading-tight">Đồng hồ thông minh</h4>
+        <p class="text-slate-300 text-[11px] truncate">Thu cũ lên đời • Trả góp 0%</p>
+    </div>
+</a>
 </div>
 </div>
 <!-- RIGHT PROMO BANNERS + QUICK ACTIONS (3 COLS) -->
@@ -296,7 +315,7 @@
                                 <span class="material-symbols-outlined text-[12px]">bolt</span>
                                 -@discountPct%
                             </span>
-                            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
+                            <span class="bg-slate-100 text-slate-700 font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
                         </div>
 
                         <!-- Product Image -->
@@ -390,7 +409,7 @@ else
 </section>
 <!-- B2B CORPORATE & TRADE-IN CAMPAIGN BANNER -->
 <section class="max-w-[1280px] mx-auto px-4 py-2 w-full reveal-on-scroll">
-    <div class="relative w-full rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-[#0d47a1] via-[#1565c0] to-[#0284c7] text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-blue-400/30">
+    <div class="relative w-full rounded-2xl overflow-hidden shadow-sm bg-gradient-to-r from-slate-900 via-[#3a0008] to-primary text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
         <div class="space-y-1.5 max-w-xl text-center md:text-left">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider text-amber-300">
                 <span class="material-symbols-outlined text-sm">business_center</span> KHÁCH HÀNG DOANH NGHIỆP CHILLBUSINESS
@@ -398,7 +417,7 @@ else
             <h3 class="font-headline font-black text-xl sm:text-2xl tracking-tight text-white">
                 Giải Pháp Thiết Bị Công Nghệ Cho Doanh Nghiệp &amp; Giáo Dục
             </h3>
-            <p class="text-blue-100 text-xs sm:text-sm font-medium">
+            <p class="text-white/80 text-xs sm:text-sm font-medium">
                 Chiết khấu đến 15% cho đơn hàng số lượng lớn • Xuất hóa đơn VAT điện tử nhanh chóng • Bảo hành tận nơi.
             </p>
         </div>
@@ -422,8 +441,8 @@ else
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 reveal-from-left">
             <div>
-                <span class="text-xs font-black uppercase tracking-wider text-[#0d47a1] bg-blue-50 border-2 border-blue-300 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#0d47a1]"></span>
+                <span class="text-xs font-black uppercase tracking-wider text-primary-container bg-badge-discount-bg border-2 border-red-200 shadow-sm px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-primary-container"></span>
                     SẢN PHẨM NỔI BẬT
                 </span>
                 <h2 class="font-headline font-black text-2xl sm:text-3xl text-slate-900 mt-2.5">
@@ -433,11 +452,11 @@ else
             </div>
 
             <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 text-xs font-bold">
-                <a href="@Url.Action("Index", "Shop")" class="px-5 py-2.5 rounded-full bg-[#0d47a1] text-white border-2 border-[#0d47a1] shadow-md shadow-[#0d47a1]/25 whitespace-nowrap">Tất cả</a>
-                <a href="@Url.Action("Index", "Search", new { q = "Điện thoại" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Điện thoại</a>
-                <a href="@Url.Action("Index", "Search", new { q = "Laptop" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Laptop</a>
-                <a href="@Url.Action("Index", "Search", new { q = "Tai nghe" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Tai nghe</a>
-                <a href="@Url.Action("Index", "Search", new { q = "Phụ kiện" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-[#0d47a1] hover:text-[#0d47a1] transition-all whitespace-nowrap shadow-sm">Phụ kiện</a>
+                <a href="@Url.Action("Index", "Shop")" class="px-5 py-2.5 rounded-full bg-primary-container text-white border-2 border-primary-container shadow-md shadow-primary-container/25 whitespace-nowrap">Tất cả</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Điện thoại" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-primary-container hover:text-primary-container transition-all whitespace-nowrap shadow-sm">Điện thoại</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Laptop" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-primary-container hover:text-primary-container transition-all whitespace-nowrap shadow-sm">Laptop</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Tai nghe" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-primary-container hover:text-primary-container transition-all whitespace-nowrap shadow-sm">Tai nghe</a>
+                <a href="@Url.Action("Index", "Search", new { q = "Phụ kiện" })" class="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 hover:border-primary-container hover:text-primary-container transition-all whitespace-nowrap shadow-sm">Phụ kiện</a>
             </div>
         </div>
 
@@ -452,8 +471,8 @@ else
             else
             {
                 <div class="col-span-full text-center py-12">
-                    <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-4xl text-[#0d47a1]">inventory_2</span>
+                    <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-badge-discount-bg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-primary-container">inventory_2</span>
                     </div>
                     <h3 class="font-headline font-bold text-xl text-slate-900 mb-2">Chưa có sản phẩm</h3>
                     <p class="text-sm text-slate-500">Các sản phẩm sẽ được hiển thị khi có dữ liệu trong hệ thống.</p>
@@ -462,7 +481,7 @@ else
         </div>
 
         <div class="mt-12 text-center">
-            <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-[#0d47a1] text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-[#0d47a1] shadow-sm hover:shadow-lg transition-all duration-300 active:scale-95">
+            <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-primary-container text-slate-900 hover:text-white font-bold text-sm border-2 border-slate-300 hover:border-primary-container shadow-sm hover:shadow-lg transition-all duration-300 active:scale-95">
                 <span>Xem tất cả sản phẩm</span>
                 <span class="material-symbols-outlined text-base">arrow_forward</span>
             </a>
@@ -518,8 +537,8 @@ Marshall Acoustic
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 <!-- Side Tall Promotional Banner (3 cols) -->
-<a href="@Url.Action("Index", "Search", new { q = "iPhone" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 aspect-[3/5] reveal-from-left">
-    <img alt="Điện Thoại &amp; Máy Tính Bảng" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800&h=1200&auto=format&fit=crop&q=80"/>
+<a href="@Url.Action("Index", "Search", new { q = "iPhone" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 min-h-[420px] reveal-from-left">
+    <img alt="Điện Thoại &amp; Máy Tính Bảng" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800&h=1200&auto=format&fit=crop&q=80"/>
     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5">
         <span class="inline-block px-2.5 py-1 rounded bg-[#d70018] text-white text-[10px] font-black uppercase tracking-wider w-fit shadow">
             FLAGSHIP KHỦNG
@@ -551,7 +570,7 @@ Marshall Acoustic
     var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
         ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
         : "https://via.placeholder.com/400x400";
-    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-[#0d47a1] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-primary-container hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
         <div class="flex items-center justify-between">
             @if (product.DiscountPrice.HasValue && product.Price > 0)
             {
@@ -611,8 +630,8 @@ Marshall Acoustic
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 <!-- Side Tall Promotional Banner (3 cols) -->
-<a href="@Url.Action("Index", "Search", new { q = "Laptop" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 aspect-[3/5] reveal-from-left">
-    <img alt="Laptop AI &amp; MacBook Đồ Họa" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=1200&auto=format&fit=crop&q=80"/>
+<a href="@Url.Action("Index", "Search", new { q = "Laptop" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 min-h-[420px] reveal-from-left">
+    <img alt="Laptop AI &amp; MacBook Đồ Họa" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=1200&auto=format&fit=crop&q=80"/>
     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5">
         <span class="inline-block px-2.5 py-1 rounded bg-[#d70018] text-white text-[10px] font-black uppercase tracking-wider w-fit shadow">
             MÙA TỰU TRƯỜNG
@@ -643,7 +662,7 @@ Marshall Acoustic
     var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
         ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
         : "https://via.placeholder.com/400x400";
-    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-[#0d47a1] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-primary-container hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
         <div class="flex items-center justify-between">
             @if (product.DiscountPrice.HasValue && product.Price > 0)
             {
@@ -654,7 +673,7 @@ Marshall Acoustic
             {
                 <span class="bg-badge-discount-bg text-badge-discount-text font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Chính hãng</span>
             }
-            <span class="bg-secondary-fixed text-secondary font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
+            <span class="bg-slate-100 text-slate-700 font-badge-label text-badge-label font-bold px-2 py-0.5 rounded-full">Trả góp 0%</span>
         </div>
         <a href="@Url.Action("Details", "Shop", new { id = product.ProductID })" class="my-3 aspect-square relative flex items-center justify-center overflow-hidden rounded-xl bg-white p-2 border border-slate-100 group-hover:border-slate-200 transition-colors">
             <img alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@mainImg"/>
@@ -703,8 +722,8 @@ Marshall Acoustic
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 <!-- Side Tall Promotional Banner (3 cols) -->
-<a href="@Url.Action("Index", "Search", new { q = "Đồng hồ" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 aspect-[3/5] reveal-from-left">
-    <img alt="Đồng Hồ &amp; Thiết Bị Âm Thanh" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&h=1200&auto=format&fit=crop&q=80"/>
+<a href="@Url.Action("Index", "Search", new { q = "Đồng hồ" })" class="hidden lg:block lg:col-span-3 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group relative bg-slate-900 min-h-[420px] reveal-from-left">
+    <img alt="Đồng Hồ &amp; Thiết Bị Âm Thanh" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&h=1200&auto=format&fit=crop&q=80"/>
     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5">
         <span class="inline-block px-2.5 py-1 rounded bg-[#d70018] text-white text-[10px] font-black uppercase tracking-wider w-fit shadow">
             PHỤ KIỆN CAO CẤP
@@ -737,7 +756,7 @@ Marshall Acoustic
     var mainImg = product.ProductImages != null && product.ProductImages.Count > 0 
         ? (product.ProductImages.FirstOrDefault(i => i.IsMain)?.ImageURL ?? product.ProductImages.FirstOrDefault()?.ImageURL)
         : "https://via.placeholder.com/400x400";
-    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-[#0d47a1] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+    <div class="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/80 hover:bg-white hover:border-primary-container hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
         <div class="flex items-center justify-between">
             @if (product.DiscountPrice.HasValue && product.Price > 0)
             {
@@ -853,7 +872,7 @@ Marshall Acoustic
 <img alt="Galaxy Z Fold8 và bước chuyển mình của kỷ nguyên AI màn hình gập" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400&h=300&auto=format&fit=crop&q=80"/>
 </div>
 <div class="space-y-1">
-<span class="text-[10px] font-bold text-secondary uppercase">Tin tức</span>
+<span class="text-[10px] font-bold text-primary-container uppercase">Tin tức</span>
 <h4 class="font-body-medium text-body-medium text-xs font-semibold text-slate-900 group-hover:text-primary-container transition-colors line-clamp-2">
                 Galaxy Z Fold8 và bí mật bản lề giọt nước siêu bền không còn nếp gấp
               </h4>
@@ -866,7 +885,7 @@ Marshall Acoustic
 <img alt="So sánh chi tiết các mẫu Laptop AI sử dụng chip Snapdragon X" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=300&auto=format&fit=crop&q=80"/>
 </div>
 <div class="space-y-1">
-<span class="text-[10px] font-bold text-tertiary-container uppercase">Tư vấn</span>
+<span class="text-[10px] font-bold text-primary-container uppercase">Tư vấn</span>
 <h4 class="font-body-medium text-body-medium text-xs font-semibold text-slate-900 group-hover:text-primary-container transition-colors line-clamp-2">
                 Top 5 Laptop AI pin trâu trên 15 tiếng đáng mua nhất cho sinh viên mùa tựu trường
               </h4>
@@ -906,11 +925,11 @@ Marshall Acoustic
 <!-- ChillCare -->
 <a class="bg-white rounded-2xl p-4.5 border border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-md transition-all flex items-center justify-between group" href="#">
 <div class="flex items-center gap-3">
-<div class="w-11 h-11 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0 shadow-sm">
+<div class="w-11 h-11 rounded-xl bg-primary-fixed text-primary-container flex items-center justify-center shrink-0 shadow-sm">
 <span class="material-symbols-outlined text-[24px]">verified_user</span>
 </div>
 <div>
-<h4 class="font-title-sm text-title-sm text-slate-900 text-sm font-bold group-hover:text-secondary transition-colors">ChillCare Apple Service</h4>
+<h4 class="font-title-sm text-title-sm text-slate-900 text-sm font-bold group-hover:text-primary-container transition-colors">ChillCare Apple Service</h4>
 <p class="font-caption-sm text-caption-sm text-slate-500 text-xs">Trung tâm bảo hành ủy quyền Apple AASP</p>
 </div>
 </div>
