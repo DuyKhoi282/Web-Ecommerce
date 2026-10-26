@@ -13,7 +13,7 @@
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#0d47a1] flex items-center justify-center shadow-xs">
+                <div class="w-10 h-10 rounded-xl bg-badge-discount-bg text-primary-container flex items-center justify-center shadow-xs">
                     <span class="material-symbols-outlined text-2xl">
                         shopping_cart
                     </span>
@@ -30,7 +30,7 @@
         @if (Model != null && Model.Items != null && Model.Items.Any())
         {
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold self-start sm:self-auto">
-                <span class="material-symbols-outlined text-base text-[#0d47a1]">inventory_2</span>
+                <span class="material-symbols-outlined text-base text-primary-container">inventory_2</span>
                 <span><strong class="text-slate-900" id="cart-item-count-badge">@Model.AvailableItemCount</strong> sản phẩm khả dụng</span>
             </div>
         }
@@ -69,7 +69,7 @@
     {
         <!-- Empty Cart State -->
         <div class="bg-white border-2 border-slate-200/80 rounded-3xl p-10 sm:p-14 text-center shadow-sm max-w-2xl mx-auto">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-center text-[#0d47a1]">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-badge-discount-bg border border-red-100 flex items-center justify-center text-primary-container">
                 <span class="material-symbols-outlined text-5xl">
                     remove_shopping_cart
                 </span>
@@ -86,8 +86,8 @@
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a href="@Url.Action("Index", "Shop")"
                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
-                          bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
-                          text-white font-bold text-sm shadow-md shadow-blue-900/10 transition-all">
+                          bg-primary-container hover:bg-brand-red-vibrant active:scale-98
+                          text-white font-bold text-sm shadow-md shadow-red-900/10 transition-all">
                     <span class="material-symbols-outlined text-lg">
                         storefront
                     </span>
@@ -130,7 +130,7 @@
                                     <img src="@item.ImageURL"
                                          alt="@item.ProductName"
                                          class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200 @(isOut ? "grayscale" : "")"
-                                         onerror="this.onerror=null; this.src='https://placehold.co/200x200/f8faff/0d47a1?text=TheChillShop';" />
+                                         onerror="this.onerror=null; this.src='https://placehold.co/200x200/fef2f2/d70018?text=TheChillShop';" />
                                 }
                                 else
                                 {
@@ -153,7 +153,7 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
                                         <a href="@Url.Action("Details", "Shop", new { id = item.ProductID })"
-                                           class="font-headline font-bold text-base text-slate-900 hover:text-[#0d47a1] transition-colors line-clamp-2">
+                                           class="font-headline font-bold text-base text-slate-900 hover:text-primary-container transition-colors line-clamp-2">
                                             @item.ProductName
                                         </a>
 
@@ -270,7 +270,7 @@
                                         {
                                             <span class="cart-item-total
                                                          font-headline font-extrabold
-                                                         text-base sm:text-lg text-[#0d47a1]">
+                                                         text-base sm:text-lg text-primary-container">
                                                 @string.Format("{0:N0}đ", item.ItemTotal)
                                             </span>
                                         }
@@ -285,7 +285,7 @@
                 <!-- Bulk Shopping Action Bar -->
                 <div class="flex items-center justify-between pt-2">
                     <a href="@Url.Action("Index", "Shop")"
-                       class="inline-flex items-center gap-2 text-sm font-bold text-[#0d47a1] hover:text-[#0a3880] transition-colors">
+                       class="inline-flex items-center gap-2 text-sm font-bold text-primary-container hover:text-brand-red-vibrant transition-colors">
                         <span class="material-symbols-outlined text-lg">arrow_back</span>
                         Tiếp tục lựa chọn sản phẩm khác
                     </a>
@@ -300,10 +300,9 @@
 
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <h2 class="font-headline font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[#0d47a1]">receipt_long</span>
+                            <span class="material-symbols-outlined text-primary-container">receipt_long</span>
                             Tóm tắt đơn hàng
                         </h2>
-                        <span class="text-xs text-slate-400 font-medium">Bảo mật SSL</span>
                     </div>
 
                     <!-- Price Calculations -->
@@ -324,7 +323,7 @@
 
                         <div class="flex items-center justify-between text-slate-600">
                             <span>Phí giao hàng</span>
-                            <span class="font-semibold text-emerald-600 flex items-center gap-1">
+                            <span class="font-semibold text-slate-500 flex items-center gap-1">
                                 <span class="material-symbols-outlined text-base">local_shipping</span>
                                 Tính khi đặt hàng
                             </span>
@@ -349,7 +348,7 @@
                         </div>
 
                         <span id="cart-total"
-                              class="font-headline font-black text-2xl text-[#0d47a1]">
+                              class="font-headline font-black text-2xl text-primary-container">
                             @string.Format("{0:N0}đ", Model.CartTotal)
                         </span>
                     </div>
@@ -359,15 +358,15 @@
                     {
                         <a href="@Url.Action("Checkout", "Order")"
                            class="w-full py-4 rounded-xl
-                                  bg-[#0d47a1] hover:bg-[#0a3880] active:scale-98
+                                  bg-primary-container hover:bg-brand-red-vibrant active:scale-98
                                   text-white font-bold text-base
                                   flex items-center justify-center gap-2
-                                  shadow-lg shadow-blue-900/15 hover:shadow-xl hover:shadow-blue-900/25
+                                  shadow-lg shadow-red-900/15 hover:shadow-xl hover:shadow-red-900/25
                                   transition-all">
                             <span class="material-symbols-outlined text-xl">
                                 credit_card
                             </span>
-                            Tiến hành thanh toán (<span id="checkout-item-count">@Model.AvailableItemCount</span> món)
+                            <span>Tiến hành thanh toán (<span id="checkout-item-count">@Model.AvailableItemCount</span> món)</span>
                         </a>
                     }
                     else
