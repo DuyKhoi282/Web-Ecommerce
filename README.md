@@ -10,7 +10,7 @@
 
 > **Đồ án Cuối kỳ:** Học phần Phát triển Ứng dụng Web (`ITE1265E`)  
 > **Đề tài:** Topic 1 – Online Shopping Website  
-> **Nhóm thực hiện:** Nhóm 5 – Lớp B02E (GVHD: TS. Hoàng Văn Hiếu)  
+> **Nhóm thực hiện:** Nhóm 5 – Lớp A03E (GVHD: TS. Hoàng Văn Hiếu)  
 > **Quy mô dự án:** 4 thành viên &bull; Thời lượng 8 tuần &bull; Tiếp cận Tích hợp Sớm Tuần hoàn (Weekly Integration)
 
 ---
