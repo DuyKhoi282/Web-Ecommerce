@@ -321,7 +321,7 @@
 @section scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var cartTotal = @((int)cartTotal);
+            var cartTotal = Number('@((int)cartTotal)');
 
             function notify(type, title, message) {
                 if (window.showToast) {
