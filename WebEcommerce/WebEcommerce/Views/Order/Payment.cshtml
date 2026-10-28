@@ -1,0 +1,499 @@
+@model WebEcommerce.Models.Order
+@{
+    ViewBag.Title = "Thanh toán đơn hàng #" + Model.OrderID + " - VietQR";
+    int remainingSeconds = (int)(ViewBag.RemainingSeconds ?? 900);
+    string transferContent = ViewBag.TransferContent as string ?? ("DH" + Model.OrderID);
+    string qrUrl = ViewBag.QrUrl as string ?? "";
+    string fallbackQrUrl = ViewBag.VietQrFallbackUrl as string ?? "";
+    string bankName = ViewBag.BankName as string ?? WebEcommerce.Helpers.SepayHelper.BankName;
+    string bankCode = ViewBag.BankCode as string ?? WebEcommerce.Helpers.SepayHelper.BankCode;
+    string accountNumber = ViewBag.AccountNumber as string ?? WebEcommerce.Helpers.SepayHelper.AccountNumber;
+    string accountName = ViewBag.AccountName as string ?? WebEcommerce.Helpers.SepayHelper.AccountName;
+}
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
+                <a href="@Url.Action("Index", "Home")" class="hover:text-[#0d47a1] transition-colors">Trang chủ</a>
+                <span>/</span>
+                <a href="@Url.Action("Index", "Order")" class="hover:text-[#0d47a1] transition-colors">Đơn hàng</a>
+                <span>/</span>
+                <span class="text-[#0d47a1]">Thanh toán #@Model.OrderID</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <span>Cổng thanh toán VietQR / SePay</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#0d47a1] border border-blue-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0d47a1] animate-pulse"></span> Tự động
+                </span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100/80 px-3 py-1.5 rounded-xl border border-slate-200">
+            <span class="material-symbols-outlined text-base text-emerald-600">lock</span>
+            <span>Bảo mật chuẩn SSL 256-bit</span>
+        </div>
+    </div>
+
+    <!-- Main Payment Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- Left Column: Bank info, Step-by-step & Order summary (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Card 1: Bank Transfer Details with 1-Click Copy -->
+            <div class="bg-white rounded-3xl border-2 border-slate-200/90 p-6 sm:p-7 shadow-xs">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-50 text-[#0d47a1] flex items-center justify-center font-black text-sm border border-blue-200">
+                            @bankCode
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
+                            <p class="text-xs text-slate-500">Quét mã QR hoặc chuyển khoản thủ công theo thông tin bên dưới</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3.5 text-sm">
+                    <!-- Ngân hàng -->
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                        <span class="text-xs text-slate-500 font-medium">Ngân hàng thụ hưởng</span>
+                        <div class="flex items-center gap-2">
+                            <strong class="text-slate-900 font-bold">@bankName (@bankCode)</strong>
+                        </div>
+                    </div>
+
+                    <!-- Số tài khoản -->
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                        <span class="text-xs text-slate-500 font-medium">Số tài khoản</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-base font-extrabold text-[#0d47a1]">@accountNumber</span>
+                            <button type="button" onclick="copyText('@accountNumber', 'Đã sao chép số tài khoản')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#0d47a1] hover:bg-white transition-all shadow-2xs"
+                                    title="Sao chép số tài khoản">
+                                <span class="material-symbols-outlined text-lg">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chủ tài khoản -->
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                        <span class="text-xs text-slate-500 font-medium">Chủ tài khoản</span>
+                        <div class="flex items-center gap-2">
+                            <strong class="text-slate-800 uppercase font-bold text-xs sm:text-sm">@accountName</strong>
+                            <button type="button" onclick="copyText('@accountName', 'Đã sao chép tên chủ tài khoản')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#0d47a1] hover:bg-white transition-all shadow-2xs"
+                                    title="Sao chép tên">
+                                <span class="material-symbols-outlined text-lg">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Số tiền -->
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+                        <div>
+                            <span class="text-xs text-emerald-800 font-medium block">Số tiền thanh toán</span>
+                            <span class="text-2xs text-emerald-600">Đã bao gồm mọi ưu đãi</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-lg sm:text-xl font-black text-emerald-700">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                            <button type="button" onclick="copyText('@((long)Model.FinalAmount)', 'Đã sao chép số tiền')"
+                                    class="p-1.5 rounded-lg text-emerald-600 hover:bg-white transition-all shadow-2xs"
+                                    title="Sao chép số tiền">
+                                <span class="material-symbols-outlined text-lg">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nội dung chuyển khoản -->
+                    <div class="p-4 rounded-2xl bg-amber-50/80 border-2 border-amber-300">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+                                <span class="material-symbols-outlined text-base text-amber-600">warning</span>
+                                <span>Nội dung chuyển khoản (BẮT BUỘC CHÍNH XÁC)</span>
+                            </div>
+                            <span class="text-2xs font-semibold px-2 py-0.5 rounded-md bg-amber-200 text-amber-900">Để tự động khớp đơn</span>
+                        </div>
+                        <div class="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-amber-300">
+                            <span class="font-mono text-base font-black text-[#d70018] tracking-wider">@transferContent</span>
+                            <button type="button" onclick="copyText('@transferContent', 'Đã sao chép nội dung chuyển khoản')"
+                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#0d47a1] text-white hover:bg-blue-800 font-bold text-xs transition-all shadow-xs">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                                Sao chép
+                            </button>
+                        </div>
+                        <p class="text-2xs text-amber-800 mt-2 leading-relaxed">
+                            Vui lòng <strong>không thay đổi</strong> nội dung chuyển khoản để hệ thống SePay tự động kích hoạt đơn hàng trong 3 giây.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: 3-Step Guide -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs">
+                <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#0d47a1] text-lg">lightbulb</span>
+                    3 bước thanh toán nhanh qua App Ngân hàng
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                        <div class="w-7 h-7 rounded-lg bg-blue-100 text-[#0d47a1] font-bold text-xs flex items-center justify-center mb-2">1</div>
+                        <p class="text-xs text-slate-700 leading-snug">
+                            Mở ứng dụng <strong>Ngân hàng</strong> bất kỳ hoặc <strong>Ví điện tử</strong> trên điện thoại.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                        <div class="w-7 h-7 rounded-lg bg-blue-100 text-[#0d47a1] font-bold text-xs flex items-center justify-center mb-2">2</div>
+                        <p class="text-xs text-slate-700 leading-snug">
+                            Chọn tính năng <strong>Quét mã QR</strong> và hướng camera vào mã QR bên cạnh.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                        <div class="w-7 h-7 rounded-lg bg-blue-100 text-[#0d47a1] font-bold text-xs flex items-center justify-center mb-2">3</div>
+                        <p class="text-xs text-slate-700 leading-snug">
+                            Kiểm tra số tiền và bấm <strong>Xác nhận chuyển</strong>. Hệ thống sẽ tự duyệt ngay!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Mini Order Summary (Collapsible) -->
+            <details class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs group">
+                <summary class="list-none cursor-pointer flex items-center justify-between font-bold text-sm text-slate-900">
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[#0d47a1]">shopping_bag</span>
+                        Xem lại sản phẩm trong đơn (#@Model.OrderID)
+                    </span>
+                    <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
+                </summary>
+                <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                    @if (Model.OrderDetails != null)
+                    {
+                        foreach (var d in Model.OrderDetails)
+                        {
+                            var img = d.Product?.ProductImages?.FirstOrDefault(x => x.IsMain) ?? d.Product?.ProductImages?.FirstOrDefault();
+                            <div class="flex items-center justify-between text-xs py-1">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                        @if (img != null)
+                                        {
+                                            <img src="@img.ImageURL" alt="@d.Product?.Name" class="w-full h-full object-contain p-0.5" />
+                                        }
+                                        else
+                                        {
+                                            <span class="material-symbols-outlined text-slate-300">image</span>
+                                        }
+                                    </div>
+                                    <div class="truncate">
+                                        <p class="font-bold text-slate-800 truncate">@(d.Product?.Name ?? "Sản phẩm")</p>
+                                        <p class="text-slate-400">SL: @d.Quantity × @string.Format("{0:N0}đ", d.UnitPrice)</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-slate-900 shrink-0">@string.Format("{0:N0}đ", d.Subtotal)</span>
+                            </div>
+                        }
+                    }
+                    <div class="pt-3 border-t border-slate-100 flex justify-between text-xs font-bold text-slate-900">
+                        <span>Tổng thanh toán:</span>
+                        <span class="text-base text-[#0d47a1]">@string.Format("{0:N0}đ", Model.FinalAmount)</span>
+                    </div>
+                </div>
+            </details>
+
+        </div>
+
+        <!-- Right Column: Dynamic QR Code, Countdown & Status (5 cols) -->
+        <div class="lg:col-span-5 space-y-5 lg:sticky lg:top-24">
+
+            <!-- Card QR & Countdown -->
+            <div class="bg-white rounded-3xl border-2 border-slate-200/90 p-6 sm:p-7 shadow-lg relative overflow-hidden text-center">
+
+                <!-- Countdown Timer Header -->
+                <div class="mb-5 pb-4 border-b border-slate-100">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Thời gian giữ đơn còn lại</p>
+                    <div class="flex items-center justify-center gap-2 text-red-600 font-mono text-3xl font-black">
+                        <span class="material-symbols-outlined text-2xl animate-spin" style="animation-duration: 3s;">timer</span>
+                        <span id="countdown-timer">15:00</span>
+                    </div>
+                    <p class="text-2xs text-slate-400 mt-1">Đơn sẽ tự động hủy và trả kho sau khi hết giờ</p>
+                </div>
+
+                <!-- QR Code Display Frame -->
+                <div class="relative mx-auto max-w-[280px] p-4 rounded-3xl bg-gradient-to-br from-slate-50 to-blue-50/40 border-2 border-blue-200/80 shadow-inner group">
+                    <div class="relative bg-white p-3 rounded-2xl shadow-sm">
+                        <img id="img-payment-qr"
+                             src="@qrUrl"
+                             alt="Mã QR thanh toán đơn hàng #@Model.OrderID"
+                             class="w-full h-auto aspect-square object-contain mx-auto transition-transform duration-300 group-hover:scale-[1.02]"
+                             onerror="this.onerror=null; this.src='@fallbackQrUrl';" />
+                    </div>
+
+                    <!-- Scanning Line Animation Effect -->
+                    <div class="pointer-events-none absolute inset-x-8 top-8 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-75 blur-[1px] animate-pulse"></div>
+                </div>
+
+                <!-- Live Status Indicator -->
+                <div class="mt-5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                    <div class="flex items-center justify-center gap-2 font-bold text-slate-700">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#0d47a1]"></span>
+                        </span>
+                        <span id="live-status-text">Đang lắng nghe giao dịch SePay...</span>
+                    </div>
+                    <p class="text-2xs text-slate-400 mt-1">Hệ thống tự động duyệt ngay khi tiền vào tài khoản</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-5 space-y-2.5">
+                    <button type="button" id="btn-manual-check" onclick="checkPaymentStatusNow();"
+                            class="w-full py-3.5 px-4 rounded-2xl bg-[#0d47a1] hover:bg-blue-800 active:scale-[0.99] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg" id="icon-check-btn">refresh</span>
+                        <span id="text-check-btn">Tôi đã chuyển tiền (Kiểm tra ngay)</span>
+                    </button>
+
+                    <div class="flex items-center justify-between text-xs pt-2">
+                        <a href="@Url.Action("Detail", "Order", new { id = Model.OrderID })"
+                           class="text-slate-500 hover:text-[#0d47a1] font-semibold transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                            Xem chi tiết đơn
+                        </a>
+
+                        @using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderID }, FormMethod.Post, new { id = "form-cancel-payment", @class = "inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cancellationReason" value="Khách hàng chủ động hủy tại trang thanh toán VietQR" />
+                            <button type="submit"
+                                    onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này? Tồn kho và ưu đãi sẽ được hoàn lại.');"
+                                    class="text-slate-400 hover:text-red-600 font-semibold transition-colors underline">
+                                Hủy đơn này
+                            </button>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- SUCCESS MODAL (Tự động bung ra khi SePay báo đã nhận tiền) -->
+<div id="payment-success-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center shadow-2xl border border-emerald-200 transform animate-bounce" style="animation-iteration-count: 1; animation-duration: 0.6s;">
+        <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-600/20">
+            <span class="material-symbols-outlined text-4xl">check_circle</span>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 mb-2">Thanh toán thành công!</h2>
+        <p class="text-sm text-slate-600 mb-4">
+            Hệ thống SePay đã ghi nhận số tiền <strong>@string.Format("{0:N0}đ", Model.FinalAmount)</strong> cho đơn hàng <strong>#@Model.OrderID</strong>.
+        </p>
+        <p class="text-xs text-slate-400 mb-6">Đang tự động chuyển hướng đến đơn hàng của bạn trong giây lát...</p>
+        <a href="@Url.Action("Detail", "Order", new { id = Model.OrderID })"
+           class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all">
+            Xem đơn hàng ngay
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+    </div>
+</div>
+
+<!-- EXPIRED MODAL (Tự động bung ra khi hết hạn 15 phút) -->
+<div id="payment-expired-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center shadow-2xl border border-red-200">
+        <div class="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-5">
+            <span class="material-symbols-outlined text-4xl">timer_off</span>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 mb-2">Đơn hàng đã hết hạn</h2>
+        <p class="text-sm text-slate-600 mb-5 leading-relaxed">
+            Đã quá 15 phút mà hệ thống chưa nhận được thanh toán. Đơn hàng #@Model.OrderID đã tự động được hủy để hoàn lại tồn kho cho khách khác.
+        </p>
+        <div class="flex flex-col gap-2.5">
+            <a href="@Url.Action("Index", "Cart")"
+               class="w-full py-3.5 px-6 rounded-2xl bg-[#0d47a1] text-white font-bold text-sm shadow-md hover:bg-blue-800 transition-all">
+                Quay lại giỏ hàng đặt lại
+            </a>
+            <a href="@Url.Action("Detail", "Order", new { id = Model.OrderID })"
+               class="w-full py-3 px-6 rounded-2xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-all">
+                Xem chi tiết đơn đã hủy
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST NOTIFICATION CHUYÊN NGHIỆP -->
+<div id="payment-toast" class="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-slate-900/95 text-white text-xs font-medium p-4 rounded-2xl shadow-2xl backdrop-blur-md hidden transition-all duration-300 border border-slate-700/60">
+    <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined text-xl text-emerald-400 flex-shrink-0" id="payment-toast-icon">check_circle</span>
+        <div class="flex-1 space-y-0.5">
+            <h4 class="font-bold text-sm text-white" id="payment-toast-title">Thông báo</h4>
+            <p class="text-xs text-slate-300 leading-relaxed" id="payment-toast-msg">Nội dung</p>
+        </div>
+        <button type="button" onclick="hideToast();" class="text-slate-400 hover:text-white p-1" title="Đóng">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    const orderId = @Model.OrderID;
+    let remainingSeconds = @remainingSeconds;
+    const detailUrl = "@Url.Action("Detail", "Order", new { id = Model.OrderID })";
+    const checkStatusUrl = "@Url.Action("CheckPaymentStatus", "Order", new { id = Model.OrderID })";
+
+    // 1. Đồng hồ đếm ngược 15:00
+    function updateCountdown() {
+        if (remainingSeconds <= 0) {
+            document.getElementById("countdown-timer").innerText = "00:00";
+            onPaymentExpired();
+            return;
+        }
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        document.getElementById("countdown-timer").innerText =
+            (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
+
+        remainingSeconds--;
+    }
+
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function onPaymentExpired() {
+        clearInterval(countdownInterval);
+        clearInterval(pollInterval);
+        document.getElementById("payment-expired-modal").classList.remove("hidden");
+    }
+
+    function onPaymentSuccess() {
+        clearInterval(countdownInterval);
+        clearInterval(pollInterval);
+        document.getElementById("payment-success-modal").classList.remove("hidden");
+        setTimeout(function () {
+            window.location.href = detailUrl;
+        }, 2500);
+    }
+
+    // 2. Polling tự động kiểm tra trạng thái mỗi 3 giây & Kiểm tra thủ công
+    let isChecking = false;
+    async function checkPaymentStatus(isManual = false) {
+        if (isChecking) return;
+        isChecking = true;
+
+        if (isManual) {
+            const iconBtn = document.getElementById("icon-check-btn");
+            const textBtn = document.getElementById("text-check-btn");
+            if (iconBtn) iconBtn.classList.add("animate-spin");
+            if (textBtn) textBtn.innerText = "Đang đối soát ngân hàng...";
+        }
+
+        try {
+            const res = await fetch(checkStatusUrl + "?t=" + new Date().getTime());
+            if (res.ok) {
+                const data = await res.json();
+                if (data.isPaid) {
+                    onPaymentSuccess();
+                    return;
+                }
+                if (data.isExpired || data.isCancelled) {
+                    onPaymentExpired();
+                    return;
+                }
+
+                // Nếu người dùng chủ động bấm "Kiểm tra lại" mà chưa thấy tiền vào:
+                if (isManual) {
+                    const now = new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const liveText = document.getElementById("live-status-text");
+                    if (liveText) {
+                        liveText.innerHTML = `<span class="text-amber-600 font-semibold">Chưa thấy tiền vào lúc ${now}. Vẫn đang lắng nghe...</span>`;
+                    }
+                    showNotificationToast(
+                        "Hệ thống chưa nhận được tiền",
+                        `Đơn hàng #${orderId} hiện chưa nhận được biến động số dư từ ngân hàng ACB. Nếu bạn vừa chuyển tiền, vui lòng đợi từ 15 – 60 giây để ngân hàng đồng bộ sang SePay, hoặc kiểm tra lại đúng cú pháp DH${orderId} nhé!`,
+                        "warning",
+                        6000
+                    );
+                }
+            } else {
+                if (isManual) {
+                    showNotificationToast("Lỗi kiểm tra", "Máy chủ phản hồi không thành công. Vui lòng thử lại sau.", "error", 4000);
+                }
+            }
+        } catch (e) {
+            console.error("Polling error:", e);
+            if (isManual) {
+                showNotificationToast("Lỗi kết nối", "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền mạng.", "error", 4000);
+            }
+        } finally {
+            isChecking = false;
+            if (isManual) {
+                setTimeout(() => {
+                    const iconBtn = document.getElementById("icon-check-btn");
+                    const textBtn = document.getElementById("text-check-btn");
+                    if (iconBtn) iconBtn.classList.remove("animate-spin");
+                    if (textBtn) textBtn.innerText = "Tôi đã chuyển tiền (Kiểm tra lại)";
+                }, 500);
+            }
+        }
+    }
+
+    const pollInterval = setInterval(function () {
+        checkPaymentStatus(false);
+    }, 3000);
+
+    function checkPaymentStatusNow() {
+        checkPaymentStatus(true);
+    }
+
+    // 3. Hệ thống Toast Notification
+    let toastTimeout = null;
+    function showNotificationToast(title, message, type = 'info', duration = 3000) {
+        const toast = document.getElementById("payment-toast");
+        const titleEl = document.getElementById("payment-toast-title");
+        const msgEl = document.getElementById("payment-toast-msg");
+        const iconEl = document.getElementById("payment-toast-icon");
+
+        if (!toast || !titleEl || !msgEl || !iconEl) return;
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+
+        if (type === 'success') {
+            iconEl.innerText = 'check_circle';
+            iconEl.className = 'material-symbols-outlined text-xl text-emerald-400 flex-shrink-0';
+        } else if (type === 'warning') {
+            iconEl.innerText = 'schedule';
+            iconEl.className = 'material-symbols-outlined text-xl text-amber-400 flex-shrink-0';
+        } else if (type === 'error') {
+            iconEl.innerText = 'error';
+            iconEl.className = 'material-symbols-outlined text-xl text-red-400 flex-shrink-0';
+        } else {
+            iconEl.innerText = 'info';
+            iconEl.className = 'material-symbols-outlined text-xl text-blue-400 flex-shrink-0';
+        }
+
+        toast.classList.remove("hidden");
+        toast.style.opacity = "1";
+
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            hideToast();
+        }, duration);
+    }
+
+    function hideToast() {
+        const toast = document.getElementById("payment-toast");
+        if (toast) toast.classList.add("hidden");
+    }
+
+    // 4. Sao chép vào Clipboard
+    function copyText(text, message) {
+        navigator.clipboard.writeText(text).then(function () {
+            showNotificationToast("Đã sao chép", message, "success", 2000);
+        }).catch(function (err) {
+            alert("Không thể sao chép: " + text);
+        });
+    }
+</script>

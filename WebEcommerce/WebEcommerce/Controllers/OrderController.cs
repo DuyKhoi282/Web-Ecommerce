@@ -360,6 +360,10 @@ namespace WebEcommerce.Controllers
                         CookieCartHelper.SaveCartItems(Response, remainingCookieItems);
 
                         TempData["SuccessMessage"] = "Đặt hàng thành công! Mã đơn hàng: #" + order.OrderID;
+                        if (order.PaymentMethod == "BankTransfer")
+                        {
+                            return RedirectToAction("Payment", new { id = order.OrderID });
+                        }
                         return RedirectToAction("Detail", new { id = order.OrderID });
                     }
                     catch (Exception ex)
@@ -491,9 +495,11 @@ namespace WebEcommerce.Controllers
                     return RedirectToAction("Index");
                 }
 
-                ViewBag.HasOrderReview = await _context.OrderReviews
-           .AnyAsync(r => r.OrderID == id && r.UserID == userId);
+                // Tự động kiểm tra hết hạn 15 phút nếu là đơn chuyển khoản chưa thanh toán
+                await OrderCancellationHelper.CheckAndCancelIfExpiredAsync(_context, order);
 
+                ViewBag.HasOrderReview = await _context.OrderReviews
+                    .AnyAsync(r => r.OrderID == id && r.UserID == userId);
 
                 return View(order);
             }
@@ -505,13 +511,120 @@ namespace WebEcommerce.Controllers
             }
         }
 
-  
-// ==============================================
-// POST: /Order/Cancel/5
-// ==============================================
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<ActionResult> Cancel(int id, string cancellationReason)
+        // ==============================================
+        // GET: /Order/Payment/5 (Màn hình Thanh toán Chuyên nghiệp)
+        // ==============================================
+        [HttpGet]
+        public async Task<ActionResult> Payment(int id)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+
+                var order = await _context.Orders
+                    .Include(o => o.OrderDetails.Select(od => od.Product.ProductImages))
+                    .Include(o => o.PromotionalCode)
+                    .FirstOrDefaultAsync(o => o.OrderID == id && o.UserID == userId);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction("Index");
+                }
+
+                // Nếu phương thức thanh toán không phải chuyển khoản -> chuyển về trang chi tiết
+                if (order.PaymentMethod != "BankTransfer")
+                {
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
+                // Nếu đơn đã thanh toán thành công -> chuyển về trang chi tiết kèm thông báo
+                if (order.PaymentStatus == "Paid")
+                {
+                    TempData["SuccessMessage"] = "Đơn hàng đã được thanh toán thành công!";
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
+                // Tự động kiểm tra xem đơn đã quá hạn 15 phút chưa
+                bool isExpired = await OrderCancellationHelper.CheckAndCancelIfExpiredAsync(_context, order);
+                if (isExpired || order.Status == "Cancelled")
+                {
+                    TempData["ErrorMessage"] = "Đơn hàng đã hết hạn thời gian thanh toán (15 phút) và đã được tự động hủy để hoàn trả tồn kho.";
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
+                var expiresAt = order.OrderDate.AddMinutes(SepayHelper.PaymentTimeoutMinutes);
+                int remainingSeconds = Math.Max(0, (int)(expiresAt - DateTime.UtcNow).TotalSeconds);
+
+                ViewBag.RemainingSeconds = remainingSeconds;
+                ViewBag.ExpiresAt = expiresAt;
+                ViewBag.QrUrl = SepayHelper.GetQrUrl(order.OrderID, order.FinalAmount);
+                ViewBag.VietQrFallbackUrl = SepayHelper.GetVietQrFallbackUrl(order.OrderID, order.FinalAmount);
+                ViewBag.TransferContent = SepayHelper.GetTransferContent(order.OrderID);
+                ViewBag.BankName = SepayHelper.BankName;
+                ViewBag.BankCode = SepayHelper.BankCode;
+                ViewBag.AccountNumber = SepayHelper.AccountNumber;
+                ViewBag.AccountName = SepayHelper.AccountName;
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Order/Payment] {ex}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi tải trang thanh toán.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ==============================================
+        // GET: /Order/CheckPaymentStatus/5 (Polling Realtime)
+        // ==============================================
+        [HttpGet]
+        public async Task<ActionResult> CheckPaymentStatus(int id)
+        {
+            try
+            {
+                var userId = User.Identity.GetUserId();
+
+                var order = await _context.Orders
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.OrderID == id && o.UserID == userId);
+
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Order not found" }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Kiểm tra tự động hủy nếu quá hạn 15 phút
+                bool isExpired = await OrderCancellationHelper.CheckAndCancelIfExpiredAsync(_context, order);
+
+                var expiresAt = order.OrderDate.AddMinutes(SepayHelper.PaymentTimeoutMinutes);
+                int remainingSeconds = Math.Max(0, (int)(expiresAt - DateTime.UtcNow).TotalSeconds);
+
+                return Json(new
+                {
+                    success = true,
+                    orderId = order.OrderID,
+                    isPaid = order.PaymentStatus == "Paid",
+                    isCancelled = order.Status == "Cancelled",
+                    isExpired = isExpired || (order.Status == "Cancelled" && order.CancelledBy == "System"),
+                    status = order.Status,
+                    paymentStatus = order.PaymentStatus,
+                    remainingSeconds = remainingSeconds
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // ==============================================
+        // POST: /Order/Cancel/5
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Cancel(int id, string cancellationReason)
         {
             try
             {
@@ -544,7 +657,14 @@ public async Task<ActionResult> Cancel(int id, string cancellationReason)
                     return RedirectToAction("Index");
                 }
 
-                // 3. Khách hàng CHỈ được tự hủy đơn khi đơn ở trạng thái Pending (Chờ xử lý)
+                // 3. Khóa tự hủy nếu đơn ĐÃ THANH TOÁN THÀNH CÔNG
+                if (order.PaymentStatus == "Paid")
+                {
+                    TempData["ErrorMessage"] = "Đơn hàng đã được thanh toán thành công. Quý khách vui lòng liên hệ tổng đài CSKH 1800.2097 để được nhân viên hỗ trợ hoàn tiền.";
+                    return RedirectToAction("Detail", new { id = id });
+                }
+
+                // 4. Khách hàng CHỈ được tự hủy đơn khi đơn ở trạng thái Pending (Chờ xử lý)
                 if (order.Status != "Pending")
                 {
                     TempData["ErrorMessage"] = order.Status == "Confirmed"

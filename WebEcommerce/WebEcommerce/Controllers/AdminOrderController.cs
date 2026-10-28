@@ -694,6 +694,43 @@ namespace WebEcommerce.Controllers
             }
         }
 
+        // ==============================================
+        // POST: /AdminOrder/ConfirmPaymentAndOrder (1-Click duyệt tiền & duyệt đơn)
+        // ==============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ConfirmPaymentAndOrder(int orderId)
+        {
+            try
+            {
+                var order = await _context.Orders.FindAsync(orderId);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction("Index");
+                }
+
+                order.PaymentStatus = "Paid";
+                order.PaymentDate = DateTime.UtcNow;
+
+                if (order.Status == "Pending")
+                {
+                    order.Status = "Confirmed";
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Đã xác nhận nhận đủ tiền và duyệt đơn hàng #{orderId} thành công!";
+                return RedirectToAction("Detail", new { id = orderId });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AdminOrder/ConfirmPaymentAndOrder] {ex}");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi duyệt đơn hàng.";
+                return RedirectToAction("Detail", new { id = orderId });
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) _context.Dispose();

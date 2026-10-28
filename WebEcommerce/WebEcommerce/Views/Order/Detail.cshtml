@@ -272,23 +272,30 @@
                         }
                         else if (!isCancelled && Model.PaymentMethod == "BankTransfer")
                         {
-                            <p class="text-xs text-slate-500 mt-1 mb-3 leading-relaxed">Mở ứng dụng ngân hàng bất kỳ và quét mã để chuyển khoản đúng số tiền, nội dung.</p>
-                            <div class="p-3 rounded-xl border border-slate-200 flex justify-center mb-3">
-                                <img src="https://img.vietqr.io/image/VCB-1029384756-compact2.png?amount=@((long)Model.FinalAmount)&addInfo=DH%20@Model.OrderID&accountName=THE%20CHILL%20SHOP"
+                            <p class="text-xs text-slate-500 mt-1 mb-3 leading-relaxed">Đơn hàng đang chờ thanh toán qua VietQR / SePay.</p>
+                            
+                            <a href="@Url.Action("Payment", "Order", new { id = Model.OrderID })"
+                               class="w-full mb-3 min-h-[44px] rounded-xl bg-[#0d47a1] hover:bg-blue-800 text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99]">
+                                <span class="material-symbols-outlined text-lg">qr_code_scanner</span>
+                                Mở màn hình thanh toán VietQR
+                            </a>
+
+                            <div class="p-3 rounded-xl border border-slate-200 flex justify-center mb-3 bg-slate-50">
+                                <img src="@WebEcommerce.Helpers.SepayHelper.GetQrUrl(Model.OrderID, Model.FinalAmount)"
                                      alt="Mã VietQR chuyển khoản đơn hàng #@Model.OrderID"
-                                     class="max-w-[200px] w-full h-auto object-contain"
-                                     onerror="this.onerror=null;this.src='https://placehold.co/200x200/fef2f2/d70018?text=VietQR+DH+@Model.OrderID';" />
+                                     class="max-w-[180px] w-full h-auto object-contain rounded-lg"
+                                     onerror="this.onerror=null;this.src='@WebEcommerce.Helpers.SepayHelper.GetVietQrFallbackUrl(Model.OrderID, Model.FinalAmount)';" />
                             </div>
                             <dl class="space-y-2 text-xs mb-3">
                                 <div class="flex justify-between items-center gap-2">
                                     <dt class="text-slate-500">Ngân hàng</dt>
-                                    <dd class="font-semibold text-slate-800">Vietcombank (VCB)</dd>
+                                    <dd class="font-semibold text-slate-800">@WebEcommerce.Helpers.SepayHelper.BankName (@WebEcommerce.Helpers.SepayHelper.BankCode)</dd>
                                 </div>
                                 <div class="flex justify-between items-center gap-2">
                                     <dt class="text-slate-500">Số tài khoản</dt>
                                     <dd class="flex items-center gap-1">
-                                        <span class="font-mono font-semibold text-slate-800">1029384756</span>
-                                        <button type="button" onclick="navigator.clipboard.writeText('1029384756'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép số tài khoản vào clipboard.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép số tài khoản">
+                                        <span class="font-mono font-semibold text-slate-800">@WebEcommerce.Helpers.SepayHelper.AccountNumber</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('@WebEcommerce.Helpers.SepayHelper.AccountNumber'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép số tài khoản vào clipboard.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép số tài khoản">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
                                     </dd>
@@ -296,8 +303,8 @@
                                 <div class="flex justify-between items-center gap-2">
                                     <dt class="text-slate-500">Nội dung</dt>
                                     <dd class="flex items-center gap-1">
-                                        <span class="font-mono font-bold text-primary-container">DH @Model.OrderID</span>
-                                        <button type="button" onclick="navigator.clipboard.writeText('DH @Model.OrderID'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép nội dung chuyển khoản.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép nội dung chuyển khoản">
+                                        <span class="font-mono font-bold text-primary-container">@WebEcommerce.Helpers.SepayHelper.GetTransferContent(Model.OrderID)</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('@WebEcommerce.Helpers.SepayHelper.GetTransferContent(Model.OrderID)'); if(window.showToast) showToast({type:'success', title:'Đã sao chép', message:'Đã chép nội dung chuyển khoản.'});" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-container hover:bg-slate-50 transition-colors" aria-label="Sao chép nội dung chuyển khoản">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
                                     </dd>
@@ -308,23 +315,10 @@
                                 </div>
                             </dl>
 
-                            <div id="transfer-notif-box" class="hidden mb-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs" role="status">
-                                <p class="font-semibold text-amber-800 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[16px]">hourglass_top</span> Đã ghi nhận yêu cầu
-                                </p>
-                                <p class="text-amber-700 mt-1 leading-relaxed">Shop đang đối soát giao dịch đơn #@Model.OrderID và sẽ cập nhật trong 5-15 phút.</p>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <button type="button" id="btn-confirm-transferred"
-                                        onclick="document.getElementById('transfer-notif-box').classList.remove('hidden'); this.classList.add('hidden'); if(window.showToast) showToast({type:'info', title:'Đã ghi nhận chuyển khoản', message:'Shop đang kiểm tra giao dịch đơn hàng #@Model.OrderID. Vui lòng đợi trong giây lát!'});"
-                                        class="w-full min-h-[44px] rounded-lg bg-primary-container hover:bg-brand-red-vibrant text-white font-semibold text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">task_alt</span> Tôi đã chuyển khoản
-                                </button>
-                                <button type="button" onclick="window.location.reload();"
-                                        class="w-full min-h-[40px] rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-medium text-xs inline-flex items-center justify-center gap-1.5 transition-colors">
-                                    <span class="material-symbols-outlined text-[16px]">refresh</span> Kiểm tra lại trạng thái
-                                </button>
-                            </div>
+                            <button type="button" onclick="window.location.reload();"
+                                    class="w-full min-h-[38px] rounded-lg border border-slate-300 bg-white hover:border-primary-container hover:text-primary-container text-slate-700 font-medium text-xs inline-flex items-center justify-center gap-1.5 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">refresh</span> Kiểm tra lại trạng thái
+                            </button>
                         }
                         else if (!isCancelled && Model.PaymentMethod == "COD")
                         {

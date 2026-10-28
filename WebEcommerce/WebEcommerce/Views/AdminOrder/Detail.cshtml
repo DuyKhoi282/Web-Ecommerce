@@ -313,17 +313,22 @@
                 <div class="space-y-3">
                     @if (needsPayment)
                     {
-                        <p class="text-xs text-slate-500">Đơn chuyển khoản: cần xác nhận đã nhận tiền trước khi xử lý tiếp.</p>
-                        using (Html.BeginForm("UpdatePaymentStatus", "AdminOrder", FormMethod.Post))
+                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 mb-2">
+                            <p class="font-bold flex items-center gap-1 mb-1">
+                                <span class="material-symbols-outlined text-sm text-amber-600">info</span>
+                                Đơn chuyển khoản đang chờ thanh toán
+                            </p>
+                            <p class="text-2xs text-amber-700">Khi khách chuyển tiền đúng cú pháp, SePay Webhook sẽ tự động duyệt đơn. Nếu khách chuyển trực tiếp, bạn có thể bấm nút bên dưới để duyệt ngay 1 chạm.</p>
+                        </div>
+                        using (Html.BeginForm("ConfirmPaymentAndOrder", "AdminOrder", FormMethod.Post))
                         {
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="orderId" value="@Model.OrderID" />
-                            <input type="hidden" name="paymentStatus" value="Paid" />
                             <button type="submit"
-                                    onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng #@Model.OrderID?');"
+                                    onclick="return confirm('Xác nhận đã nhận đủ tiền và duyệt đơn hàng #@Model.OrderID sang Đã xác nhận?');"
                                     class="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-sm active:scale-[0.99]">
                                 <span class="material-symbols-outlined text-base">verified</span>
-                                Xác nhận đã nhận chuyển khoản
+                                Xác nhận nhận tiền & Duyệt đơn hàng
                             </button>
                         }
                     }

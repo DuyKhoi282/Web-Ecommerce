@@ -237,6 +237,7 @@
     <Compile Include="Controllers\AdminOrderController.cs" />
     <Compile Include="Controllers\PromotionController.cs" />
     <Compile Include="Controllers\FlashSaleController.cs" />
+    <Compile Include="Controllers\SepayWebhookController.cs" />
     <Compile Include="Filters\CustomAuthorizeAttribute.cs" />
     <Compile Include="Helpers\CookieCartItem.cs" />
     <Compile Include="Helpers\CookieCartHelper.cs" />
@@ -244,6 +245,8 @@
     <Compile Include="Helpers\OrderStatusHelper.cs" />
     <Compile Include="Helpers\StockHelper.cs" />
     <Compile Include="Helpers\VietnameseNumberHelper.cs" />
+    <Compile Include="Helpers\SepayHelper.cs" />
+    <Compile Include="Helpers\OrderCancellationHelper.cs" />
     <Compile Include="Models\CartViewModels.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
